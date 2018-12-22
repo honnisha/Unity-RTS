@@ -1,0 +1,48 @@
+<link rel="stylesheet" type="text/css" href="css/menu.css">
+<style type='text/css'>
+
+</style>
+<script>
+	function CreateMessage(message) {
+        var div = document.createElement("div");
+        div.className = "crateRoomForm info";
+        div.textContent = message;
+		document.getElementsByTagName("html")[0].appendChild(div);
+	}
+	function CreateConnectDialog() {
+        var roomDiv = document.createElement("div");
+        roomDiv.className = "crateRoomForm";
+
+        var innerDiv = document.createElement("p");
+        innerDiv.textContent = "Username:";
+        roomDiv.appendChild(innerDiv);
+
+        var innerDiv = document.createElement("input");
+        innerDiv.type = "text";
+        innerDiv.className = "inputName";
+        roomDiv.appendChild(innerDiv);
+
+        var innerDiv = document.createElement("p");
+        innerDiv.className = "error";
+        roomDiv.appendChild(innerDiv);
+
+        var innerDiv = document.createElement("div");
+        innerDiv.className = "button deleteDialog";
+        innerDiv.textContent = "Cancel";
+        roomDiv.appendChild(innerDiv);
+        var innerDiv = document.createElement("div");
+        innerDiv.className = "button dialogOK";
+        innerDiv.textContent = "Create";
+        roomDiv.appendChild(innerDiv);
+		document.getElementsByTagName("html")[0].appendChild(roomDiv);
+	}
+</script>
+
+<div class="mainContent">
+	<div class="mainMenu">
+		<div class="menuElement">Single game</div>
+		<div class="menuElement multiplayer">Multiplayer game</div>
+		<div class="menuElement">Settings</div>
+		<div class="menuElement">Exit</div>
+	</div>
+</div>

@@ -1,0 +1,266 @@
+<style type='text/css'>
+html {
+    height: 100%;
+    width: 100%;
+	position: absolute; 
+}
+.container {
+    height: 18%;
+    width: 100%;
+	bottom: 3%;
+	position: absolute; 
+	text-align: center;
+	z-index: -1;
+}
+.block {
+    height: 100%;
+	display: inline-block;
+	vertical-align: top;
+}
+.lblock {
+    width: 25.5%;
+}
+.cblock {
+    width: 38.5%;
+}
+.rblock {
+    width: 27.5%;
+}
+.content {
+	position: absolute;
+    font-size: 13pt;
+    height: 100%;
+	padding: 8% 1%;
+    margin: 3px;
+    background: url(background.png) no-repeat;
+	background-size: 100%;
+	text-align: left;
+	overflow: hidden;
+}
+.proceduralContent {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+.element {
+	image-rendering: crisp-edges;
+	width: auto;
+	height: 27%;
+    border: 1px solid black;
+	display: inline-block;
+}
+.title {
+    font-size: 110%;
+	font-weight: bold;
+	padding-bottom: 2px;
+    text-shadow: 1px 1px 1px #000;
+}
+.resources {
+    font-size: 90%;
+}
+.info {
+	height: 30%;
+	width: 88%;
+	display: inline-block;
+	position: absolute; 
+}
+.description {
+	position: absolute; 
+    font-size: 75%;
+	display: inline-block;
+	overflow: ellipsis;
+    text-shadow: 1px 1px 1px #000;
+}
+.stats {
+	width: 100%; 
+	display: inline-block;
+}
+.stats > p{
+	font-weight: bold;
+	margin: 0px;
+	width: 32%;
+    font-size: 65%;
+	color: #96C2FF;
+    text-shadow: 1px 1px 1px #000;
+	display: inline-block;
+}
+.healthback {
+	right: 0px;
+	margin-top: 3%;
+    border: 1px solid black;
+    background: gray;
+    float: right;
+	height: 6%;
+	width: 50%; 
+}
+.health {
+	position: relative; 
+	height: 100%;
+    background: #B20707;
+}
+.query{
+    background: url(background.png) no-repeat;
+	background-size: 100%;
+    border: 1px solid black;
+	height: 100%;
+	width: 100%;
+}
+.production{
+	margin: 2px;
+	display: inline-block;
+	margin: 7% 0 7% 6px;
+	height: 85%;
+    border: 1px solid black;
+	background-size: 100%;
+}
+.production > img {
+	position: absolute; 
+	height: 85%;
+}
+.production > div {
+	position: relative; 
+	height: 100%;
+    background: rgba(205, 214, 219, 0.5);
+}
+.messages {
+	width: 100%;
+	bottom: 23%;
+	position: absolute;
+	text-align: center;
+}
+.messages > .msgbox{
+	display: inline-block;
+	width: 60%;
+}
+.msg {
+	margin: 1px;
+    font-size: 100%;
+	padding: 6px 16px;
+	display: inline-block;
+    background: url(background.png) no-repeat;
+	background-size: 100%;
+    text-shadow: 1px 1px 1px #000;
+}
+.containerDescription {
+    height: 76.5%;
+    width: 100%;
+	position: absolute;
+}
+.altInfo {
+	position: absolute;
+	margin: 0px;
+	padding: 1% 1% 2% 1%;
+	vertical-align: top;
+	height: auto;
+    width: 27.5%;
+	left: 69.5%;
+	bottom: 0px;
+}
+.altInfo > .info {
+	height: auto;
+	width: 100%;
+	position: relative;
+}
+.altInfo > .info > .description {
+	height: auto;
+	position: relative;
+	padding-bottom: 5px;
+}
+.altInfo > .stats > p{
+	width: 49%;
+	position: relative;
+	height: auto;
+}
+.costs {
+padding-bottom: 5px;
+}
+.costs > p{
+	display: block;
+	color: #89FFC1;
+}
+.dinamicInfo {
+	height: auto;
+	width: auto;
+}
+.dinamicInfo > p {
+    text-shadow: 1px 1px 1px #000;
+	padding: 0px;
+	margin: 0px;
+	font-weight: bold;
+    font-size: 70%;
+	color: #89FFC1;
+}
+.elementsBlock {
+	height: 28%;
+	width: 99%;
+	padding-bottom: 10px;
+}
+.elementsContent {
+	margin-right: 10px;
+	height: 100%;
+	width: 10%;
+	display: inline-block;
+}
+.center > .proceduralContent > .elementsBlock > .elementsContent {
+	width: 7%;
+}
+.elementsContent > img {
+	position: absolute;
+    border: 1px solid black;
+	image-rendering: crisp-edges;
+	height: 28%;
+	width: auto;
+    border: 1px solid black;
+	display: inline-block;
+}
+.elementsContent > .hotkey {
+	margin: 5%;
+    font-size: 50%;
+	background: grey;
+	height: 30%;
+	width: 25%;
+	display: inline-block;
+	text-align: center;
+}
+</style>
+<script>
+	function CreateMessage(message, timeout) {
+        var parentElement = document.getElementsByClassName("messages")[0];
+        var msgboxDiv = document.createElement("div");
+        msgboxDiv.className = "msgbox";
+        parentElement.appendChild(msgboxDiv);
+
+        var innerDiv = document.createElement("div");
+        innerDiv.className = "msg";
+        innerDiv.textContent = message;
+        msgboxDiv.appendChild(innerDiv);
+
+		setTimeout(function() {
+			msgboxDiv.remove();
+		}, timeout)
+	}
+</script>
+
+<div class="messages">
+</div>
+<div class="container">
+    <div class="block">
+		<div class="left content lblock">
+			<div class="title resources">
+			Food: &food;<br>
+			Gold: &gold;<br>
+			Wood: &wood;
+			</div>
+		</div>
+	</div>
+	<div class="block">
+		<div class="center content cblock">
+		</div>
+	</div>
+	<div class="block">
+		<div class="right content rblock">
+		</div>
+	</div>
+</div>
+<div class="containerDescription">
+</div>

@@ -1,0 +1,71 @@
+<style type='text/css'>
+.content {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	text-align: left;
+}
+.bar {
+	text-align: center;
+	background: grey;
+	height: 4%;
+	width: 80%; 
+    border: 1% solid black;
+	display: inline-block;
+}
+#health {
+	background: red;
+	height: 100%;
+	width: 0%;
+}
+.messages {
+	position: relative;
+	height: 40%;
+	width: 78%;
+	text-align: center;
+	display: table-cell; 
+	vertical-align: bottom;
+}
+.messages > .msgbox{
+	display: inline-block;
+	height: 20%;
+	width: 60%;
+	bottom: 0px;
+    font-size: 80%;
+	padding-bottom: 11%;
+	padding-right: 5%;
+	padding-top: 50%;
+}
+.msg {
+	font-weight: bold;
+}
+.content .messages > .msgbox > .msg{
+	color: #FF4B36;
+    text-shadow: 1px 1px 1px #000;
+}
+</style>
+
+<script>
+	function CreateMessage(message, timeout) {
+        let parentElement = document.getElementsByClassName("messages")[0];
+
+        let msgboxDiv = document.createElement("div");
+        msgboxDiv.className = "msgbox";
+        parentElement.appendChild(msgboxDiv);
+
+        let innerDiv = document.createElement("div");
+        innerDiv.className = "msg";
+        innerDiv.textContent = message;
+        msgboxDiv.appendChild(innerDiv);
+
+		setTimeout(function() {
+			msgboxDiv.remove();
+		}, timeout)
+	}
+</script>
+
+<div class="content">
+	<div class="messages">
+	</div>
+	<div class="bar"><div id="health"></div></div>
+</div>

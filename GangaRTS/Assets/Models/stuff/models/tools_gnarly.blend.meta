@@ -1,0 +1,155 @@
+fileFormatVersion: 2
+guid: a1efb172e1e022f4ba14be37bd4d10b8
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: ClawHammer
+    100002: Hatchet
+    100004: HeavyAxe
+    100006: Hoe
+    100008: Kama
+    100010: Pickaxe
+    100012: Pitchfork
+    100014: Plane
+    100016: Scythe
+    100018: Shovel
+    100020: Sickle
+    100022: Sledge
+    100024: //RootNode
+    400000: ClawHammer
+    400002: Hatchet
+    400004: HeavyAxe
+    400006: Hoe
+    400008: Kama
+    400010: Pickaxe
+    400012: Pitchfork
+    400014: Plane
+    400016: Scythe
+    400018: Shovel
+    400020: Sickle
+    400022: Sledge
+    400024: //RootNode
+    2100000: Dull__gnarly_tool_png
+    2100002: Shiny__gnarly_tool_png
+    2100004: WoodGnarl__gnarly_tool_png
+    2100006: SteelGnarl__gnarly_tool_png
+    2300000: ClawHammer
+    2300002: Hatchet
+    2300004: HeavyAxe
+    2300006: Hoe
+    2300008: Kama
+    2300010: Pickaxe
+    2300012: Pitchfork
+    2300014: Plane
+    2300016: Scythe
+    2300018: Shovel
+    2300020: Sickle
+    2300022: Sledge
+    3300000: ClawHammer
+    3300002: Hatchet
+    3300004: HeavyAxe
+    3300006: Hoe
+    3300008: Kama
+    3300010: Pickaxe
+    3300012: Pitchfork
+    3300014: Plane
+    3300016: Scythe
+    3300018: Shovel
+    3300020: Sickle
+    3300022: Sledge
+    4300000: Hoe
+    4300002: Plane
+    4300004: Pitchfork
+    4300006: Shovel
+    4300008: Sledge
+    4300010: Hatchet
+    4300012: ClawHammer
+    4300014: Pickaxe
+    4300016: HeavyAxe
+    4300018: Kama
+    4300020: Scythe
+    4300022: Sickle
+    7400000: Default Take
+    9500000: //RootNode
+  externalObjects: {}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.15
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 0.2
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

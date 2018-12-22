@@ -1,0 +1,202 @@
+
+html{
+	background: #000;
+}
+.content {
+	padding-top: 10%;
+	padding-left: 30%;
+	position: absolute; 
+	height: 100%;
+	width: 40%;
+	text-align: center;
+}
+.mainContent {
+	position: absolute; 
+	height: 100%;
+	width: 100%;
+	text-align: center;
+}
+.mainMenu {
+	padding-top: 50%;
+	bottom: 0;
+	height: 50%;
+	width: 25%;
+	text-align: center;
+	display: inline-block;
+	vertical-align: center;
+}
+.menuElement {
+	color: black;
+	margin-bottom: 10px;
+	padding: 5px;
+	display: inline-block;
+	width: 100%;
+    font-size: 100%;
+	font-weight: bold;
+    border: 1px solid white;
+	background: gray;
+}
+.menuElement:hover {
+	background: #919191;
+}
+
+.menu {
+	height: 60%;
+	width: 100%;
+	display: inline-block;
+    border: 1px solid white;
+	background: #3D3D3D;
+}
+.menu > div {
+	color: grey;
+	text-align: left;
+	margin: 5px;
+	display: inline-block;
+	width: 95%;
+	height: 7%;
+    font-size: 11pt;
+	font-weight: bold;
+    border: 1px solid white;
+}
+.menu div:hover {
+    color: white;
+}
+.title {
+	text-align: left;
+	display: inline-block;
+}
+.button {
+	color: white;
+	background: #303030;
+	margin-right: 10px;
+	margin-top: 10px;
+	padding: 5px 0 5px 0;
+    border: 1px solid white;
+	text-align: center;
+	display: inline-block;
+	height: 20px;
+	width: 25%;
+}
+.button:hover {
+	background: #919191;
+}
+.button:active {
+	color: #000;
+}
+.crateRoomForm {
+	text-align: left;
+	padding: 10px;
+	left: 40%;
+	top: 40%;
+	height: auto;
+	width: 20%;
+	position: absolute; 
+    border: 1px solid white;
+	background: #3C6347;
+}
+.crateRoomForm > p {
+}
+.crateRoomForm > .inputName {
+	width: 100%;
+	height: 20px;
+}
+.crateRoomForm > .button {
+	width: 47%;
+}
+.info {
+	text-align: center;
+}
+.error {
+	padding: 0px;
+	margin: 0px;
+	color: red;
+}
+
+.room {
+	padding-top: 6%;
+	padding-left: 13%;
+	height: 100%;
+	width: 100%;
+	display: inline-block;
+	text-align: left;
+}
+.roomMenu {
+	height: 80%;
+	width: 50%;
+	display: inline-block;
+	background: #000;
+	text-align: left;
+}
+.players {
+	margin: 5px 0px 0px 0px;
+	width: 97%;
+
+	height: 60%;
+    border: 1px solid white;
+	display: inline-block;
+	background: #292929;
+}
+.chat {
+	margin: 5px 0px 0px 0px;
+	width: 97%;
+
+	height: 20.5%;
+    border: 1px solid white;
+	display: inline-block;
+	background: #292929;
+	overflow-y: scroll;
+	margin-bottom: 5px;
+}
+.roomMenu > input {
+	margin-right: 5px;
+	height: 5%;
+	width: 75%;
+}
+.roomMenu > .button {
+	margin-right: 5px;
+	padding-right: 5px;
+	margin: 0px;
+	height: auto;
+	width: 20%;
+}
+.infoBlock {
+	position: relative; 
+	height: 80%;
+	width: 20%;
+	display: inline-block;
+	text-align: center;
+}
+.infoBlock > .roomInfo {
+	margin: 5px 0px 0px 5px;
+	height: 89%;
+	width: 100%;
+    border: 1px solid white;
+	background: #292929;
+}
+.infoBlock > .button {
+	width: 40%;
+}
+.players > div {
+	text-align: left;
+	font-weight: bold;
+	margin: 5px;
+	padding: 5px;
+	height: 35px;
+	width: 96%;
+    border: 1px solid white;
+	background: #424242;
+}
+.players > div > p{
+	margin: 7px;
+	display: inline-block;
+}
+.chat > div {
+	text-align: left;
+	margin: 5px;
+	height: 12px;
+	width: 96.3%;
+}
+.roomInfo > div {
+	margin: 10px;
+	text-align: left;
+}
