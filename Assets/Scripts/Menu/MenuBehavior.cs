@@ -20,7 +20,7 @@ namespace GangaGame
     {
         string gameVersion = "0.1";
 
-        private Dictionary<string, RoomInfo> cachedRoomList;
+        private Dictionary<string, RoomInfo> cachedRoomList = new Dictionary<string, RoomInfo>();
         private List<Player> playerListEntries = new List<Player>();
 
         public TextAsset MenuHTMLFile;
@@ -43,12 +43,12 @@ namespace GangaGame
             {
                 timerToStart -= Time.deltaTime;
                 sendMessageTimer -= Time.deltaTime;
-                if(sendMessageTimer <= 0)
+                if (sendMessageTimer <= 0)
                 {
                     AddMessasgeToChat(String.Format("Game will start in {0:F0}", timerToStart));
                     sendMessageTimer = 1.0f;
                 }
-                if(timerToStart <= 0)
+                if (timerToStart <= 0)
                 {
                     AddMessasgeToChat(String.Format("Game started..."));
                     gameStarted = true;
@@ -56,14 +56,16 @@ namespace GangaGame
                     PhotonNetwork.CurrentRoom.IsOpen = false;
                     PhotonNetwork.CurrentRoom.IsVisible = false;
 
-                    PhotonNetwork.LoadLevel("test1");
+                    PhotonNetwork.LoadLevel("Levels/test1");
                 }
             }
             string className = "";
-            if (PowerUI.CameraPointer.All[0].ActiveOver != null)
-                className = PowerUI.CameraPointer.All[0].ActiveOver.className;
+            var element = PowerUI.CameraPointer.All[0].ActiveOver;
+            if (element != null)
+                className = element.className;
 
-            if (UnityEngine.Input.GetMouseButtonUp(0))
+            if (UnityEngine.Input.GetMouseButtonUp(0) || UnityEngine.Input.GetKeyDown(KeyCode.Return))
+            {
                 if (className.Contains("multiplayer"))
                     CreateConnectDialog();
                 else if (className.Contains("dialogOK") && !PhotonNetwork.IsConnected)
@@ -89,6 +91,12 @@ namespace GangaGame
 
                 else if (className.Contains("createRoomDialog"))
                     CreateRoomMenu();
+
+                else if (className.Contains("roomInLobby"))
+                {
+                    CreateMessage(String.Format("Connecting to \"{0}\"...", element.innerText));
+                    PhotonNetwork.JoinRoom(element.innerText);
+                }
 
                 else if (className.Contains("deleteDialog"))
                     DeleteDialog();
@@ -120,7 +128,7 @@ namespace GangaGame
                 else if (PhotonNetwork.InRoom && (UnityEngine.Input.GetKeyDown(KeyCode.Return) || className.Contains("chatSend")))
                 {
                     string chatInput = UI.document.getElementsByClassName("chatInput")[0].getAttribute("value");
-                    if(chatInput.Length > 0)
+                    if (chatInput.Length > 0)
                     {
                         UI.document.getElementsByClassName("chatInput")[0].setAttribute("value", "");
                         GetComponent<PhotonView>().RPC(
@@ -132,11 +140,16 @@ namespace GangaGame
                 {
                     SetReady(!isPlayerReady);
                 }
-                else if (PhotonNetwork.InRoom && className.Contains("teamSelect"))
+                else if (PhotonNetwork.InRoom && UI.document.getElementsByAttribute("name", "teamSelect").length > 0)
                 {
-                    int teamSelect = int.Parse(UI.document.getElementsByClassName("teamSelect")[0].getAttribute("value"));
-                    SetTeam(teamSelect);
+                    var select = UI.document.getElementsByAttribute("name", "teamSelect")[0];
+                    int teamSelect = int.Parse(select.id);
+                    if (playerTeam != teamSelect)
+                    {
+                        SetTeam(teamSelect);
+                    }
                 }
+            }
         }
 
         void CreateConnectDialog()
@@ -155,6 +168,13 @@ namespace GangaGame
         {
             UI.document.Run("CreateMessage", new string[1] { message });
         }
+        void CreateErrorMessage(string message)
+        {
+            if (UI.document.getElementsByClassName("crateRoomForm").length > 0)
+                UI.document.getElementsByClassName("crateRoomForm")[0].remove();
+
+            UI.document.Run("CreateErrorMessage", new string[1] { message });
+        }
         void AddInfo(string info)
         {
             UI.document.Run("AddInfo", new string[1] { info });
@@ -165,6 +185,8 @@ namespace GangaGame
                 return;
             
             UI.document.Run("CreateUser", username, playerTeam, playerReady, canEdit);
+            //var select = UI.document.getElementsByAttribute("name", "teamSelect")[0];
+            // select.childNodes[playerTeam - 1].setAttribute("selected", "selected");
         }
         [PunRPC]
         public void AddMessasgeToChat(string message)
@@ -172,24 +194,49 @@ namespace GangaGame
             if (UI.document.getElementsByClassName("chat").length <= 0)
                 return;
 
-            UI.document.Run("CreateMessage", new string[1] { message });
+            UI.document.Run("CreateChatMessage", new string[1] { message });
         }
         
+        private void UpdateLobbyListView()
+        {
+            var menuBlock = UI.document.getElementsByClassName("menu")[0];
+            menuBlock.innerText = "";
+
+            foreach (RoomInfo info in cachedRoomList.Values)
+            {
+                var roomBlock = UI.document.createElement("div");
+                roomBlock.className = "menuElement roomInLobby";
+                roomBlock.innerText = info.Name;
+                menuBlock.appendChild(roomBlock);
+            }
+
+        }
+
         public override void OnConnectedToMaster()
         {
-            UI.document.innerHTML = LobbyHTMLFile.text;
-            UpdateLobbyListView();
-        }
-        
-        public override void OnDisconnected(DisconnectCause cause)
-        {
-            gameStarted = false;
-            UI.document.innerHTML = MenuHTMLFile.text;
+            if (!PhotonNetwork.InLobby)
+            {
+                PhotonNetwork.JoinLobby();
+            }
         }
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
         {
             UpdateCachedRoomList(roomList);
+            UpdateLobbyListView();
+        }
+        public override void OnJoinedLobby()
+        {
+            UI.document.innerHTML = LobbyHTMLFile.text;
+        }
+        public override void OnLeftLobby()
+        {
+        }
+
+        public override void OnDisconnected(DisconnectCause cause)
+        {
+            gameStarted = false;
+            UI.document.innerHTML = MenuHTMLFile.text;
         }
         
         public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
@@ -205,6 +252,7 @@ namespace GangaGame
                 playerListEntries.Add(p);
             }
             UI.document.innerHTML = RoomHTMLFile.text;
+            SetReady(false);
             UpdateRoomView();
 
             //Hashtable props = new Hashtable
@@ -218,27 +266,46 @@ namespace GangaGame
         {
             gameStarted = false;
             playerListEntries.Clear();
+
+            if (!PhotonNetwork.InLobby)
+            {
+                PhotonNetwork.JoinLobby();
+            }
             UI.document.innerHTML = LobbyHTMLFile.text;
             UpdateLobbyListView();
         }
 
         public override void OnPlayerEnteredRoom(Player newPlayer)
         {
-            CreateMessage(string.Format("{0} connected to room", newPlayer.NickName));
+            AddMessasgeToChat(string.Format("{0} connected to room", newPlayer.NickName));
             playerListEntries.Add(newPlayer);
             UpdateRoomView();
         }
-
         public override void OnPlayerLeftRoom(Player otherPlayer)
         {
-            CreateMessage(string.Format("{0} disconnected from room", otherPlayer.NickName));
+            AddMessasgeToChat(string.Format("{0} disconnected from room", otherPlayer.NickName));
             playerListEntries.Remove(otherPlayer);
             UpdateRoomView();
         }
-
+        public override void OnCreateRoomFailed(short returnCode, string message)
+        {
+            Debug.Log("OnCreateRoomFailed: " + message);
+            CreateErrorMessage(String.Format("Romm create failed: {0} ({1})", message, returnCode.ToString()));
+        }
+        public override void OnJoinRoomFailed(short returnCode, string message)
+        {
+            Debug.Log("OnJoinRoomFailed: " + message);
+            CreateErrorMessage(String.Format("Join failed: {0} ({1})", message, returnCode.ToString()));
+        }
         public override void OnJoinRandomFailed(short returnCode, string message)
         {
             Debug.Log("OnJoinRandomFailed: " + message);
+            CreateErrorMessage(String.Format("Join failed: {0} ({1})", message, returnCode.ToString()));
+        }
+        public override void OnCustomAuthenticationFailed(string debugMessage)
+        {
+            Debug.Log("OnCustomAuthenticationFailed: " + debugMessage);
+            CreateErrorMessage(String.Format("Authentication failed: {0}", debugMessage));
         }
 
         public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
@@ -249,28 +316,27 @@ namespace GangaGame
         private void UpdateCachedRoomList(List<RoomInfo> roomList)
         {
             Debug.Log("UpdateCachedRoomList: " + roomList.Count);
-            foreach (RoomInfo info in roomList)
+            foreach (RoomInfo roomInfo in roomList)
             {
                 // Remove room from cached room list if it got closed, became invisible or was marked as removed
-                if (!info.IsOpen || !info.IsVisible || info.RemovedFromList)
+                if (!roomInfo.IsOpen || !roomInfo.IsVisible || roomInfo.RemovedFromList)
                 {
-                    if (cachedRoomList.ContainsKey(info.Name))
+                    if (cachedRoomList.ContainsKey(roomInfo.Name))
                     {
-                        cachedRoomList.Remove(info.Name);
+                        cachedRoomList.Remove(roomInfo.Name);
                     }
-
                     continue;
                 }
 
                 // Update cached room info
-                if (cachedRoomList.ContainsKey(info.Name))
+                if (cachedRoomList.ContainsKey(roomInfo.Name))
                 {
-                    cachedRoomList[info.Name] = info;
+                    cachedRoomList[roomInfo.Name] = roomInfo;
                 }
                 // Add new room info to cache
                 else
                 {
-                    cachedRoomList.Add(info.Name, info);
+                    cachedRoomList.Add(roomInfo.Name, roomInfo);
                 }
             }
         }
@@ -342,22 +408,6 @@ namespace GangaGame
                 { GameInfo.PLAYER_TEAM, playerTeam}
             };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-        }
-
-        private void UpdateLobbyListView()
-        {
-            var menuBlock = UI.document.getElementsByClassName("menu")[0];
-            menuBlock.innerText = "";
-
-            if(cachedRoomList != null)
-                foreach (RoomInfo info in cachedRoomList.Values)
-                {
-                    var roomBlock = UI.document.createElement("div");
-                    roomBlock.className = "menuElement";
-                    roomBlock.innerText = info.Name;
-                    menuBlock.appendChild(roomBlock);
-                }
-
         }
 
         void Awake()

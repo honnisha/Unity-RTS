@@ -1,4 +1,5 @@
 <link rel="stylesheet" type="text/css" href="css/menu.css">
+<script type='text/javascript' src="js/menu.js"></script>
 <style>
 .ready {
 	height: 30px;
@@ -25,55 +26,19 @@
 	position: absolute;
 	width: 40px;
 }
+.team {
+	padding-top: 15px;
+	left: 40%;
+	position: absolute;
+}
+.green {
+	background: #006612;
+}
 </style>
-<script>
-	function CreateMessage(message) {
-		var chat = document.getElementsByClassName("chat")[0];
-        var div = document.createElement("div");
-        div.textContent = message;
-		chat.prepend(div);
-	}
-	function CreateUser(username, playerTeam, playerReady, canEdit) {
-        var playerDiv = document.createElement("div");
-		document.getElementsByClassName("players")[0].appendChild(playerDiv);
-		
-        var pdiv = document.createElement("p");
-        pdiv.textContent = username;
-		playerDiv.appendChild(pdiv);
-
-        var dropdownDiv = document.createElement("select");
-        dropdownDiv.name = "team"
-		playerDiv.appendChild(dropdownDiv);
-		if(canEdit)
-			dropdownDiv.class = "teamSelect"
-		else
-			element.disabled = true;
-		for (var i = 1; i <= 9; i++) {
-			dropdownDiv.innerHTML += "<option>" + i + "</option>";
-		}
-		dropdownDiv.value = playerTeam;
-		
-        var div = document.createElement("div");
-		if(playerReady)
-			div.className = "ready";
-		else
-			div.className = "notReady";
-		playerDiv.appendChild(div);
-	}
-	function AddInfo(info) {
-        var div = document.createElement("div");
-        div.textContent = info;
-		document.getElementsByClassName("roomInfo")[0].appendChild(div);
-	}
-</script>
 
 <div class="content room">
 	<div class="roomMenu">
 		<div class="players">
-			<div>
-				<select>
-				</select>
-			</div>
 		</div>
 		<div class="chat">
 		</div>

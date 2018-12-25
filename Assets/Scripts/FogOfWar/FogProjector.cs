@@ -65,8 +65,8 @@ public class FogProjector : MonoBehaviour
 
         temp.filterMode = FilterMode.Bilinear;
 
-        Graphics.Blit(projecTexture, temp, blurMaterial, 1);
-        Graphics.Blit(temp, projecTexture, blurMaterial, 2);
+        // Graphics.Blit(projecTexture, temp, blurMaterial, 1);
+        // Graphics.Blit(temp, projecTexture, blurMaterial, 2);
 
         StartCoroutine(Blend());
 

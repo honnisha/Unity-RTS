@@ -39,6 +39,15 @@ html{
 .menuElement:hover {
 	background: #919191;
 }
+.menu > .menuElement {
+	margin: 0px;
+	margin-top: 10px;
+	color: #000;
+	width: 93%;
+}
+.menu > .menuElement:hover {
+	color: #2B2B2B;
+}
 
 .menu {
 	height: 60%;

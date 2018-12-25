@@ -83,7 +83,7 @@ public class UnitBehavior : BaseBehavior
             Destroy(holderObject);
         }
 
-        if (interactType == InteractigType.None)
+        if (interactType == InteractigType.None && resourceGatherInfo.Count > 0)
             if (resourceHold <= 0)
             {
                 anim.SetBool("Carry", false);
@@ -602,8 +602,10 @@ public class UnitBehavior : BaseBehavior
 
         if (interactType != InteractigType.None)
         {
-            anim.SetBool(interactAnimation, false);
-            anim.SetBool("Builded", false);
+            if(interactAnimation != "")
+                anim.SetBool(interactAnimation, false);
+            if (buildHpPerSecond > 0.0f)
+                anim.SetBool("Builded", false);
             if (deleteObject)
                 interactObject = null;
         }

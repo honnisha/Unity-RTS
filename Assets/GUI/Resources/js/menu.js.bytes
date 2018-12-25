@@ -1,0 +1,109 @@
+
+function CreateChatMessage(message) {
+	var chat = document.getElementsByClassName("chat")[0];
+	var div = document.createElement("div");
+	div.textContent = message;
+	chat.prepend(div);
+}
+
+function selectFunction() {
+    var selectBox = document.getElementsByClassName("teamSelect")[0];
+    selectBox.id = selectBox.options[selectBox.selectedIndex].value;
+}
+function CreateUser(username, playerTeam, playerReady, canEdit) {
+	var playerDiv = document.createElement("div");
+	if(playerReady)
+		playerDiv.className = "green";
+	document.getElementsByClassName("players")[0].appendChild(playerDiv);
+	
+	var pdiv = document.createElement("p");
+	pdiv.textContent = username;
+	playerDiv.appendChild(pdiv);
+
+	var teamDiv;
+	if(canEdit)
+	{
+		var teamDiv = document.createElement("select");
+		for (var i = 1; i <= 9; i++) {
+			teamDiv.innerHTML += "<option value=" + i + ">" + i + "</option>";
+		}
+		playerDiv.setAttribute("onchange", "selectFunction(this)");
+		teamDiv.name = "teamSelect";
+		teamDiv.className = "teamSelect";
+		teamDiv.id = playerTeam;
+		teamDiv.childNodes[playerTeam - 1].setAttribute("selected", "selected");
+	}
+	else
+	{
+		var teamDiv = document.createElement("p");
+		teamDiv.className = "team";
+		teamDiv.textContent = playerTeam;
+	}
+	playerDiv.appendChild(teamDiv);
+	
+	var div = document.createElement("div");
+	if(playerReady)
+		div.className = "ready";
+	else
+		div.className = "notReady";
+	playerDiv.appendChild(div);
+}
+function AddInfo(info) {
+	var div = document.createElement("div");
+	div.textContent = info;
+	document.getElementsByClassName("roomInfo")[0].appendChild(div);
+}
+
+function CreateRoomDialog() {
+	var roomDiv = document.createElement("div");
+	roomDiv.className = "crateRoomForm";
+
+	var innerDiv = document.createElement("p");
+	innerDiv.textContent = "Room name:";
+	roomDiv.appendChild(innerDiv);
+
+	var innerDiv = document.createElement("input");
+	innerDiv.type = "text";
+	innerDiv.className = "inputName";
+	roomDiv.appendChild(innerDiv);
+
+	var innerDiv = document.createElement("p");
+	innerDiv.textContent = "Max players:";
+	roomDiv.appendChild(innerDiv);
+
+	var innerDiv = document.createElement("input");
+	innerDiv.type = "text";
+	innerDiv.value = "2";
+	innerDiv.className = "inputMaxplayers";
+	roomDiv.appendChild(innerDiv);
+
+	var innerDiv = document.createElement("p");
+	innerDiv.className = "error";
+	roomDiv.appendChild(innerDiv);
+
+	var innerDiv = document.createElement("div");
+	innerDiv.className = "button deleteDialog";
+	innerDiv.textContent = "Cancel";
+	roomDiv.appendChild(innerDiv);
+	var innerDiv = document.createElement("div");
+	innerDiv.className = "button dialogOK";
+	innerDiv.textContent = "Create";
+	roomDiv.appendChild(innerDiv);
+	document.getElementsByTagName("html")[0].appendChild(roomDiv);
+}
+function CreateMessage(message) {
+	var div = document.createElement("div");
+	div.className = "crateRoomForm info";
+	div.textContent = message;
+	document.getElementsByTagName("html")[0].appendChild(div);
+}
+function CreateErrorMessage(message) {
+	var div = document.createElement("div");
+	div.className = "crateRoomForm error";
+	div.textContent = message;
+	document.getElementsByTagName("html")[0].appendChild(div);
+}
+function GetSelectedTeam() {
+	var e = document.getElementsByClassName("teamSelect")[0];
+	return e.options[e.selectedIndex].text;
+}

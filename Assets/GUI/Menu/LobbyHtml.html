@@ -1,49 +1,5 @@
 <link rel="stylesheet" type="text/css" href="css/menu.css">
-<script>
-	function CreateRoomDialog() {
-        var roomDiv = document.createElement("div");
-        roomDiv.className = "crateRoomForm";
-
-        var innerDiv = document.createElement("p");
-        innerDiv.textContent = "Room name:";
-        roomDiv.appendChild(innerDiv);
-
-        var innerDiv = document.createElement("input");
-        innerDiv.type = "text";
-        innerDiv.className = "inputName";
-        roomDiv.appendChild(innerDiv);
-
-        var innerDiv = document.createElement("p");
-        innerDiv.textContent = "Max players:";
-        roomDiv.appendChild(innerDiv);
-
-        var innerDiv = document.createElement("input");
-        innerDiv.type = "text";
-        innerDiv.value = "2";
-        innerDiv.className = "inputMaxplayers";
-        roomDiv.appendChild(innerDiv);
-
-        var innerDiv = document.createElement("p");
-        innerDiv.className = "error";
-        roomDiv.appendChild(innerDiv);
-
-        var innerDiv = document.createElement("div");
-        innerDiv.className = "button deleteDialog";
-        innerDiv.textContent = "Cancel";
-        roomDiv.appendChild(innerDiv);
-        var innerDiv = document.createElement("div");
-        innerDiv.className = "button dialogOK";
-        innerDiv.textContent = "Create";
-        roomDiv.appendChild(innerDiv);
-		document.getElementsByTagName("html")[0].appendChild(roomDiv);
-	}
-	function CreateMessage(message) {
-        var div = document.createElement("div");
-        div.className = "crateRoomForm info";
-        div.textContent = message;
-		document.getElementsByTagName("html")[0].appendChild(div);
-	}
-</script>
+<script type='text/javascript' src="js/menu.js"></script>
 
 <div class="content">
 	<div class="title">Room list:</div>
