@@ -56,7 +56,7 @@ namespace GangaGame
                     PhotonNetwork.CurrentRoom.IsOpen = false;
                     PhotonNetwork.CurrentRoom.IsVisible = false;
 
-                    PhotonNetwork.LoadLevel("Levels/test1");
+                    PhotonNetwork.LoadLevel("Levels/Map1/Map1");
                 }
             }
             string className = "";

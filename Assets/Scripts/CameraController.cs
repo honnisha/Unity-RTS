@@ -7,6 +7,8 @@ using System.Linq;
 using UnityEngine.UI;
 using PowerUI;
 using System.Text.RegularExpressions;
+using Photon.Pun;
+using GangaGame;
 
 public class CameraController : MonoBehaviour
 {
@@ -18,7 +20,11 @@ public class CameraController : MonoBehaviour
     [Header("Select info")]
     public bool isSelecting = false;
     private Vector3 mousePosition1;
+
     public int team = 1;
+    public string userId = "1";
+    public int userNumber = 1;
+
     [System.Serializable]
     public class TagToSelect
     {
@@ -42,12 +48,77 @@ public class CameraController : MonoBehaviour
             return _whiteTexture;
         }
     }
+    [HideInInspector]
     public GameObject buildedObject;
+    [HideInInspector]
     private GameObject selectedObject;
 
-    // Use this for initialization
-    void Start() {
+    public GameObject createSpawnBuilding;
 
+    // Use this for initialization
+    void Start()
+    {
+        GameObject createdUnit = null;
+
+        // Multiplayer
+        if (PhotonNetwork.InRoom)
+        {
+            // Getting userNumber
+            int index = 1;
+            foreach (var player in PhotonNetwork.PlayerList)
+            {
+                if (player == PhotonNetwork.LocalPlayer)
+                    userNumber = index;
+                index += 1;
+            }
+
+            object playerTeamObd;
+            if (PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue(GameInfo.PLAYER_TEAM, out playerTeamObd))
+            {
+                team = (int)playerTeamObd;
+            }
+            userId = PhotonNetwork.LocalPlayer.UserId;
+            Debug.Log("userNumber: " + userNumber + " team: " + team + " userId: " + userId);
+
+            foreach (GameObject spawnPoint in GameObject.FindGameObjectsWithTag("Spawn"))
+            {
+                SpawnBehavior spawnBehavior = spawnPoint.GetComponent<SpawnBehavior>();
+                PhotonView spawnPhotonView = spawnPoint.GetComponent<PhotonView>();
+                if (spawnBehavior.number == userNumber)
+                {
+                    createdUnit = PhotonNetwork.Instantiate(createSpawnBuilding.name, spawnPoint.transform.position, spawnPoint.transform.rotation, 0);
+                    break;
+                }
+            }
+        }
+        // Singleplayer
+        else
+        {
+            foreach (GameObject spawnPoint in GameObject.FindGameObjectsWithTag("Spawn"))
+            {
+                SpawnBehavior spawnBehavior = spawnPoint.GetComponent<SpawnBehavior>();
+                if (spawnBehavior.number == userNumber)
+                {
+                    createdUnit = Instantiate(createSpawnBuilding, spawnPoint.transform.position, spawnPoint.transform.rotation);
+                    break;
+                }
+            }
+        }
+        if (createdUnit == null)
+        {
+            UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+            cameraUIBaseScript.DisplayMessage("Could not find free spawn place.", 3000);
+        }
+        else
+        {
+            BaseBehavior baseBehaviorComponent = createdUnit.GetComponent<BaseBehavior>();
+            if (PhotonNetwork.InRoom)
+                createdUnit.GetComponent<PhotonView>().RPC("ChangeOwner", PhotonTargets.All, userId, team);
+            else
+                baseBehaviorComponent.ChangeOwner(userId, team);
+
+            transform.position = new Vector3(createdUnit.transform.position.x, transform.position.y, createdUnit.transform.position.z);
+        }
     }
 
     public class ObjectWithDistance
@@ -119,7 +190,11 @@ public class CameraController : MonoBehaviour
                             foreach (GameObject unit in selectedUnits)
                             {
                                 BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-                                baseBehaviorComponent.GiveOrder(selectedObject, true);
+                                PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
+                                if (PhotonNetwork.InRoom)
+                                    unitPhotonView.RPC("GiveOrder", PhotonTargets.All, selectedObject, true);
+                                else
+                                    baseBehaviorComponent.GiveOrder(selectedObject, true);
                             }
                             buildedObject = null;
                             selectedObject = null;
@@ -203,7 +278,11 @@ public class CameraController : MonoBehaviour
                             {
                                 if (tagsToSelect.Exists(x => (x.name == hit.transform.gameObject.tag)))
                                 {
-                                    baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true);
+                                    PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
+                                    if (PhotonNetwork.InRoom)
+                                        unitPhotonView.RPC("GiveOrder", PhotonTargets.All, hit.transform.gameObject, true);
+                                    else
+                                        baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true);
                                 }
                                 else
                                 {
@@ -367,7 +446,13 @@ public class CameraController : MonoBehaviour
                 point.z + (z * distance) - (float)(formationSize - 1) / 2 * distance
                 );
             var rotatedPoint = Rotate(new Vector2(newPoint.x, newPoint.z), new Vector2(point.x, point.z), angle);
-            baseBehaviorComponent.GiveOrder(new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true);
+
+            PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
+            if (PhotonNetwork.InRoom)
+                unitPhotonView.RPC("GiveOrder", PhotonTargets.All, new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true);
+            else
+                baseBehaviorComponent.GiveOrder(new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true);
+
             indexCount += 1;
         }
     }

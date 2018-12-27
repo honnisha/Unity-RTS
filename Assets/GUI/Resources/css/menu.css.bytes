@@ -84,7 +84,7 @@ html{
 	text-align: center;
 	display: inline-block;
 	height: 20px;
-	width: 25%;
+	width: 23%;
 }
 .button:hover {
 	background: #919191;

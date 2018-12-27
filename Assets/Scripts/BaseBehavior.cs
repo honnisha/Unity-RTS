@@ -5,13 +5,18 @@ using PowerUI;
 using System.Text;
 using System;
 using System.Linq;
+using Photon.Pun;
+using UnityEngine.AI;
 
-public class BaseBehavior : MonoBehaviour
+public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 {
+    private PhotonView photonView;
+
     #region Unit info
 
     [Header("Unit info")]
     public int team = 1;
+    public string ownerId = "1";
     public float maxHealth = 100.0f;
     public float health;
     public bool live = true;
@@ -30,16 +35,6 @@ public class BaseBehavior : MonoBehaviour
     public float costGold = 10.0f;
     public float costWood = 10.0f;
     public KeyCode productionHotkey;
-
-    //[Header("Health Bar")]
-    //public Texture2D healthTexture;
-    //public Texture2D healthBackgroundTexture;
-    //public Texture2D healthBorderTexture;
-    //public float healthBarWidth = 30.0f;
-    //public float healthBarHeight = 4.0f;
-    //public float healthBarBorder = 1.0f;
-    //public float healthBarXOffset = 0.0f;
-    //public float healthBarYOffset = 0.0f;
 
     #endregion
 
@@ -153,8 +148,7 @@ public class BaseBehavior : MonoBehaviour
 
     #endregion
 
-
-    #region Stuff
+    #region Gatering hold info
 
     public enum ResourceType { None, Food, Gold, Wood };
     [Header("Gatering hold info")]
@@ -163,33 +157,34 @@ public class BaseBehavior : MonoBehaviour
 
     #endregion
 
-    //void OnGUI()
-    //{
-    //    if (!live)
-    //        return;
-
-    //    CameraController cameraController = Camera.main.GetComponent<CameraController>();
-    //    var tagsToSelect = cameraController.tagsToSelect.Find(x => (x.name == gameObject.tag));
-    //    UnitSelectionComponent unitSelectionComponent = GetComponent<UnitSelectionComponent>();
-
-    //    if (tagsToSelect.healthVisibleOnlyWhenSelect && !unitSelectionComponent.isSelected)
-    //        return;
-
-    //    var screenHealthPosition = Camera.main.WorldToViewportPoint(transform.position);
-    //    float xPos = Screen.width * screenHealthPosition.x - healthBarWidth / 2 + healthBarXOffset;
-    //    float yPos = Screen.height - Screen.height * screenHealthPosition.y - healthBarHeight / 2 + healthBarYOffset;
-    //    // GUI.Label(new Rect(x, y, 100, 40), health + " / " + maxHealth);
-    //    var healthBarBorderRect = Rect.MinMaxRect(xPos - healthBarBorder, yPos - healthBarBorder, xPos + healthBarWidth + healthBarBorder, yPos + healthBarHeight + healthBarBorder);
-    //    GUI.DrawTexture(healthBarBorderRect, healthBorderTexture);
-    //    var rect = Rect.MinMaxRect(xPos, yPos, xPos + healthBarWidth, yPos + healthBarHeight);
-    //    GUI.DrawTexture(rect, healthBackgroundTexture);
-    //    float healthWidth = healthBarWidth * ((maxHealth - health) / maxHealth);
-    //    var backgroundRect = Rect.MinMaxRect(xPos, yPos, xPos + healthBarWidth - healthWidth, yPos + healthBarHeight);
-    //    GUI.DrawTexture(backgroundRect, healthTexture);
-    //}
-
-    virtual public void Start()
+    #region Photon
+    
+    void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(this.team);
+            stream.SendNext(this.ownerId);
+        }
+        else
+        {
+            this.team = (int)stream.ReceiveNext();
+            this.ownerId = (string)stream.ReceiveNext();
+        }
+    }
+
+    #endregion
+
+    [PunRPC]
+    public void ChangeOwner(string newOwnerId, int newTeam)
+    {
+        ownerId = newOwnerId;
+        team = newTeam;
+    }
+
+    virtual public void Awake()
+    {
+        photonView = GetComponent<PhotonView>();
         anim = GetComponent<Animator>();
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
     }
@@ -459,8 +454,16 @@ public class BaseBehavior : MonoBehaviour
         }
     }
 
+    public Vector3 GetRandomPoint(Vector3 point, float randomDistance)
+    {
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(point + UnityEngine.Random.insideUnitSphere * randomDistance, out hit, randomDistance, NavMesh.AllAreas))
+            return hit.position;
+
+        return new Vector3();
+    }
+
     public virtual void GiveOrder(Vector3 point, bool displayMarker) { }
-    public virtual void GiveOrder(Vector3 point, bool displayMarker, float infelicity) { }
     public virtual void GiveOrder(GameObject targetObject, bool displayMarker) { }
     public virtual void TakeDamage(float damage, GameObject attacker) { }
     public virtual bool StartInteract(GameObject target) { return false; }

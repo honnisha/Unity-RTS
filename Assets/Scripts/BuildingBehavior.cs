@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Text;
 using System;
 using UnityEngine.AI;
+using Photon.Pun;
 
 public class BuildingBehavior : BaseBehavior
 {
@@ -24,12 +25,12 @@ public class BuildingBehavior : BaseBehavior
 
     #endregion
 
-    public override void Start()
+    public override void Awake()
     {
         if (gameObject.layer == LayerMask.NameToLayer("Ambient"))
             beenSeen = true;
 
-        base.Start();
+        base.Awake();
         if (spawnPoint != null)
             spawnTarget = spawnPoint.transform.position;
     }
@@ -44,17 +45,30 @@ public class BuildingBehavior : BaseBehavior
             buildTimer -= Time.deltaTime;
             if (buildTimer <= 0.0f)
             {
-                GameObject createdObject = (GameObject)Instantiate(unitsQuery[0], spawnPoint.transform.position, spawnPoint.transform.rotation);
-                unitsQuery.Remove(unitsQuery[0]);
+                // Create object
+                GameObject createdObject = null;
+                if (PhotonNetwork.InRoom)
+                    createdObject = PhotonNetwork.Instantiate(unitsQuery[0].name, spawnPoint.transform.position, spawnPoint.transform.rotation);
+                else
+                    createdObject = Instantiate(unitsQuery[0], spawnPoint.transform.position, spawnPoint.transform.rotation);
 
                 BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
-                createdObjectBehaviorComponent.Start();
+                PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();
+                // Set owner
+                if (PhotonNetwork.InRoom)
+                    createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
+                else
+                    createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
 
-                //Send command to created object to spawn target
-                createdObjectBehaviorComponent.GiveOrder(spawnTarget, true, 2.0f);
+                unitsQuery.Remove(unitsQuery[0]);
 
-                //Set team as build have
-                createdObjectBehaviorComponent.team = team;
+                // createdObjectBehaviorComponent.Awake();
+
+                //Send command to created object to spawn target 
+                if (PhotonNetwork.InRoom)
+                    createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget, 2.0f), true);
+                else
+                    createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget, 2.0f), true);
 
                 if (unitsQuery.Count > 0)
                 {
@@ -176,6 +190,7 @@ public class BuildingBehavior : BaseBehavior
         return false;
     }
 
+    [PunRPC]
     public override void GiveOrder(Vector3 point, bool displayMarker)
     {
         if (!live)
@@ -184,6 +199,7 @@ public class BuildingBehavior : BaseBehavior
         spawnTarget = point;
     }
 
+    [PunRPC]
     public override void GiveOrder(GameObject targetObject, bool displayMarker)
     {
         if (!live)

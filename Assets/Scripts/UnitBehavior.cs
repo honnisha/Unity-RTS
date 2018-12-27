@@ -5,6 +5,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Linq;
+using Photon.Pun;
 
 public class UnitBehavior : BaseBehavior
 {
@@ -34,9 +35,9 @@ public class UnitBehavior : BaseBehavior
     private float interactDistance = 0.0f;
 
     // Use this for initialization
-    public override void Start()
+    public override void Awake()
     {
-        base.Start();
+        base.Awake();
 
         health = maxHealth;
         resourceHold = 0.0f;
@@ -525,7 +526,7 @@ public class UnitBehavior : BaseBehavior
         if (behaviorType == BehaviorType.Run)
         {
             Vector3 dirToTarget = (transform.position - attacker.transform.position).normalized;
-            GiveOrder(transform.position + dirToTarget * 10 , true, 3.0f);
+            GiveOrder(GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true);
         }
     }
 
@@ -612,16 +613,7 @@ public class UnitBehavior : BaseBehavior
         interactType = InteractigType.None;
     }
 
-    public override void GiveOrder(Vector3 point, bool displayMarker, float infelicity)
-    {
-        if (!live)
-            return;
-
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(point + UnityEngine.Random.insideUnitSphere * 2.0f, out hit, 2.0f, NavMesh.AllAreas))
-            GiveOrder(hit.position, displayMarker);
-    }
-
+    [PunRPC]
     public override void GiveOrder(Vector3 point, bool displayMarker)
     {
         if (!live)
