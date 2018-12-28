@@ -79,29 +79,21 @@ public class CameraController : MonoBehaviour
             }
             userId = PhotonNetwork.LocalPlayer.UserId;
             Debug.Log("userNumber: " + userNumber + " team: " + team + " userId: " + userId);
-
-            foreach (GameObject spawnPoint in GameObject.FindGameObjectsWithTag("Spawn"))
-            {
-                SpawnBehavior spawnBehavior = spawnPoint.GetComponent<SpawnBehavior>();
-                PhotonView spawnPhotonView = spawnPoint.GetComponent<PhotonView>();
-                if (spawnBehavior.number == userNumber)
-                {
-                    createdUnit = PhotonNetwork.Instantiate(createSpawnBuilding.name, spawnPoint.transform.position, spawnPoint.transform.rotation, 0);
-                    break;
-                }
-            }
         }
         // Singleplayer
         else
         {
-            foreach (GameObject spawnPoint in GameObject.FindGameObjectsWithTag("Spawn"))
+            PhotonNetwork.OfflineMode = true;
+        }
+
+        foreach (GameObject spawnPoint in GameObject.FindGameObjectsWithTag("Spawn"))
+        {
+            SpawnBehavior spawnBehavior = spawnPoint.GetComponent<SpawnBehavior>();
+            PhotonView spawnPhotonView = spawnPoint.GetComponent<PhotonView>();
+            if (spawnBehavior.number == userNumber)
             {
-                SpawnBehavior spawnBehavior = spawnPoint.GetComponent<SpawnBehavior>();
-                if (spawnBehavior.number == userNumber)
-                {
-                    createdUnit = Instantiate(createSpawnBuilding, spawnPoint.transform.position, spawnPoint.transform.rotation);
-                    break;
-                }
+                createdUnit = PhotonNetwork.Instantiate(createSpawnBuilding.name, spawnPoint.transform.position, spawnPoint.transform.rotation, 0);
+                break;
             }
         }
         if (createdUnit == null)
@@ -151,11 +143,13 @@ public class CameraController : MonoBehaviour
                 {
                     if (selectedObject == null)
                     {
-                        selectedObject = (GameObject)Instantiate(buildedObject, hit.point, buildedObject.transform.rotation);
+                        selectedObject = PhotonNetwork.Instantiate(buildedObject.name, hit.point, buildedObject.transform.rotation);
                         BuildingBehavior buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
                         buildedObjectBuildingBehavior.state = BuildingBehavior.BuildingState.Selected;
                         buildedObjectBuildingBehavior.canBeSelected = false;
                         buildedObjectBuildingBehavior.health = 0;
+                        buildedObjectBuildingBehavior.team = team;
+                        buildedObjectBuildingBehavior.ownerId = userId;
                         buildedObjectBuildingBehavior.live = false;
                         selectedObject.layer = LayerMask.NameToLayer("Project");
 
@@ -176,6 +170,8 @@ public class CameraController : MonoBehaviour
                     {
                         if (intersection == null)
                         {
+                            // Create building in project state
+
                             buildingBehavior.canBeSelected = true;
                             newColor = new Color(1, 1, 1, 0.45f);
                             projector.active = false;

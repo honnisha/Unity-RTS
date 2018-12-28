@@ -47,10 +47,7 @@ public class BuildingBehavior : BaseBehavior
             {
                 // Create object
                 GameObject createdObject = null;
-                if (PhotonNetwork.InRoom)
-                    createdObject = PhotonNetwork.Instantiate(unitsQuery[0].name, spawnPoint.transform.position, spawnPoint.transform.rotation);
-                else
-                    createdObject = Instantiate(unitsQuery[0], spawnPoint.transform.position, spawnPoint.transform.rotation);
+                createdObject = PhotonNetwork.Instantiate(unitsQuery[0].name, spawnPoint.transform.position, spawnPoint.transform.rotation);
 
                 BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
                 PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();

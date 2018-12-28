@@ -204,7 +204,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 unitMeshRender.enabled = false;
 
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        if (team == cameraController.team && live)
+        if (team == cameraController.team && ownerId == cameraController.userId && live)
         {
             if (visionTool == null && visionToolPrefab != null)
             {
@@ -247,6 +247,20 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 objectUIInfo.transform.position = gameObject.transform.position;
                 objectUIInfo.transform.position += InfoHTMLOffset;
                 objectUIInfo.document.innerHTML = HTMLHealthFile.text;
+
+                if (team == cameraController.team)
+                {
+                    if (ownerId == cameraController.userId)
+                        // If its your unit
+                        objectUIInfo.document.getElementById("health").style.background = "green";
+                    else
+                        // If unit of your allies
+                        objectUIInfo.document.getElementById("health").style.background = "yellow";
+                }
+                else
+                    // Enemy unit
+                    objectUIInfo.document.getElementById("health").style.background = "red";
+
                 tempHealth = 0.0f;
             }
         }
@@ -310,6 +324,12 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 }
             }
         }
+    }
+
+    void OnDestroy()
+    {
+        if (objectUIInfo != null)
+            objectUIInfo.Destroy();
     }
 
     public void TextBubble(string message, int timer)
@@ -425,7 +445,11 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         }
         if (targetUnit != null)
         {
-            GiveOrder(targetUnit, true);
+            PhotonView createdPhotonView = GetComponent<PhotonView>();
+            if (PhotonNetwork.InRoom)
+                createdPhotonView.RPC("GiveOrder", PhotonTargets.All, targetUnit, true);
+            else
+                GiveOrder(targetUnit, true);
             return true;
         }
         return false;
