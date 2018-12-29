@@ -759,7 +759,7 @@ MonoBehaviour:
   agrRange: 15
   alertRange: 10
   actionEffect: {fileID: 0}
-  bloodEffect: {fileID: 1853939043361806, guid: 70e77f3a01b62ca44b033369593672de,
+  bloodEffect: {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc,
     type: 3}
   bloodOnBroundEffects:
   - {fileID: 100000, guid: 358b75ea5451cf143ab19029a189097d, type: 3}
@@ -914,7 +914,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 0}
-  viewIdField: 5
+  viewIdField: 0
   InstantiationId: 5
   isRuntimeInstantiated: 0
 --- !u!114 &2509989962941706409

@@ -588,6 +588,7 @@ public class UnitBehavior : BaseBehavior
             GameObject createdBloodEffect = Instantiate(bloodEffect, gameObject.transform.position, Quaternion.identity);
             createdBloodEffect.transform.parent = gameObject.transform;
             createdBloodEffect.transform.LookAt(attacker.transform.position);
+            Destroy(createdBloodEffect, 1.5f);
         }
     }
 

@@ -27,7 +27,9 @@ public class UnitSelectionComponent : MonoBehaviour
 
         RaycastHit hit;
         bool outlineDraw = false;
-        if (Physics.Linecast(transform.position + new Vector3(0, 1.0f, 0), camera.transform.position) && baseBehaviorComponent.IsVisible() && baseBehaviorComponent.live)
+        if (baseBehaviorComponent.team > 0 &&
+            baseBehaviorComponent.IsVisible() && baseBehaviorComponent.live &&
+            Physics.Linecast(transform.position + new Vector3(0, 1.0f, 0), camera.transform.position))
             outlineDraw = true;
         else if (isWithinSelectionBounds && baseBehaviorComponent.IsVisible())
             outlineDraw = true;
@@ -70,11 +72,11 @@ public class UnitSelectionComponent : MonoBehaviour
         {
             Projector projectorComponent = projector.GetComponent<Projector>();
             if (baseBehaviorComponent.team <= 0)
-                projectorComponent.material.color = new Color(1, 1, 1, 0.4f);
+                projectorComponent.material.color = new Color(1, 1, 1, 1f);
             else if (baseBehaviorComponent.team == cameraController.team)
-                projectorComponent.material.color = new Color(0, 1, 0, 0.4f);
+                projectorComponent.material.color = new Color(0, 1, 0, 1f);
             else
-                projectorComponent.material.color = new Color(1, 0, 0, 0.4f);
+                projectorComponent.material.color = new Color(1, 0, 0, 1f);
         }
     }
 }

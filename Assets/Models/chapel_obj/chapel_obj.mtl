@@ -1,0 +1,15 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl Chapel_Mat_
+Ns 0.000000
+Ka 0.100000 0.100000 0.100000
+Kd 0.000000 0.000000 0.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd chapel_diffuse.tga
+map_Bump chapel_normal.tga
+map_Ks chapel_spec.tga

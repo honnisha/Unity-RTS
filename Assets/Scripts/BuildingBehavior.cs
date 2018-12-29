@@ -13,7 +13,6 @@ public class BuildingBehavior : BaseBehavior
     public enum BuildingState { Selected, Project, Building, Builded };
     [Header("Building info")]
     public BuildingState state = BuildingState.Builded;
-    public List<ResourceType> storedResources = new List<ResourceType>();
 
     [Header("Units production")]
     public List<GameObject> producedUnits = new List<GameObject>();

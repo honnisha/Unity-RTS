@@ -338,6 +338,7 @@ GameObject:
   - component: {fileID: 208687129007450452}
   - component: {fileID: 2923045895709666377}
   - component: {fileID: 8964997363262689653}
+  - component: {fileID: 394392352842859905}
   m_Layer: 14
   m_Name: mine
   m_TagString: Building
@@ -583,6 +584,22 @@ MonoBehaviour:
   m_SynchronizePosition: 1
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
+--- !u!114 &394392352842859905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1517551109366952}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbf3575480402db40813e763382412fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: 0
+  eraseRenderer: 0
+  originalLayer: 0
+  originalMaterials: []
 --- !u!1 &1564992669115788
 GameObject:
   m_ObjectHideFlags: 0

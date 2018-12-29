@@ -270,7 +270,8 @@ MonoBehaviour:
   pointMarkerPrefab: {fileID: 0}
   pointMarker: {fileID: 0}
   HTMLHealthSize: {x: 100, y: 100}
-  visionToolPrefab: {fileID: 0}
+  visionToolPrefab: {fileID: 1311408724359970, guid: fc937d29efbc7d146a830e8e4d19ea62,
+    type: 3}
   visionTool: {fileID: 0}
   canBeSelected: 1
   visionCount: 0

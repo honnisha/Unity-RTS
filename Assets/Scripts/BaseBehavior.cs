@@ -73,6 +73,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     public GameObject actionEffect;
 
+    #endregion
+
+    #region Effects info
 
     [Header("Effects info")]
     public GameObject bloodEffect;
@@ -80,6 +83,10 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public GameObject destroyEffectPrefab;
     public GameObject destroyEffectHandler;
 
+    #endregion
+
+    #region Destroy Info
+    
     [Header("Destroy Info")]
     public float timeToDestroy = 30.0f;
     public float destroyAfter = 7.0f;
@@ -154,11 +161,12 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     [Header("Gatering hold info")]
     public ResourceType resourceCapacityType = ResourceType.None;
     public float resourceCapacity = 0.0f;
+    public List<ResourceType> storedResources = new List<ResourceType>();
 
     #endregion
 
     #region Photon
-    
+
     void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -247,6 +255,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 objectUIInfo.transform.position = gameObject.transform.position;
                 objectUIInfo.transform.position += InfoHTMLOffset;
                 objectUIInfo.document.innerHTML = HTMLHealthFile.text;
+                objectUIInfo.Layer = LayerMask.NameToLayer("HP");
 
                 if (team == cameraController.team)
                 {
@@ -429,7 +438,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         float minDistance = range;
         foreach (GameObject unit in allUnits)
         {
-            UnitBehavior unitBehaviorComponent = unit.transform.gameObject.GetComponent<UnitBehavior>();
+            UnitBehavior unitBehaviorComponent = unit.GetComponent<UnitBehavior>();
             if (unitBehaviorComponent.team != team && unitBehaviorComponent.live && unitBehaviorComponent.team > 0)
             {
                 if (attackTeam != 999 && attackTeam != unitBehaviorComponent.team)
@@ -461,8 +470,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         var allUnits = GameObject.FindGameObjectsWithTag("Unit");
         foreach (GameObject unit in allUnits)
         {
-            UnitBehavior unitBehaviorComponent = unit.transform.gameObject.GetComponent<UnitBehavior>();
-            if (unitBehaviorComponent.behaviorType == BehaviorType.Counterattack
+            UnitBehavior unitBehaviorComponent = unit.GetComponent<UnitBehavior>();
+            if (unitBehaviorComponent != null && unitBehaviorComponent.behaviorType == BehaviorType.Counterattack
                 || unitBehaviorComponent.behaviorType == BehaviorType.Aggressive)
             {
                 float dist = Vector3.Distance(gameObject.transform.position, unit.transform.position);

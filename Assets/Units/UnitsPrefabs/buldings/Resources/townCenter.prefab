@@ -130,8 +130,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 4.047797, y: 3.9996, z: 4.1758156}
-  m_Center: {x: -0.18877272, y: 1.95, z: 0.011930516}
+  m_Size: {x: 4.3090553, y: 3.9996, z: 4.5003896}
+  m_Center: {x: -0.16955945, y: 1.95, z: -0.060170483}
 --- !u!208 &208105249511787890
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -144,7 +144,7 @@ NavMeshObstacle:
   m_Shape: 1
   m_Extents: {x: 1.95, y: 2.5, z: 2}
   m_MoveThreshold: 0.1
-  m_Carve: 0
+  m_Carve: 1
   m_CarveOnlyStationary: 1
   m_Center: {x: -0.2, y: 2.25, z: 0}
   m_TimeToStationary: 0.5
@@ -169,7 +169,8 @@ MonoBehaviour:
   visionDistanve: 15
   uniqueName: townCenter
   readableName: Town center
-  readableDescription: Main building, can produce workers and store resources.
+  readableDescription: Main building, can produce workers and store resources from
+    workers.
   imagePath: house.png
   timeToBuild: 10
   costFood: 0
@@ -201,7 +202,7 @@ MonoBehaviour:
   destroyEffectHandler: {fileID: 0}
   timeToDestroy: 30
   destroyAfter: 7
-  toUndergroundSpeed: 1
+  toUndergroundSpeed: 2
   sendToDestroy: 0
   delayToMoveUnderground: 3
   weapon:
@@ -232,10 +233,11 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
-  state: 3
   storedResources: 010000000200000003000000
+  state: 3
   producedUnits:
   - {fileID: 1433930624698878, guid: e02417c767ce18243bcf55cb7fba72c2, type: 3}
+  - {fileID: 0}
   spawnPoint: {fileID: 1302593100708304}
   unitsQuery: []
   uqeryLimit: 10
@@ -302,6 +304,7 @@ GameObject:
   - component: {fileID: 4370739330849222}
   - component: {fileID: 33936990368785944}
   - component: {fileID: 23086476382580994}
+  - component: {fileID: 7691248584285414933}
   m_Layer: 13
   m_Name: barrack
   m_TagString: Untagged
@@ -372,3 +375,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &7691248584285414933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1929091652464856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbf3575480402db40813e763382412fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: 0
+  eraseRenderer: 0
+  originalLayer: 0
+  originalMaterials: []

@@ -110,6 +110,7 @@ public class CameraController : MonoBehaviour
                 baseBehaviorComponent.ChangeOwner(userId, team);
 
             transform.position = new Vector3(createdUnit.transform.position.x, transform.position.y, createdUnit.transform.position.z);
+            transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
         }
     }
 
@@ -270,7 +271,7 @@ public class CameraController : MonoBehaviour
                         {
                             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
                             UnitSelectionComponent selectionComponent = unit.GetComponent<UnitSelectionComponent>();
-                            if (selectionComponent.isSelected == true && baseBehaviorComponent.team == team && baseBehaviorComponent.live)
+                            if (selectionComponent != null && selectionComponent.isSelected == true && baseBehaviorComponent.team == team && baseBehaviorComponent.live)
                             {
                                 if (tagsToSelect.Exists(x => (x.name == hit.transform.gameObject.tag)))
                                 {
@@ -358,8 +359,8 @@ public class CameraController : MonoBehaviour
             var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
             foreach (GameObject unit in allUnits)
             {
-                UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-                if (selection.isSelected == true)
+                UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
+                if (selection != null && selection.isSelected == true)
                     objects.Add(unit);
             }
         }
@@ -460,8 +461,9 @@ public class CameraController : MonoBehaviour
             var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
             foreach (GameObject unit in allUnits)
             {
-                UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-                selection.isSelected = false;
+                UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
+                if(selection != null)
+                    selection.isSelected = false;
             }
         }
     }
