@@ -834,6 +834,7 @@ MonoBehaviour:
     holder: {fileID: 1462440244385870}
   resourceCapacityType: 0
   resourceCapacity: 0
+  storedResources: 
   buildHpPerSecond: 10
   buildingTool:
     prefab: {fileID: 1266908089214646, guid: 0d6787997193dc34882796b0a1a05748, type: 3}
@@ -914,8 +915,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 0}
-  viewIdField: 0
-  InstantiationId: 5
+  viewIdField: 27
+  InstantiationId: 27
   isRuntimeInstantiated: 0
 --- !u!114 &2509989962941706409
 MonoBehaviour:

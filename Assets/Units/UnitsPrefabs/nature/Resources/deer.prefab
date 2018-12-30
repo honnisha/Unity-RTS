@@ -1602,6 +1602,8 @@ GameObject:
   - component: {fileID: 114021840293253856}
   - component: {fileID: 195135486197180870}
   - component: {fileID: 114564243325718884}
+  - component: {fileID: 3673927643701903400}
+  - component: {fileID: 2398416377298581108}
   m_Layer: 12
   m_Name: deer
   m_TagString: Unit
@@ -1742,6 +1744,7 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 1
   resourceCapacity: 50
+  storedResources: 
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}
@@ -1785,6 +1788,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isSelected: 0
   projector: {fileID: 1156474353859876}
+--- !u!114 &3673927643701903400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937853774954928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 2398416377298581108}
+  viewIdField: 36
+  InstantiationId: 36
+  isRuntimeInstantiated: 0
+--- !u!114 &2398416377298581108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937853774954928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
 --- !u!1 &1963004173517882
 GameObject:
   m_ObjectHideFlags: 0

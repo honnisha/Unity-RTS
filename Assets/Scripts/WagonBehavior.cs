@@ -29,8 +29,6 @@ public class WagonBehavior : MonoBehaviour
             if (newRotate < 0)
                 newRotate = 360 + newRotate;
 
-            Debug.Log("rotateChange: " + rotateChange + "newRotate " + newRotate);
-
             if (newRotate > maxAngle && newRotate < 180.0f)
                 newRotate = maxAngle;
             else if (newRotate < 360 - maxAngle && newRotate > 180.0f)

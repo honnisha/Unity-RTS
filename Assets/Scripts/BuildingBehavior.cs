@@ -44,28 +44,8 @@ public class BuildingBehavior : BaseBehavior
             buildTimer -= Time.deltaTime;
             if (buildTimer <= 0.0f)
             {
-                // Create object
-                GameObject createdObject = null;
-                createdObject = PhotonNetwork.Instantiate(unitsQuery[0].name, spawnPoint.transform.position, spawnPoint.transform.rotation);
-
-                BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
-                PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();
-                // Set owner
-                if (PhotonNetwork.InRoom)
-                    createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
-                else
-                    createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
-
+                ProduceUnit(unitsQuery[0]);
                 unitsQuery.Remove(unitsQuery[0]);
-
-                // createdObjectBehaviorComponent.Awake();
-
-                //Send command to created object to spawn target 
-                if (PhotonNetwork.InRoom)
-                    createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget, 2.0f), true);
-                else
-                    createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget, 2.0f), true);
-
                 if (unitsQuery.Count > 0)
                 {
                     BaseBehavior firstElementBehaviorComponent = unitsQuery[0].GetComponent<BaseBehavior>();
@@ -79,6 +59,29 @@ public class BuildingBehavior : BaseBehavior
             CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f);
         if (!unitSelectionComponent.isSelected)
             DestroyPointMarker();
+    }
+
+    public GameObject ProduceUnit(GameObject createdPrefab)
+    {
+        // Create object
+        GameObject createdObject = PhotonNetwork.Instantiate(createdPrefab.name, spawnPoint.transform.position, spawnPoint.transform.rotation);
+
+        BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
+        PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();
+        // Set owner
+        if (PhotonNetwork.InRoom)
+            createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
+        else
+            createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
+
+        // createdObjectBehaviorComponent.Awake();
+
+        //Send command to created object to spawn target 
+        if (PhotonNetwork.InRoom)
+            createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget, 2.0f), true);
+        else
+            createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget, 2.0f), true);
+        return createdObject;
     }
 
     public override void AlertAttacking(GameObject attacker)
@@ -104,12 +107,17 @@ public class BuildingBehavior : BaseBehavior
         TextBubble(String.Format("-{0:F0}", newDamage), 1000);
         if (health <= 0)
         {
-            health = 0.0f;
-            live = false;
-
-            if (resourceCapacity <= 0)
-                sendToDestroy = true;
+            BecomeDead();
         }
+    }
+
+    public override void BecomeDead()
+    {
+        health = 0.0f;
+        live = false;
+
+        if (resourceCapacity <= 0)
+            sendToDestroy = true;
     }
 
     public override bool IsVisible()
@@ -164,6 +172,8 @@ public class BuildingBehavior : BaseBehavior
                     material.renderQueue = 3000;
                     material.color = new Color(1, 1, 1, 1.0f);
                 }
+                if (spawnPoint != null)
+                    spawnTarget = spawnPoint.transform.position;
                 return true;
             }
         }
@@ -226,7 +236,7 @@ public class BuildingBehavior : BaseBehavior
     public bool StopAction()
     {
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        if (state == BuildingState.Building)
+        if (state == BuildingState.Building || state == BuildingState.Project)
         {
             cameraController.food += costFood;
             cameraController.gold += costGold;

@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1302593100708304}
   m_LocalRotation: {x: 0.000000029802322, y: -1, z: -0.000000074505806, w: -0.000000014901161}
-  m_LocalPosition: {x: -2.96, y: -1.68, z: -0.17}
+  m_LocalPosition: {x: -4.13, y: -0, z: -0.17}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 4740038719223890}
@@ -237,7 +237,7 @@ MonoBehaviour:
   state: 3
   producedUnits:
   - {fileID: 1433930624698878, guid: e02417c767ce18243bcf55cb7fba72c2, type: 3}
-  - {fileID: 0}
+  - {fileID: 3155895443718321516, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
   spawnPoint: {fileID: 1302593100708304}
   unitsQuery: []
   uqeryLimit: 10
@@ -275,8 +275,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 7201522695753978645}
-  viewIdField: 1
-  InstantiationId: 1
+  viewIdField: 30
+  InstantiationId: 30
   isRuntimeInstantiated: 0
 --- !u!114 &7201522695753978645
 MonoBehaviour:

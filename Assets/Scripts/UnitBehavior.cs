@@ -449,11 +449,14 @@ public class UnitBehavior : BaseBehavior
             }
         }
         // Store resources in building
-        if (targetBuildingBehavior != null)
+        if (targetBaseBehavior != null)
         {
-            ResourceType storedResource = targetBuildingBehavior.storedResources.Find(x => x == resourceType);
-            if (storedResource != ResourceType.None && resourceHold > 0 && targetBuildingBehavior.state == BuildingBehavior.BuildingState.Builded)
+            ResourceType storedResource = targetBaseBehavior.storedResources.Find(x => x == resourceType);
+            if (storedResource != ResourceType.None && resourceHold > 0 && targetBaseBehavior.live)
             {
+                if (targetBuildingBehavior != null && targetBuildingBehavior.state != BuildingBehavior.BuildingState.Builded)
+                    return false;
+
                 CameraController cameraController = Camera.main.GetComponent<CameraController>();
                 if (resourceType == ResourceType.Food)
                     cameraController.food += resourceHold;
@@ -476,13 +479,17 @@ public class UnitBehavior : BaseBehavior
     public void GoToStoreResources()
     {
         List<CameraController.ObjectWithDistance> buildings = new List<CameraController.ObjectWithDistance>();
-        var allUnits = GameObject.FindGameObjectsWithTag("Building");
+        var allUnits = GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")).ToArray();
         foreach (GameObject building in allUnits)
         {
-            BuildingBehavior buildingBuildingBehavior = building.GetComponent<BuildingBehavior>();
-            ResourceType storedResource = buildingBuildingBehavior.storedResources.Find(x => x == resourceType);
-            if (buildingBuildingBehavior.team == team && storedResource != ResourceType.None && buildingBuildingBehavior.state == BuildingBehavior.BuildingState.Builded)
+            BaseBehavior buildingBaseBehavior = building.GetComponent<BaseBehavior>();
+            ResourceType storedResource = buildingBaseBehavior.storedResources.Find(x => x == resourceType);
+            if (buildingBaseBehavior.team == team && storedResource != ResourceType.None && buildingBaseBehavior.live)
             {
+                BuildingBehavior buildingBuildingBehavior = building.GetComponent<BuildingBehavior>();
+                if (buildingBuildingBehavior != null && buildingBuildingBehavior.state != BuildingBehavior.BuildingState.Builded)
+                    continue;
+
                 float distance = Vector3.Distance(gameObject.transform.position, building.transform.position);
                 buildings.Add(new CameraController.ObjectWithDistance(building, distance));
             }
@@ -565,18 +572,10 @@ public class UnitBehavior : BaseBehavior
 
         if (health <= 0)
         {
-            anim.Rebind();
-            anim.SetTrigger("Die");
-            live = false;
-            // var collider = GetComponent<Collider>();
-            // collider.enabled = false;
-            agent.enabled = false;
+            BecomeDead();
 
             UnitBehavior attackerBehaviorComponent = attacker.GetComponent<UnitBehavior>();
             attackerBehaviorComponent.ActionIsDone();
-
-            if (resourceCapacity <= 0)
-                sendToDestroy = true;
         }
         else
         {
@@ -590,6 +589,19 @@ public class UnitBehavior : BaseBehavior
             createdBloodEffect.transform.LookAt(attacker.transform.position);
             Destroy(createdBloodEffect, 1.5f);
         }
+    }
+
+    public override void BecomeDead()
+    {
+        anim.Rebind();
+        anim.SetTrigger("Die");
+        live = false;
+        // var collider = GetComponent<Collider>();
+        // collider.enabled = false;
+        agent.enabled = false;
+
+        if (resourceCapacity <= 0)
+            sendToDestroy = true;
     }
 
     public void StopAction(bool deleteObject)

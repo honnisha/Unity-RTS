@@ -315,8 +315,8 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
-  state: 3
   storedResources: 
+  state: 3
   producedUnits:
   - {fileID: 1731176499304606, guid: 95eb1e8559a643a489385f9c45b9163b, type: 3}
   - {fileID: 1528613431990062, guid: 2c7addb4de208dd47b215e38fc2e92db, type: 3}
@@ -374,8 +374,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 7079655673605072063}
-  viewIdField: 3
-  InstantiationId: 3
+  viewIdField: 1
+  InstantiationId: 1
   isRuntimeInstantiated: 0
 --- !u!114 &7079655673605072063
 MonoBehaviour:

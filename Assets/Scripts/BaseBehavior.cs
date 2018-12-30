@@ -499,6 +499,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public virtual void GiveOrder(Vector3 point, bool displayMarker) { }
     public virtual void GiveOrder(GameObject targetObject, bool displayMarker) { }
     public virtual void TakeDamage(float damage, GameObject attacker) { }
+    public virtual void BecomeDead() { }
     public virtual bool StartInteract(GameObject target) { return false; }
     public virtual bool[] UICommand(string commandName) { return new bool[2] { false, false}; }
     public virtual bool IsHealthVisible() { return false; }

@@ -54,6 +54,7 @@ public class CameraController : MonoBehaviour
     private GameObject selectedObject;
 
     public GameObject createSpawnBuilding;
+    public List<GameObject> startUnits = new List<GameObject>();
 
     // Use this for initialization
     void Start()
@@ -93,6 +94,11 @@ public class CameraController : MonoBehaviour
             if (spawnBehavior.number == userNumber)
             {
                 createdUnit = PhotonNetwork.Instantiate(createSpawnBuilding.name, spawnPoint.transform.position, spawnPoint.transform.rotation, 0);
+                foreach (var startUnit in startUnits)
+                {
+                    BuildingBehavior createdUnitBuildingBehavior = createdUnit.GetComponent<BuildingBehavior>();
+                    createdUnitBuildingBehavior.ProduceUnit(startUnit);
+                }
                 break;
             }
         }
