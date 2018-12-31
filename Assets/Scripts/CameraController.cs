@@ -161,7 +161,8 @@ public class CameraController : MonoBehaviour
                         selectedObject.layer = LayerMask.NameToLayer("Project");
 
                         UnityEngine.AI.NavMeshObstacle navMesh = selectedObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
-                        navMesh.enabled = false;
+                        if (navMesh != null)
+                            navMesh.enabled = false;
                     }
                     BuildingBehavior buildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
                     selectedObject.transform.position = hit.point;
@@ -183,8 +184,11 @@ public class CameraController : MonoBehaviour
                             newColor = new Color(1, 1, 1, 0.45f);
                             projector.active = false;
                             projector.GetComponent<Projector>().material.color = newColor;
-                            foreach (var material in selectedObject.GetComponent<Renderer>().materials)
-                                material.color = newColor;
+
+                            var allRenders = selectedObject.GetComponents<Renderer>().Concat(selectedObject.GetComponentsInChildren<Renderer>()).ToArray();
+                            foreach (var render in allRenders)
+                                foreach (var material in render.materials)
+                                    material.color = newColor;
 
                             BuildingBehavior buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
                             buildedObjectBuildingBehavior.state = BuildingBehavior.BuildingState.Project;
@@ -223,18 +227,20 @@ public class CameraController : MonoBehaviour
 
                     projector.active = true;
                     projector.GetComponent<Projector>().material.color = newColor;
-                    foreach (var material in selectedObject.GetComponent<Renderer>().materials)
-                    {
-                        material.SetFloat("_Mode", 2);
-                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                        material.SetInt("_ZWrite", 0);
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        material.EnableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                        material.renderQueue = 3000;
-                        material.SetColor("_Color", newColor);
-                    }
+                    var allNewRenders = selectedObject.GetComponents<Renderer>().Concat(selectedObject.GetComponentsInChildren<Renderer>()).ToArray();
+                    foreach (var render in allNewRenders)
+                        foreach (var material in render.materials)
+                        {
+                            material.SetFloat("_Mode", 2);
+                            material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                            material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                            material.SetInt("_ZWrite", 0);
+                            material.DisableKeyword("_ALPHATEST_ON");
+                            material.EnableKeyword("_ALPHABLEND_ON");
+                            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                            material.renderQueue = 3000;
+                            material.SetColor("_Color", newColor);
+                        }
                     return;
                 }
             }

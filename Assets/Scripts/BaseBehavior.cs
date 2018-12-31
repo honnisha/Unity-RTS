@@ -45,7 +45,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public float damage = 50.0f;
     public float rangeAttack = 2.0f;
 
-    public enum InteractigType { None, Attacking, Bulding, Gathering, CuttingTree };
+    public enum InteractigType { None, Attacking, Bulding, Gathering, CuttingTree, Farming };
     public InteractigType interactType = InteractigType.None;
 
     public float attackTime = 1.2f;

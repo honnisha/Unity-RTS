@@ -1317,7 +1317,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: 0
-  ownerId: 1
+  ownerId: 0
   maxHealth: 50
   health: 50
   live: 1
@@ -1450,8 +1450,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 6685409450178812008}
-  viewIdField: 34
-  InstantiationId: 34
+  viewIdField: 0
+  InstantiationId: 12
   isRuntimeInstantiated: 0
 --- !u!114 &6685409450178812008
 MonoBehaviour:

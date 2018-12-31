@@ -1204,6 +1204,7 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
+  storedResources: 
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}
@@ -1211,6 +1212,17 @@ MonoBehaviour:
   resourceGatherInfo: []
   resourceHold: 0
   resourceType: 0
+  farmInfo:
+    type: 0
+    gatherPerSecond: 0.5
+    maximumCapacity: 10
+    carryObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
+    toolObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
+  interactObject: {fileID: 0}
 --- !u!114 &7661890078232436951
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1230,8 +1242,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 5791970414735973560}
-  viewIdField: 0
-  InstantiationId: 0
+  viewIdField: 4
+  InstantiationId: 4
   isRuntimeInstantiated: 0
 --- !u!114 &5791970414735973560
 MonoBehaviour:

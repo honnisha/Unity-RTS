@@ -235,8 +235,9 @@ MonoBehaviour:
   resourceCapacity: 0
   storedResources: 010000000200000003000000
   state: 3
+  farm: 0
   producedUnits:
-  - {fileID: 1433930624698878, guid: e02417c767ce18243bcf55cb7fba72c2, type: 3}
+  - {fileID: 1433930624698878, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
   - {fileID: 3155895443718321516, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
   spawnPoint: {fileID: 1302593100708304}
   unitsQuery: []
@@ -275,8 +276,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 7201522695753978645}
-  viewIdField: 30
-  InstantiationId: 30
+  viewIdField: 28
+  InstantiationId: 28
   isRuntimeInstantiated: 0
 --- !u!114 &7201522695753978645
 MonoBehaviour:

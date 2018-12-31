@@ -210,9 +210,9 @@ MonoBehaviour:
   createSpawnBuilding: {fileID: 1849125382684708, guid: 601738f4d30038c4db1250fba0a66f48,
     type: 3}
   startUnits:
-  - {fileID: 1433930624698878, guid: e02417c767ce18243bcf55cb7fba72c2, type: 3}
-  - {fileID: 1433930624698878, guid: e02417c767ce18243bcf55cb7fba72c2, type: 3}
-  - {fileID: 1433930624698878, guid: e02417c767ce18243bcf55cb7fba72c2, type: 3}
+  - {fileID: 1433930624698878, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
+  - {fileID: 1433930624698878, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
+  - {fileID: 1433930624698878, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
   - {fileID: 3155895443718321516, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
 --- !u!114 &114047147111761268
 MonoBehaviour:

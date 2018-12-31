@@ -30,9 +30,13 @@ public class UnitBehavior : BaseBehavior
     public ResourceType resourceType = ResourceType.None;
     private string interactAnimation = "";
 
-    private GameObject interactObject;
+    public ResourceGatherInfo farmInfo;
+    [HideInInspector]
+    public GameObject interactObject;
     private float interactTimer = 0.0f;
     private float interactDistance = 0.0f;
+
+    private float workingTimer = 0.0f;
 
     // Use this for initialization
     public override void Awake()
@@ -92,57 +96,113 @@ public class UnitBehavior : BaseBehavior
             else
                 anim.SetBool("Carry", true);
 
+        if(target != null)
+        {
+            BuildingBehavior targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
+            if (targetBuildingBehavior != null && targetBuildingBehavior.farm)
+            {
+                foreach(GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
+                {
+                    UnitBehavior workerUnitBehavior = unit.GetComponent<UnitBehavior>();
+                    if (workerUnitBehavior.interactObject == target && unit != gameObject)
+                    {
+                        UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+                        cameraUIBaseScript.DisplayMessage("Only one worker can work in farm", 1000);
+                        StopAction(true);
+                        break;
+                    }
+                }
+                if (target != null)
+                {
+                    interactObject = target;
+                    base.agent.destination = GetRandomPoint(target.transform.position, 2.0f);
+                    target = null;
+                }
+            }
+        }
+
+        if (interactObject != null && workingTimer >= 5.0f)
+        {
+            BuildingBehavior interactObjectBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
+            if (interactObjectBuildingBehavior != null && interactObjectBuildingBehavior.farm)
+            {
+                GiveOrder(interactObject, false);
+                workingTimer = 0.0f;
+                return;
+            }
+        }
         // Interact with something
-        if (interactType == InteractigType.Bulding || interactType == InteractigType.Gathering || interactType == InteractigType.CuttingTree)
+        if (
+            interactType == InteractigType.Bulding || interactType == InteractigType.Gathering || 
+            interactType == InteractigType.CuttingTree || interactType == InteractigType.Farming)
         {
             if (interactObject != null)
             {
                 float distance = Vector3.Distance(interactObject.transform.position, transform.position);
-                if (distance < interactDistance + 0.5f || interactDistance == 0.0f)
+                if (distance < interactDistance + 1.0f || interactDistance == 0.0f)
                 {
-                    if (interactType == InteractigType.Gathering || interactType == InteractigType.CuttingTree)
+                    if (interactType == InteractigType.Gathering || interactType == InteractigType.CuttingTree || interactType == InteractigType.Farming)
                     {
                         interactDistance = distance;
                         BaseBehavior baseObjectBehaviorComponent = interactObject.GetComponent<BaseBehavior>();
+                        BuildingBehavior buildingObjectBehaviorComponent = interactObject.GetComponent<BuildingBehavior>();
                         if (baseObjectBehaviorComponent != null)
                         {
-                            ResourceGatherInfo resourceInfo = resourceGatherInfo.Find(x => x.type == baseObjectBehaviorComponent.resourceCapacityType);
+                            ResourceGatherInfo resourceInfo = new ResourceGatherInfo();
+                            var objectResourceType = baseObjectBehaviorComponent.resourceCapacityType;
+                            if (buildingObjectBehaviorComponent != null && buildingObjectBehaviorComponent.farm)
+                            {
+                                resourceInfo = farmInfo;
+                                objectResourceType = ResourceType.Food;
+                            }
+                            else
+                            {
+                                resourceInfo = resourceGatherInfo.Find(x => x.type == baseObjectBehaviorComponent.resourceCapacityType);
+                                transform.LookAt(interactObject.transform.position);
+                            }
 
                             interactTimer -= Time.deltaTime;
+                            workingTimer += Time.deltaTime;
                             if (interactTimer <= 0)
                             {
                                 interactTimer = 1.0f;
-                                transform.LookAt(interactObject.transform.position);
 
-                                if (interactAnimation != "")
-                                    anim.SetBool(interactAnimation, true);
+                                // if (interactAnimation != "")
+                                //     anim.SetBool(interactAnimation, true);
 
-                                if (resourceType != baseObjectBehaviorComponent.resourceCapacityType)
+                                if (resourceType != objectResourceType)
                                 {
                                     resourceHold = 0.0f;
-                                    resourceType = baseObjectBehaviorComponent.resourceCapacityType;
+                                    resourceType = objectResourceType;
                                 }
 
-                                if (baseObjectBehaviorComponent.resourceCapacity > resourceInfo.gatherPerSecond)
-                                {
-                                    if (resourceHold < resourceInfo.maximumCapacity)
+                                resourceHold += resourceInfo.gatherPerSecond;
+
+                                bool isFarm = false;
+                                if (buildingObjectBehaviorComponent != null && buildingObjectBehaviorComponent.farm)
+                                    isFarm = true;
+
+                                if(!isFarm)
+                                    if (baseObjectBehaviorComponent.resourceCapacity > resourceInfo.gatherPerSecond)
                                     {
-                                        baseObjectBehaviorComponent.resourceCapacity -= resourceInfo.gatherPerSecond;
-                                        resourceHold += resourceInfo.gatherPerSecond;
+                                        if (resourceHold < resourceInfo.maximumCapacity)
+                                        {
+                                            baseObjectBehaviorComponent.resourceCapacity -= resourceInfo.gatherPerSecond;
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    // Resources is out
-                                    baseObjectBehaviorComponent.ResourcesIsOut(gameObject);
-                                    anim.SetBool(interactAnimation, false);
-                                    interactAnimation = "";
-                                    baseObjectBehaviorComponent.resourceCapacity = 0;
-                                    resourceHold += resourceInfo.gatherPerSecond;
-                                    interactObject = null;
-                                    ActionIsDone();
-                                    interactType = InteractigType.None;
-                                }
+                                    else
+                                    {
+                                        // Resources is out
+                                        baseObjectBehaviorComponent.ResourcesIsOut(gameObject);
+                                        anim.SetBool(interactAnimation, false);
+                                        interactAnimation = "";
+                                        baseObjectBehaviorComponent.resourceCapacity = 0;
+                                        resourceHold += resourceInfo.gatherPerSecond;
+                                        interactObject = null;
+                                        ActionIsDone();
+                                        interactType = InteractigType.None;
+                                    }
+
                                 if (resourceHold >= resourceInfo.maximumCapacity)
                                 {
                                     // Go to store resource
@@ -159,20 +219,27 @@ public class UnitBehavior : BaseBehavior
                     {
                         interactDistance = distance;
                         interactTimer -= Time.deltaTime;
+                        workingTimer += Time.deltaTime;
                         if (interactTimer <= 0)
                         {
                             interactTimer = 1.0f;
-                            anim.SetBool("Builded", true);
+                            BuildingBehavior interactObjectBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
+                            anim.SetBool(interactAnimation, true);
 
-                            BuildingBehavior targetBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
-                            bool builded = targetBuildingBehavior.RepairOrBuild(buildHpPerSecond);
-                            if (builded || !targetBuildingBehavior.live)
+                            bool builded = interactObjectBuildingBehavior.RepairOrBuild(buildHpPerSecond);
+                            if (builded || !interactObjectBuildingBehavior.live)
                             {
-                                anim.SetBool("Builded", false);
-                                interactObject = null;
-                                base.agent.isStopped = true;
                                 ActionIsDone();
                                 interactType = InteractigType.None;
+                                anim.SetBool(interactAnimation, false);
+
+                                if (interactObjectBuildingBehavior.farm)
+                                    GiveOrder(interactObject, false);
+                                else
+                                    base.agent.isStopped = true;
+
+                                interactAnimation = "";
+                                interactObject = null;
                             }
                         }
                     }
@@ -182,7 +249,6 @@ public class UnitBehavior : BaseBehavior
                     GameObject tempTarget = interactObject;
                     StopAction(true);
                     GiveOrder(tempTarget, false);
-                    interactObject = null;
                 }
             }
             else
@@ -203,11 +269,11 @@ public class UnitBehavior : BaseBehavior
             BaseBehavior targetBaseBehavior = target.GetComponent<BaseBehavior>();
             if (Vector3.Distance(targetOldPosition, target.transform.position) > 0.4f)
             {
-                BuildingBehavior targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
                 var targetPoint = target.transform.position;
                 if (targetBaseBehavior.pointToInteract != null)
                     targetPoint = targetBaseBehavior.pointToInteract.transform.position;
 
+                BuildingBehavior targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
                 if (targetBuildingBehavior != null)
                 {
 
@@ -280,8 +346,13 @@ public class UnitBehavior : BaseBehavior
         }
         else if (target == null && !base.agent.isStopped && Vector3.Distance(gameObject.transform.position, base.agent.destination) <= 0.2f)
         {
-            base.agent.isStopped = true;
             ActionIsDone();
+            if (interactObject != null)
+            {
+                bool newOrder = StartInteract(interactObject);
+                if (!newOrder)
+                    base.agent.isStopped = true;
+            }
         }
         if (tempDestinationPoint != Vector3.zero && target == null)
         {
@@ -412,7 +483,13 @@ public class UnitBehavior : BaseBehavior
                 {
                     interactTimer = 1.0f;
                     transform.LookAt(target.transform.position);
-                    anim.SetBool("Builded", true);
+
+                    if (targetBuildingBehavior.farm)
+                        interactAnimation = "Farming";
+                    else
+                        interactAnimation = "Builded";
+
+                    anim.SetBool(interactAnimation, true);
                     interactObject = target;
                     interactType = InteractigType.Bulding;
                     return false;
@@ -422,12 +499,22 @@ public class UnitBehavior : BaseBehavior
         // Start gathering food
         BaseBehavior targetBaseBehavior = target.GetComponent<BaseBehavior>();
         UnitBehavior unitBehaviorComponent = target.GetComponent<UnitBehavior>();
-        if (targetBaseBehavior != null && targetBaseBehavior.resourceCapacity > 0)
+        if ((targetBaseBehavior != null && targetBaseBehavior.resourceCapacity > 0) || (targetBuildingBehavior != null && targetBuildingBehavior.farm))
         {
-            ResourceGatherInfo resourceInfo = resourceGatherInfo.Find(x => x.type == targetBaseBehavior.resourceCapacityType);
+            ResourceGatherInfo resourceInfo;
+            if (targetBuildingBehavior != null && targetBuildingBehavior.farm)
+                resourceInfo = farmInfo;
+            else
+                resourceInfo = resourceGatherInfo.Find(x => x.type == targetBaseBehavior.resourceCapacityType);
+
             if(resourceInfo != null)
             {
                 interactType = InteractigType.None;
+                if (targetBuildingBehavior != null && targetBuildingBehavior.farm && targetBaseBehavior.live)
+                {
+                    interactType = InteractigType.Farming;
+                    interactAnimation = "Farming";
+                }
                 if (targetBaseBehavior.resourceCapacityType == BaseBehavior.ResourceType.Food && !targetBaseBehavior.live)
                 {
                     interactType = InteractigType.Gathering;
@@ -618,11 +705,10 @@ public class UnitBehavior : BaseBehavior
         {
             if(interactAnimation != "")
                 anim.SetBool(interactAnimation, false);
-            if (buildHpPerSecond > 0.0f)
-                anim.SetBool("Builded", false);
             if (deleteObject)
                 interactObject = null;
         }
+        workingTimer = 0.0f;
         interactType = InteractigType.None;
     }
 

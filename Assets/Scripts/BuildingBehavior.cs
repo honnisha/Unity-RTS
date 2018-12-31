@@ -5,6 +5,7 @@ using System.Text;
 using System;
 using UnityEngine.AI;
 using Photon.Pun;
+using System.Linq;
 
 public class BuildingBehavior : BaseBehavior
 {
@@ -13,6 +14,7 @@ public class BuildingBehavior : BaseBehavior
     public enum BuildingState { Selected, Project, Building, Builded };
     [Header("Building info")]
     public BuildingState state = BuildingState.Builded;
+    public bool farm = false;
 
     [Header("Units production")]
     public List<GameObject> producedUnits = new List<GameObject>();
@@ -157,21 +159,25 @@ public class BuildingBehavior : BaseBehavior
                 gameObject.layer = LayerMask.NameToLayer("Building");
                 live = true;
                 UnityEngine.AI.NavMeshObstacle navMesh = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
-                navMesh.enabled = true;
+                if (navMesh != null)
+                    navMesh.enabled = true;
+
                 state = BuildingState.Building;
                 canBeSelected = true;
-                foreach (var material in gameObject.GetComponent<Renderer>().materials)
-                {
-                    material.SetFloat("_Mode", 1);
-                    material.SetInt("_SrcBlend", 1);
-                    material.SetInt("_DstBlend", 0);
-                    material.SetInt("_ZWrite", 1);
-                    material.EnableKeyword("_ALPHATEST_ON");
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-                    material.renderQueue = 3000;
-                    material.color = new Color(1, 1, 1, 1.0f);
-                }
+                var allRenders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
+                foreach (var render in allRenders)
+                    foreach (var material in render.materials)
+                    {
+                        material.SetFloat("_Mode", 1);
+                        material.SetInt("_SrcBlend", 1);
+                        material.SetInt("_DstBlend", 0);
+                        material.SetInt("_ZWrite", 1);
+                        material.EnableKeyword("_ALPHATEST_ON");
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                        material.renderQueue = 3000;
+                        material.color = new Color(1, 1, 1, 1.0f);
+                    }
                 if (spawnPoint != null)
                     spawnTarget = spawnPoint.transform.position;
                 return true;

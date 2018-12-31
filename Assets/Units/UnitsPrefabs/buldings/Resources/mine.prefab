@@ -510,8 +510,8 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
-  state: 3
   storedResources: 
+  state: 3
   producedUnits: []
   spawnPoint: {fileID: 0}
   unitsQuery: []

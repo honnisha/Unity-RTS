@@ -258,7 +258,7 @@ MonoBehaviour:
   costFood: 0
   costGold: 0
   costWood: 100
-  productionHotkey: 102
+  productionHotkey: 100
   canAttack: 1
   damage: 50
   rangeAttack: 2
@@ -317,6 +317,7 @@ MonoBehaviour:
   resourceCapacity: 0
   storedResources: 
   state: 3
+  farm: 0
   producedUnits:
   - {fileID: 1731176499304606, guid: 95eb1e8559a643a489385f9c45b9163b, type: 3}
   - {fileID: 1528613431990062, guid: 2c7addb4de208dd47b215e38fc2e92db, type: 3}
@@ -374,8 +375,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 7079655673605072063}
-  viewIdField: 1
-  InstantiationId: 1
+  viewIdField: 26
+  InstantiationId: 26
   isRuntimeInstantiated: 0
 --- !u!114 &7079655673605072063
 MonoBehaviour:

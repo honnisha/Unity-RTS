@@ -2539,6 +2539,17 @@ MonoBehaviour:
   resourceGatherInfo: []
   resourceHold: 0
   resourceType: 0
+  farmInfo:
+    type: 0
+    gatherPerSecond: 0.5
+    maximumCapacity: 10
+    carryObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
+    toolObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
+  interactObject: {fileID: 0}
 --- !u!114 &3156223600596097075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2572,8 +2583,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 7795401744698654463}
-  viewIdField: 19
-  InstantiationId: 19
+  viewIdField: 17
+  InstantiationId: 17
   isRuntimeInstantiated: 0
 --- !u!114 &7795401744698654463
 MonoBehaviour:
@@ -2639,7 +2650,7 @@ Projector:
   m_Material: {fileID: 2100000, guid: 9e921ee33f8e5ee4884f95bba0a27ce7, type: 2}
   m_IgnoreLayers:
     serializedVersion: 2
-    m_Bits: 7735
+    m_Bits: 32311
 --- !u!1 &3156606383721759084
 GameObject:
   m_ObjectHideFlags: 0
