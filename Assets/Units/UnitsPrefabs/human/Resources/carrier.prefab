@@ -2474,7 +2474,6 @@ MonoBehaviour:
   costGold: 0
   costWood: 0
   productionHotkey: 100
-  canAttack: 0
   damage: 10
   rangeAttack: 1.5
   interactType: 0

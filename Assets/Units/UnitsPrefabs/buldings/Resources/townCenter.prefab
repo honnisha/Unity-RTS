@@ -177,7 +177,6 @@ MonoBehaviour:
   costGold: 100
   costWood: 300
   productionHotkey: 103
-  canAttack: 1
   damage: 50
   rangeAttack: 2
   interactType: 0
@@ -237,8 +236,8 @@ MonoBehaviour:
   state: 3
   farm: 0
   producedUnits:
-  - {fileID: 1433930624698878, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
-  - {fileID: 3155895443718321516, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
+  - {fileID: 1150, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
+  - {fileID: 822, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
   spawnPoint: {fileID: 767}
   unitsQuery: []
   uqeryLimit: 10

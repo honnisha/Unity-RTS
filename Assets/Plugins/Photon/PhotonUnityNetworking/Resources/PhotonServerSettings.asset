@@ -38,4 +38,5 @@ MonoBehaviour:
   - SpawnPlayer
   - ChangeOwner
   - GiveOrder
+  - GiveOrderViewID
   DisableAutoOpenWizard: 1

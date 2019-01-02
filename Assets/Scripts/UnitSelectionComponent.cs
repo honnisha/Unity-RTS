@@ -37,11 +37,31 @@ public class UnitSelectionComponent : MonoBehaviour
             if (hit.transform == gameObject.transform)
                 outlineDraw = true;
 
-        int newColor = 1;
+        Color newColor = new Color(1, 1, 1, 1f);
+        int newColorId = 1;
         if (baseBehaviorComponent.team <= 0)
-            newColor = 2;
+        {
+            newColorId = 2;
+            newColor = new Color(1, 1, 1, 1f);
+        }
         else if (cameraController.team != baseBehaviorComponent.team)
-            newColor = 0;
+        {
+            newColorId = 0;
+            newColor = new Color(1, 0, 0, 1f);
+        }
+        else
+        {
+            if (cameraController.userId == baseBehaviorComponent.ownerId)
+            {
+                newColorId = 1;
+                newColor = new Color(0, 1, 0, 1f);
+            }
+            else
+            {
+                newColorId = 2;
+                newColor = new Color(1, 1, 1, 1f);
+            }
+        }
 
         BuildingBehavior buildingBehavior = gameObject.GetComponent<BuildingBehavior>();
         if (buildingBehavior != null && buildingBehavior.state == BuildingBehavior.BuildingState.Selected)
@@ -53,7 +73,7 @@ public class UnitSelectionComponent : MonoBehaviour
         foreach (cakeslice.Outline outline in outlines.Concat(childOutlines).ToArray())
         {
             outline.enabled = outlineDraw;
-            outline.color = newColor;
+            outline.color = newColorId;
         }
 
         if (baseBehaviorComponent.canBeSelected == false)
@@ -71,12 +91,7 @@ public class UnitSelectionComponent : MonoBehaviour
         if (projector.active)
         {
             Projector projectorComponent = projector.GetComponent<Projector>();
-            if (baseBehaviorComponent.team <= 0)
-                projectorComponent.material.color = new Color(1, 1, 1, 1f);
-            else if (baseBehaviorComponent.team == cameraController.team)
-                projectorComponent.material.color = new Color(0, 1, 0, 1f);
-            else
-                projectorComponent.material.color = new Color(1, 0, 0, 1f);
+            projectorComponent.material.color = newColor;
         }
     }
 }

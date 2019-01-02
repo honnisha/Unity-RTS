@@ -86,8 +86,6 @@ public class BuildingBehavior : BaseBehavior
             else
                 createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
 
-            // createdObjectBehaviorComponent.Awake();
-
             //Send command to created object to spawn target 
             if (PhotonNetwork.InRoom)
                 createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true);
@@ -222,8 +220,7 @@ public class BuildingBehavior : BaseBehavior
 
         spawnTarget = point;
     }
-
-    [PunRPC]
+    
     public override void GiveOrder(GameObject targetObject, bool displayMarker)
     {
         if (!live)

@@ -126,7 +126,11 @@ public class UnitBehavior : BaseBehavior
             BuildingBehavior interactObjectBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
             if (interactObjectBuildingBehavior != null && interactObjectBuildingBehavior.farm)
             {
-                GiveOrder(interactObject, false);
+                PhotonView unitPhotonView = GetComponent<PhotonView>();
+                if (PhotonNetwork.InRoom)
+                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false);
+                else
+                    GiveOrder(interactObject, false);
                 workingTimer = 0.0f;
                 return;
             }
@@ -234,7 +238,13 @@ public class UnitBehavior : BaseBehavior
                                 anim.SetBool(interactAnimation, false);
 
                                 if (interactObjectBuildingBehavior.farm)
-                                    GiveOrder(interactObject, false);
+                                {
+                                    PhotonView unitPhotonView = GetComponent<PhotonView>();
+                                    if (PhotonNetwork.InRoom)
+                                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false);
+                                    else
+                                        GiveOrder(interactObject, false);
+                                }
                                 else
                                     base.agent.isStopped = true;
 
@@ -248,7 +258,12 @@ public class UnitBehavior : BaseBehavior
                 {
                     GameObject tempTarget = interactObject;
                     StopAction(true);
-                    GiveOrder(tempTarget, false);
+
+                    PhotonView unitPhotonView = GetComponent<PhotonView>();
+                    if (PhotonNetwork.InRoom)
+                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false);
+                    else
+                        GiveOrder(tempTarget, false);
                 }
             }
             else
@@ -331,7 +346,7 @@ public class UnitBehavior : BaseBehavior
                 {
                     //agent.ResetPath();
                     base.agent.isStopped = true;
-                    if (canAttack)
+                    if (attackType != AttackType.None)
                         Attack(target);
                 }
                 else
@@ -463,7 +478,13 @@ public class UnitBehavior : BaseBehavior
             if (buildings.Count > 0)
             {
                 GameObject building = buildings.OrderBy(v => v.distance).ToArray()[0].unit;
-                GiveOrder(building, false);
+
+                PhotonView unitPhotonView = GetComponent<PhotonView>();
+                if (PhotonNetwork.InRoom)
+                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, building.GetComponent<PhotonView>().ViewID, false);
+                else
+                    GiveOrder(building, false);
+
                 Destroy(pointMarker);
                 return true;
             }
@@ -557,7 +578,12 @@ public class UnitBehavior : BaseBehavior
                 resourceHold = 0.0f;
                 if (interactObject != null)
                 {
-                    GiveOrder(interactObject, false);
+                    PhotonView unitPhotonView = GetComponent<PhotonView>();
+                    if (PhotonNetwork.InRoom)
+                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false);
+                    else
+                        GiveOrder(interactObject, false);
+
                     return true;
                 }
             }
@@ -586,7 +612,12 @@ public class UnitBehavior : BaseBehavior
         if (buildings.Count > 0)
         {
             GameObject building = buildings.OrderBy(v => v.distance).ToArray()[0].unit;
-            GiveOrder(building, false);
+
+            PhotonView unitPhotonView = GetComponent<PhotonView>();
+            if (PhotonNetwork.InRoom)
+                unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, building.GetComponent<PhotonView>().ViewID, false);
+            else
+                GiveOrder(building, false);
         }
     }
 
@@ -622,7 +653,12 @@ public class UnitBehavior : BaseBehavior
         if (behaviorType == BehaviorType.Run)
         {
             Vector3 dirToTarget = (transform.position - attacker.transform.position).normalized;
-            GiveOrder(GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true);
+
+            PhotonView unitPhotonView = GetComponent<PhotonView>();
+            if (PhotonNetwork.InRoom)
+                unitPhotonView.RPC("GiveOrder", PhotonTargets.All, GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true);
+            else
+                GiveOrder(GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true);
         }
     }
 

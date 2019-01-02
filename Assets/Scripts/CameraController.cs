@@ -213,7 +213,7 @@ public class CameraController : MonoBehaviour
                                 BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
                                 PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
                                 if (PhotonNetwork.InRoom)
-                                    unitPhotonView.RPC("GiveOrder", PhotonTargets.All, selectedObject, true);
+                                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, selectedObject.GetComponent<PhotonView>().ViewID, true);
                                 else
                                     baseBehaviorComponent.GiveOrder(selectedObject, true);
                             }
@@ -311,13 +311,17 @@ public class CameraController : MonoBehaviour
                         {
                             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
                             UnitSelectionComponent selectionComponent = unit.GetComponent<UnitSelectionComponent>();
-                            if (selectionComponent != null && selectionComponent.isSelected == true && baseBehaviorComponent.team == team && baseBehaviorComponent.live)
+                            if (
+                                selectionComponent != null && selectionComponent.isSelected == true && baseBehaviorComponent.team == team && baseBehaviorComponent.live &&
+                                baseBehaviorComponent.ownerId == userId)
                             {
                                 if (tagsToSelect.Exists(x => (x.name == hit.transform.gameObject.tag)))
                                 {
                                     PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
                                     if (PhotonNetwork.InRoom)
-                                        unitPhotonView.RPC("GiveOrder", PhotonTargets.All, hit.transform.gameObject, true);
+                                    {
+                                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, hit.transform.gameObject.GetComponent<PhotonView>().ViewID, true);
+                                    }
                                     else
                                         baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true);
                                 }

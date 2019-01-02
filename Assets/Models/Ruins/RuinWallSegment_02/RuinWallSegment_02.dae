@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>RonMain</author>
+      <authoring_tool>OpenCOLLADA for 3ds Max;  Version: 1.2.5;  Revision: 673;  Platform: Win32;  Configuration: Release Max9</authoring_tool>
+      <source_data>file:///E:/3TDS%20Torque%20Model%20Library/Fantasy_Ruins/RuinWallSegment_02/RuinWallSegment_02_final.max</source_data>
+    </contributor>
+    <created>2013-02-11T15:35:09</created>
+    <modified>2013-02-11T15:35:09</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="MossyConcrete1">
+      <profile_COMMON>
+        <newparam sid="_td_Concrete_mossy_01_jpg-surface">
+          <surface type="2D">
+            <init_from>_td_Concrete_mossy_01_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="_td_Concrete_mossy_01_jpg-sampler">
+          <sampler2D>
+            <source>_td_Concrete_mossy_01_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <blinn>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0.5882353 0.5882353 0.5882353 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="_td_Concrete_mossy_01_jpg-sampler" texcoord="CHANNEL1"/>
+            </diffuse>
+            <specular>
+              <color>0.9 0.9 0.9 1</color>
+            </specular>
+            <shininess>
+              <float>9.999999</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <transparent opaque="A_ONE">
+              <color>1 1 1 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </blinn>
+        </technique>
+      </profile_COMMON>
+      <extra>
+        <technique profile="OpenCOLLADA3dsMax">
+          <extended_shader>
+            <apply_reflection_dimming>0</apply_reflection_dimming>
+            <dim_level>0</dim_level>
+            <falloff_type>0</falloff_type>
+            <index_of_refraction>1.5</index_of_refraction>
+            <opacity_type>0</opacity_type>
+            <reflection_level>3</reflection_level>
+            <wire_size>1</wire_size>
+            <wire_units>0</wire_units>
+          </extended_shader>
+          <shader>
+            <ambient_diffuse_lock>1</ambient_diffuse_lock>
+            <ambient_diffuse_texture_lock>1</ambient_diffuse_texture_lock>
+            <diffuse_specular_lock>0</diffuse_specular_lock>
+            <soften>0.1</soften>
+            <use_self_illum_color>0</use_self_illum_color>
+          </shader>
+        </technique>
+      </extra>
+    </effect>
+    <effect id="OldGray02">
+      <profile_COMMON>
+        <newparam sid="_td_BrickOldGray_02_jpg-surface">
+          <surface type="2D">
+            <init_from>_td_BrickOldGray_02_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="_td_BrickOldGray_02_jpg-sampler">
+          <sampler2D>
+            <source>_td_BrickOldGray_02_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <blinn>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0.5882353 0.5882353 0.5882353 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="_td_BrickOldGray_02_jpg-sampler" texcoord="CHANNEL1"/>
+            </diffuse>
+            <specular>
+              <color>0.9 0.9 0.9 1</color>
+            </specular>
+            <shininess>
+              <float>9.999999</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <transparent opaque="A_ONE">
+              <color>1 1 1 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </blinn>
+        </technique>
+      </profile_COMMON>
+      <extra>
+        <technique profile="OpenCOLLADA3dsMax">
+          <extended_shader>
+            <apply_reflection_dimming>0</apply_reflection_dimming>
+            <dim_level>0</dim_level>
+            <falloff_type>0</falloff_type>
+            <index_of_refraction>1.5</index_of_refraction>
+            <opacity_type>0</opacity_type>
+            <reflection_level>3</reflection_level>
+            <wire_size>1</wire_size>
+            <wire_units>0</wire_units>
+          </extended_shader>
+          <shader>
+            <ambient_diffuse_lock>1</ambient_diffuse_lock>
+            <ambient_diffuse_texture_lock>1</ambient_diffuse_texture_lock>
+            <diffuse_specular_lock>0</diffuse_specular_lock>
+            <soften>0.1</soften>
+            <use_self_illum_color>0</use_self_illum_color>
+          </shader>
+        </technique>
+      </extra>
+    </effect>
+    <effect id="ColorEffectR227G153B153">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <ambient>
+              <color>0.8901961 0.6 0.6 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.8901961 0.6 0.6 1</color>
+            </diffuse>
+            <specular>
+              <color>1 1 1 1</color>
+            </specular>
+            <shininess>
+              <float>10</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <transparent>
+              <color>1 1 1 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+        </technique>
+      </profile_COMMON>
+      <extra>
+        <technique profile="OpenCOLLADA3dsMax">
+          <extended_shader>
+            <apply_reflection_dimming>0</apply_reflection_dimming>
+            <dim_level>0</dim_level>
+            <falloff_type>0</falloff_type>
+            <index_of_refraction>1.5</index_of_refraction>
+            <opacity_type>0</opacity_type>
+            <reflection_level>3</reflection_level>
+            <wire_size>1</wire_size>
+            <wire_units>0</wire_units>
+          </extended_shader>
+          <shader>
+            <ambient_diffuse_lock>1</ambient_diffuse_lock>
+            <ambient_diffuse_texture_lock>1</ambient_diffuse_texture_lock>
+            <diffuse_specular_lock>0</diffuse_specular_lock>
+            <soften>0.1</soften>
+            <use_self_illum_color>0</use_self_illum_color>
+          </shader>
+        </technique>
+      </extra>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="ColorEffectR227G153B153-material" name="ColorEffectR227G153B153-material">
+      <instance_effect url="#ColorEffectR227G153B153"/>
+    </material>
+    <material id="MossyConcrete1-material" name="MossyConcrete1">
+      <instance_effect url="#MossyConcrete1"/>
+    </material>
+    <material id="OldGray02-material" name="OldGray02">
+      <instance_effect url="#OldGray02"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="geom-RuinWallSementTwo300" name="RuinWallSementTwo300">
+      <mesh>
+        <source id="geom-RuinWallSementTwo300-positions">
+          <float_array id="geom-RuinWallSementTwo300-positions-array" count="96">-0.75 -0.75 0 0.75 -0.75 0 -0.75 0.75 0 0.75 0.75 0 -0.75 -0.75 1.122067 0.75 -0.75 1.122067 -0.75 0.75 1.122067 0.75 0.75 1.122067 -0.6575111 -0.6575111 1.214556 0.6575111 -0.6575111 1.214556 -0.6575111 0.6575111 1.214556 0.6575111 0.6575111 1.214556 -0.6 -0.6000001 1.224172 0.6 -0.6000001 1.224172 -0.6 0.6 1.224172 0.6 0.6 1.224172 -0.6 -0.6000001 4.578235 0.6 -0.6000001 4.578235 -0.6 0.6 4.578235 0.6 0.6 4.578235 -0.75 -0.7500002 4.58964 0.75 -0.7500002 4.58964 -0.75 0.7499998 4.58964 0.75 0.7499998 4.58964 -0.75 -0.7500002 5.10812 0.75 -0.7500002 5.10812 -0.75 0.7499998 5.10812 0.75 0.7499998 5.10812 -0.5667998 -0.5667999 5.209064 0.5667998 -0.5667999 5.209064 -0.5667998 0.5667996 5.209064 0.5667998 0.5667996 5.209064</float_array>
+          <technique_common>
+            <accessor source="#geom-RuinWallSementTwo300-positions-array" count="32" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-RuinWallSementTwo300-normals">
+          <float_array id="geom-RuinWallSementTwo300-normals-array" count="360">0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 -0.7071066 0.707107 0 -0.7071065 0.7071069 0 -0.7071066 0.707107 0 -0.7071065 0.7071069 0 -0.7071066 0.707107 0 -0.7071066 0.7071069 0.7071066 0 0.707107 0.7071065 0 0.7071069 0.7071066 0 0.707107 0.7071065 0 0.7071069 0.7071066 0 0.707107 0.7071066 0 0.7071069 0 0.7071066 0.707107 0 0.7071065 0.7071069 0 0.7071066 0.707107 0 0.7071065 0.7071069 0 0.7071066 0.707107 0 0.7071066 0.7071069 -0.7071066 0 0.707107 -0.7071065 0 0.7071069 -0.7071066 0 0.707107 -0.7071065 0 0.7071069 -0.7071066 0 0.707107 -0.7071066 0 0.7071069 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 -0.4825919 0.8758453 0 -0.4825919 0.8758454 0 -0.4825919 0.8758453 0 -0.482592 0.8758454 0 -0.4825919 0.8758453 0 -0.4825919 0.8758453 0.4825919 0 0.8758453 0.4825919 0 0.8758454 0.4825919 0 0.8758453 0.482592 0 0.8758454 0.4825919 0 0.8758453 0.4825919 0 0.8758453 0 0.4825919 0.8758453 0 0.4825919 0.8758454 0 0.4825919 0.8758453 0 0.482592 0.8758454 0 0.4825919 0.8758453 0 0.4825919 0.8758453 -0.4825919 0 0.8758453 -0.4825919 0 0.8758454 -0.4825919 0 0.8758453 -0.482592 0 0.8758454 -0.4825919 0 0.8758453 -0.4825919 0 0.8758453</float_array>
+          <technique_common>
+            <accessor source="#geom-RuinWallSementTwo300-normals-array" count="120" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-RuinWallSementTwo300-map1">
+          <float_array id="geom-RuinWallSementTwo300-map1-array" count="264">0.8750001 0.1250001 -0.00660634 0.1250001 0.1249999 -0.00660634 0.8749999 0.8750001 -0.00660634 0.1249999 0.8749999 -0.00660634 0.1249999 0.5544271 0.1250001 0.8749999 0.5544271 0.1249999 0.8749999 0.5544271 0.8750001 0.8749999 0.5544271 0.8750001 0.1712444 0.1712446 0.6006716 0.8287554 0.1712444 0.6006716 0.1712446 0.8287556 0.6006716 0.8287556 0.8287554 0.6006716 0.1249999 -0.00660634 0.1250001 0.8749999 -0.00660634 0.1249999 0.1249999 -0.00660634 0.8749999 0.8749999 -0.00660634 0.8750001 0.1249999 0.5544271 0.8749999 0.1249999 -0.00660634 0.8749999 0.8749999 -0.00660634 0.8750001 0.1249999 0.5544271 0.8749999 0.1249999 -0.00660634 0.1250001 0.8749999 -0.00660634 0.1249999 0.8749999 0.5544271 0.1249999 0.1249999 0.5544271 0.1250001 0.1249999 0.1250001 0.5544271 0.8749999 0.1249999 0.5544271 0.8749999 0.1249999 0.5544271 0.8750001 0.8749999 0.5544271 0.8750001 0.8749999 0.5544271 0.1250001 0.8750001 0.5544271 0.1250001 0.8750001 0.5544271 0.1249999 0.1250001 0.5544271 0.65 0.35 0.1436763 0.35 0.35 0.1436763 0.65 0.65 0.1436763 0.35 0.65 0.1436763 0.35 0.35 0.982192 0.65 0.35 0.982192 0.35 0.65 0.982192 0.65 0.65 0.982192 0.35 0.1436763 0.35 0.65 0.1436763 0.35 0.65 0.982192 0.35 0.35 0.982192 0.35 0.35 0.1436763 0.65 0.65 0.1436763 0.65 0.65 0.982192 0.65 0.35 0.982192 0.65 0.35 0.1436763 0.65 0.65 0.1436763 0.65 0.65 0.982192 0.65 0.35 0.982192 0.65 0.35 0.1436763 0.35 0.65 0.1436763 0.35 0.65 0.982192 0.35 0.35 0.982192 0.35 0.8750001 0.1250001 0.3451441 0.1250001 0.1249999 0.3451441 0.8749999 0.8750001 0.3451441 0.1249999 0.8749999 0.3451441 0.1249999 0.6043842 0.1250001 0.8749999 0.6043842 0.1249999 0.8749999 0.6043842 0.8750001 0.8749999 0.6043842 0.8750001 0.2166001 0.2166002 0.6548558 0.7833998 0.2166001 0.6548558 0.2166002 0.7833999 0.6548558 0.7833999 0.7833998 0.6548558 0.1249999 0.3451441 0.1250001 0.8749999 0.3451441 0.1249999 0.1249999 0.3451441 0.8749999 0.8749999 0.3451441 0.8750001 0.1249999 0.6043842 0.8749999 0.1249999 0.3451441 0.8749999 0.8749999 0.3451441 0.8750001 0.1249999 0.6043842 0.8749999 0.1249999 0.3451441 0.1250001 0.8749999 0.3451441 0.1249999 0.8749999 0.6043842 0.1249999 0.1249999 0.6043842 0.1250001 0.1249999 0.1250001 0.6043842 0.8749999 0.1249999 0.6043842 0.8749999 0.1249999 0.6043842 0.8750001 0.8749999 0.6043842 0.8750001 0.8749999 0.6043842 0.1250001 0.8750001 0.6043842 0.1250001 0.8750001 0.6043842 0.1249999 0.1250001 0.6043842</float_array>
+          <technique_common>
+            <accessor source="#geom-RuinWallSementTwo300-map1-array" count="88" stride="3">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+              <param name="P" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-RuinWallSementTwo300-map1-textangents">
+          <float_array id="geom-RuinWallSementTwo300-map1-textangents-array" count="360">-1 -2.78155e-7 0 -1 -3.17891e-7 0 -1 -2.78155e-7 0 -1 -2.38419e-7 0 1 2.71956e-7 0 1 2.71956e-7 0 1 2.71956e-7 0 1 2.71956e-7 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 2.38419e-7 2.38418e-7 1 2.38419e-7 2.38418e-7 1 2.38419e-7 2.38418e-7 1 2.71956e-7 2.71956e-7 1 2.71956e-7 2.71956e-7 1 2.71956e-7 2.71956e-7 0.707107 2.80979e-8 -0.7071066 0.707107 2.80979e-8 -0.7071066 0.707107 2.80979e-8 -0.7071066 0.707107 4.55696e-7 -0.7071066 0.707107 4.55696e-7 -0.7071066 0.707107 4.55696e-7 -0.7071066 1 3.17892e-7 -3.17891e-7 1 3.17892e-7 -3.17891e-7 1 3.17892e-7 -3.17891e-7 1 2.71956e-7 -2.71956e-7 1 2.71956e-7 -2.71956e-7 1 2.71956e-7 -2.71956e-7 0.707107 4.27598e-7 0.7071066 0.707107 4.27598e-7 0.7071066 0.707107 4.27598e-7 0.7071066 0.707107 0 0.7071066 0.707107 0 0.7071066 0.707107 0 0.7071066 -1 -1.98682e-7 0 -1 -1.98682e-7 0 -1 -1.98682e-7 0 -1 -1.98682e-7 0 1 1.98682e-7 0 1 1.98682e-7 0 1 1.98682e-7 0 1 1.98682e-7 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 -1 -2.78155e-7 0 -1 -3.17891e-7 0 -1 -2.78155e-7 0 -1 -2.38419e-7 0 1 2.1032e-7 0 1 2.1032e-7 0 1 2.1032e-7 0 1 2.1032e-7 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 2.38419e-7 1.31369e-7 1 2.38419e-7 1.31369e-7 1 2.38419e-7 1.31369e-7 1 2.1032e-7 1.15887e-7 1 2.1032e-7 1.15887e-7 1 2.1032e-7 1.15887e-7 0.8758453 3.19761e-7 -0.4825919 0.8758453 3.19761e-7 -0.4825919 0.8758453 3.19761e-7 -0.4825919 0.8758453 5.69917e-7 -0.4825919 0.8758453 5.69917e-7 -0.4825919 0.8758453 5.69917e-7 -0.4825919 1 3.17892e-7 -1.75159e-7 1 3.17892e-7 -1.75159e-7 1 3.17892e-7 -1.75159e-7 1 2.1032e-7 -1.15887e-7 1 2.1032e-7 -1.15887e-7 1 2.1032e-7 -1.15886e-7 0.8758453 5.35114e-7 0.4825919 0.8758453 5.35114e-7 0.4825919 0.8758453 5.35114e-7 0.4825919 0.8758453 2.84958e-7 0.4825919 0.8758453 2.84958e-7 0.4825919 0.8758453 2.84958e-7 0.4825919</float_array>
+          <technique_common>
+            <accessor source="#geom-RuinWallSementTwo300-map1-textangents-array" count="120" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-RuinWallSementTwo300-map1-texbinormals">
+          <float_array id="geom-RuinWallSementTwo300-map1-texbinormals-array" count="360">2.78155e-7 -1 0 3.17891e-7 -1 0 2.78155e-7 -1 0 2.38419e-7 -1 0 2.71956e-7 -1 0 2.71956e-7 -1 0 2.71956e-7 -1 0 2.71956e-7 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 3.37175e-7 -0.707107 -0.7071066 3.37175e-7 -0.707107 -0.7071066 3.37175e-7 -0.707107 -0.7071066 3.84604e-7 -0.707107 -0.7071066 3.84604e-7 -0.707107 -0.7071066 3.84604e-7 -0.707107 -0.7071066 1.98682e-8 -1 -1.98682e-8 1.98682e-8 -1 -1.98682e-8 1.98682e-8 -1 -1.98682e-8 3.22226e-7 -1 -3.22226e-7 3.22226e-7 -1 -3.22226e-7 3.22226e-7 -1 -3.22226e-7 4.49566e-7 -0.707107 0.7071066 4.49566e-7 -0.707107 0.7071066 4.49566e-7 -0.707107 0.7071066 3.84603e-7 -0.707107 0.7071066 3.84603e-7 -0.707107 0.7071066 3.84603e-7 -0.707107 0.7071066 3.02358e-7 -1 3.02358e-7 3.02358e-7 -1 3.02358e-7 3.02358e-7 -1 3.02358e-7 0 -1 0 0 -1 0 0 -1 0 1.98682e-7 -1 0 1.98682e-7 -1 0 1.98682e-7 -1 0 1.98682e-7 -1 0 1.98682e-7 -1 0 1.98682e-7 -1 0 1.98682e-7 -1 0 1.98682e-7 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 2.78155e-7 -1 0 3.17891e-7 -1 0 2.78155e-7 -1 0 2.38419e-7 -1 0 2.1032e-7 -1 0 2.1032e-7 -1 0 2.1032e-7 -1 0 2.1032e-7 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 2.72215e-7 -0.8758453 -0.4825919 2.72215e-7 -0.8758453 -0.4825919 2.72215e-7 -0.8758453 -0.4825919 2.40134e-7 -0.8758453 -0.4825919 2.40134e-7 -0.8758453 -0.4825919 2.40134e-7 -0.8758453 -0.4825919 2.80062e-7 -1 -1.54314e-7 2.80062e-7 -1 -1.54314e-7 2.80062e-7 -1 -1.54314e-7 4.99159e-7 -1 -2.75037e-7 4.99159e-7 -1 -2.75037e-7 4.99159e-7 -1 -2.75037e-7 3.62954e-7 -0.8758453 0.4825919 3.62954e-7 -0.8758453 0.4825919 3.62954e-7 -0.8758453 0.4825919 2.40134e-7 -0.8758453 0.4825919 2.40134e-7 -0.8758453 0.4825919 2.40134e-7 -0.8758453 0.4825919 4.68677e-7 -1 2.58242e-7 4.68677e-7 -1 2.58242e-7 4.68677e-7 -1 2.58242e-7 2.49579e-7 -1 1.37519e-7 2.49579e-7 -1 1.37519e-7 2.4958e-7 -1 1.37519e-7</float_array>
+          <technique_common>
+            <accessor source="#geom-RuinWallSementTwo300-map1-texbinormals-array" count="120" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="geom-RuinWallSementTwo300-vertices">
+          <input semantic="POSITION" source="#geom-RuinWallSementTwo300-positions"/>
+        </vertices>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>0 0 0 0 2 1 2 1 3 2 3 2 3 2 3 2 1 3 1 3 0 0 0 0</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="10">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>8 4 8 4 9 5 9 5 11 6 11 6 11 6 11 6 10 7 10 7 8 4 8 4 8 24 8 24 4 25 24 25 5 26 25 26 5 27 25 27 9 28 9 28 8 29 8 29 9 30 9 30 5 31 26 31 7 32 27 32 7 33 27 33 11 34 11 34 9 35 9 35 11 36 11 36 7 37 28 37 6 38 29 38 6 39 29 39 10 40 10 40 11 41 11 41 10 42 10 42 6 43 30 43 4 44 31 44 4 45 31 45 8 46 8 46 10 47 10 47</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>0 8 12 8 1 9 13 9 5 10 5 10 5 10 5 10 4 11 4 11 0 8 12 8</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>1 12 14 12 3 13 15 13 7 14 7 14 7 14 7 14 5 15 16 15 1 12 14 12</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>3 16 17 16 2 17 18 17 6 18 6 18 6 18 6 18 7 19 19 19 3 16 17 16</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>2 20 20 20 0 21 21 21 4 22 22 22 4 22 22 22 6 23 23 23 2 20 20 20</p>
+        </triangles>
+        <triangles material="OldGray02_6" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>12 48 32 48 14 49 34 49 15 50 35 50 15 50 35 50 13 51 33 51 12 48 32 48</p>
+        </triangles>
+        <triangles material="OldGray02_6" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>16 52 36 52 17 53 37 53 19 54 39 54 19 54 39 54 18 55 38 55 16 52 36 52</p>
+        </triangles>
+        <triangles material="OldGray02_6" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>12 56 40 56 13 57 41 57 17 58 42 58 17 58 42 58 16 59 43 59 12 56 40 56</p>
+        </triangles>
+        <triangles material="OldGray02_6" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>13 60 44 60 15 61 45 61 19 62 46 62 19 62 46 62 17 63 47 63 13 60 44 60</p>
+        </triangles>
+        <triangles material="OldGray02_6" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>15 64 48 64 14 65 49 65 18 66 50 66 18 66 50 66 19 67 51 67 15 64 48 64</p>
+        </triangles>
+        <triangles material="OldGray02_6" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>14 68 52 68 12 69 53 69 16 70 54 70 16 70 54 70 18 71 55 71 14 68 52 68</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>20 72 56 72 22 73 58 73 23 74 59 74 23 74 59 74 21 75 57 75 20 72 56 72</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="10">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>28 76 64 76 29 77 65 77 31 78 67 78 31 78 67 78 30 79 66 79 28 76 64 76 28 96 64 96 24 97 80 97 25 98 81 98 25 99 81 99 29 100 65 100 28 101 64 101 29 102 65 102 25 103 82 103 27 104 83 104 27 105 83 105 31 106 67 106 29 107 65 107 31 108 67 108 27 109 84 109 26 110 85 110 26 111 85 111 30 112 66 112 31 113 67 113 30 114 66 114 26 115 86 115 24 116 87 116 24 117 87 117 28 118 64 118 30 119 66 119</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>20 80 68 80 21 81 69 81 25 82 61 82 25 82 61 82 24 83 60 83 20 80 68 80</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>21 84 70 84 23 85 71 85 27 86 63 86 27 86 63 86 25 87 72 87 21 84 70 84</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>23 88 73 88 22 89 74 89 26 90 62 90 26 90 62 90 27 91 75 91 23 88 73 88</p>
+        </triangles>
+        <triangles material="MossyConcrete1_12" count="2">
+          <input semantic="VERTEX" source="#geom-RuinWallSementTwo300-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-RuinWallSementTwo300-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-RuinWallSementTwo300-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-RuinWallSementTwo300-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-RuinWallSementTwo300-map1-texbinormals" offset="3" set="1"/>
+          <p>22 92 76 92 20 93 77 93 24 94 78 94 24 94 78 94 26 95 79 95 22 92 76 92</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="geom-Collision" name="Collision">
+      <mesh>
+        <source id="geom-Collision-positions">
+          <float_array id="geom-Collision-positions-array" count="24">-0.7987726 -0.8108752 0 0.7987726 -0.8108752 0 -0.7987726 0.8108752 0 0.7987726 0.8108752 0 -0.7987726 -0.8108752 5.22833 0.7987726 -0.8108752 5.22833 -0.7987726 0.8108752 5.22833 0.7987726 0.8108752 5.22833</float_array>
+          <technique_common>
+            <accessor source="#geom-Collision-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-Collision-normals">
+          <float_array id="geom-Collision-normals-array" count="72">0 0 -0.9999999 0 0 -1 0 0 -0.9999999 0 0 -1 0 0 0.9999999 0 0 1 0 0 0.9999999 0 0 1 0 -0.9999999 0 0 -1 0 0 -0.9999999 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0.9999999 0 0 1 0 0 0.9999999 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0</float_array>
+          <technique_common>
+            <accessor source="#geom-Collision-normals-array" count="24" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-Collision-map1">
+          <float_array id="geom-Collision-map1-array" count="36">0 0 0 1 0 0 0 1 0 1 1 0 0 0 0 1 0 0 0 1 0 1 1 0 0 0 0 1 0 0 0 1 0 1 1 0</float_array>
+          <technique_common>
+            <accessor source="#geom-Collision-map1-array" count="12" stride="3">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+              <param name="P" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-Collision-map1-textangents">
+          <float_array id="geom-Collision-map1-textangents-array" count="72">-1 0 0 -1 0 0 -1 0 0 -1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0</float_array>
+          <technique_common>
+            <accessor source="#geom-Collision-map1-textangents-array" count="24" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-Collision-map1-texbinormals">
+          <float_array id="geom-Collision-map1-texbinormals-array" count="72">0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#geom-Collision-map1-texbinormals-array" count="24" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="geom-Collision-vertices">
+          <input semantic="POSITION" source="#geom-Collision-positions"/>
+        </vertices>
+        <triangles material="ColorMaterial" count="12">
+          <input semantic="VERTEX" source="#geom-Collision-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-Collision-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-Collision-map1" offset="2" set="1"/>
+          <input semantic="TEXTANGENT" source="#geom-Collision-map1-textangents" offset="3" set="1"/>
+          <input semantic="TEXBINORMAL" source="#geom-Collision-map1-texbinormals" offset="3" set="1"/>
+          <p>0 0 9 0 2 1 11 1 3 2 10 2 3 2 10 2 1 3 8 3 0 0 9 0 4 4 8 4 5 5 9 5 7 6 11 6 7 6 11 6 6 7 10 7 4 4 8 4 0 8 4 8 1 9 5 9 5 10 7 10 5 10 7 10 4 11 6 11 0 8 4 8 1 12 0 12 3 13 1 13 7 14 3 14 7 14 3 14 5 15 2 15 1 12 0 12 3 16 4 16 2 17 5 17 6 18 7 18 6 18 7 18 7 19 6 19 3 16 4 16 2 20 0 20 0 21 1 21 4 22 3 22 4 22 3 22 6 23 2 23 2 20 0 20</p>
+        </triangles>
+      </mesh>
+      <extra>
+        <technique profile="OpenCOLLADA3dsMax">
+          <box>
+            <generateuvs>1</generateuvs>
+            <height>5.22833</height>
+            <heightsegments>1</heightsegments>
+            <length>1.62175</length>
+            <lengthsegments>1</lengthsegments>
+            <width>1.597545</width>
+            <widthsegments>1</widthsegments>
+          </box>
+        </technique>
+      </extra>
+    </geometry>
+  </library_geometries>
+  <library_lights>
+    <light id="EnvironmentAmbientLight" name="EnvironmentAmbientLight">
+      <technique_common>
+        <ambient>
+          <color>0 0 0</color>
+        </ambient>
+      </technique_common>
+    </light>
+  </library_lights>
+  <library_images>
+    <image id="_td_BrickOldGray_02_jpg">
+      <init_from>file:///C:/Users/RonMain/Documents/3dsmax/sceneassets/Ruins_Textures/3td_BrickOldGray_02.jpg</init_from>
+    </image>
+    <image id="_td_Concrete_mossy_01_jpg">
+      <init_from>file:///C:/Users/RonMain/Documents/3dsmax/sceneassets/Ruins_Textures/3td_Concrete_mossy_01.jpg</init_from>
+    </image>
+  </library_images>
+  <library_visual_scenes>
+    <visual_scene id="MaxScene">
+      <node name="EnvironmentAmbientLight">
+        <instance_light url="#EnvironmentAmbientLight"/>
+      </node>
+      <node id="node-Base01" name="Base01">
+        <translate>0.05088921 0.05088921 0</translate>
+        <node id="node-Start01" name="Start01">
+          <node id="node-RuinWallSementTwo300" name="RuinWallSementTwo300">
+            <translate>-0.0306818 -0.05589612 0</translate>
+            <instance_geometry url="#geom-RuinWallSementTwo300">
+              <bind_material>
+                <technique_common>
+                  <instance_material symbol="OldGray02_6" target="#OldGray02-material">
+                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="1"/>
+                  </instance_material>
+                  <instance_material symbol="MossyConcrete1_12" target="#MossyConcrete1-material">
+                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="1"/>
+                  </instance_material>
+                </technique_common>
+              </bind_material>
+            </instance_geometry>
+          </node>
+          <node id="node-Collision" name="Collision">
+            <translate>-0.02865787 -0.06181307 0</translate>
+            <instance_geometry url="#geom-Collision">
+              <bind_material>
+                <technique_common>
+                  <instance_material symbol="ColorMaterial" target="#ColorEffectR227G153B153-material"/>
+                </technique_common>
+              </bind_material>
+            </instance_geometry>
+          </node>
+        </node>
+        <node id="node-detail300" name="detail300"/>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#MaxScene"/>
+  </scene>
+</COLLADA>

@@ -41,7 +41,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     #region Fight info
 
     [Header("Attack Info")]
-    public bool canAttack = true;
     public float damage = 50.0f;
     public float rangeAttack = 2.0f;
 
@@ -444,7 +443,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     public bool AttackNearEnemies(Vector3 centerOfSearch, float range, int attackTeam = 999)
     {
-        if (!canAttack && interactType != InteractigType.Attacking)
+        if (attackType != AttackType.None && interactType != InteractigType.Attacking)
             return false;
 
         var allUnits = GameObject.FindGameObjectsWithTag("Unit");
@@ -510,6 +509,12 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         return new Vector3();
     }
 
+    [PunRPC]
+    public virtual void GiveOrderViewID(int targetViewId, bool displayMarker)
+    {
+        GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker);
+    }
+
     public virtual void GiveOrder(Vector3 point, bool displayMarker) { }
     public virtual void GiveOrder(GameObject targetObject, bool displayMarker) { }
     public virtual void TakeDamage(float damage, GameObject attacker) { }
@@ -559,7 +564,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         if (attackType == AttackType.Stabbing)
             attackTypeName = "Stabbing";
 
-        if (attackType != AttackType.None && canAttack)
+        if (attackType != AttackType.None)
         {
             statistics.Add(String.Format("Att. type: {0}", attackTypeName));
             statistics.Add(String.Format("Damage: {0:F0}", damage));

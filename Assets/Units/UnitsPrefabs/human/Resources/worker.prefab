@@ -180,7 +180,6 @@ MonoBehaviour:
   costGold: 0
   costWood: 0
   productionHotkey: 115
-  canAttack: 1
   damage: 10
   rangeAttack: 2
   interactType: 2
@@ -190,7 +189,7 @@ MonoBehaviour:
   attackTimer: -0.00851091
   attackDelayTimer: -1.2085108
   attacked: 1
-  attackType: 4
+  attackType: 1
   stabbingResist: 20
   cuttingResist: 20
   bitingResist: 40
@@ -248,8 +247,7 @@ MonoBehaviour:
     costWood: 10
   - uniqueName: buildTownCenter
     hotkey: 0
-    skillObject: {fileID: 1849125382684708, guid: 601738f4d30038c4db1250fba0a66f48,
-      type: 3}
+    skillObject: {fileID: 769, guid: 601738f4d30038c4db1250fba0a66f48, type: 3}
     imagePath: 
     readableName: 
     readableDescription: 
@@ -286,7 +284,7 @@ MonoBehaviour:
     type: 3}
   visionTool: {fileID: 0}
   canBeSelected: 1
-  visionCount: 36
+  visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
   holderToolInfo:
@@ -387,8 +385,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2778}
-  viewIdField: 8
-  InstantiationId: 8
+  viewIdField: 21
+  InstantiationId: 21
   isRuntimeInstantiated: 0
 --- !u!114 &2778
 MonoBehaviour:

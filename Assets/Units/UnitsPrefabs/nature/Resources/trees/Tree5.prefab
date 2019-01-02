@@ -64,6 +64,8 @@ GameObject:
   - component: {fileID: 8000905455862865591}
   - component: {fileID: 8033820214945276043}
   - component: {fileID: 8034094907520552359}
+  - component: {fileID: 182240791720817489}
+  - component: {fileID: 54101482768443968}
   m_Layer: 14
   m_Name: Tree5
   m_TagString: Ambient
@@ -149,6 +151,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: -1
+  ownerId: 1
   maxHealth: 100
   health: 100
   live: 1
@@ -217,8 +220,9 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 3
   resourceCapacity: 150
-  state: 3
   storedResources: 
+  state: 3
+  farm: 0
   producedUnits: []
   spawnPoint: {fileID: 0}
   unitsQuery: []
@@ -238,6 +242,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isSelected: 0
   projector: {fileID: 7993814643077547849}
+--- !u!114 &182240791720817489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7993852223387248859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 54101482768443968}
+  viewIdField: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &54101482768443968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7993852223387248859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
 --- !u!1001 &3236293475291724581
 PrefabInstance:
   m_ObjectHideFlags: 0

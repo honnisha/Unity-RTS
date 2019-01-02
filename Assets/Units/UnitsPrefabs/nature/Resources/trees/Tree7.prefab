@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 136126961747989630}
   - component: {fileID: 114471481107098178}
   - component: {fileID: 114178920209631086}
+  - component: {fileID: 1964251293179279170}
+  - component: {fileID: 2946452692753136818}
   m_Layer: 14
   m_Name: Tree7
   m_TagString: Ambient
@@ -168,8 +170,9 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 3
   resourceCapacity: 150
-  state: 3
   storedResources: 
+  state: 3
+  farm: 0
   producedUnits: []
   spawnPoint: {fileID: 0}
   unitsQuery: []
@@ -189,6 +192,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isSelected: 0
   projector: {fileID: 1354390515699072}
+--- !u!114 &1964251293179279170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317083741807122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 2946452692753136818}
+  viewIdField: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &2946452692753136818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317083741807122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
 --- !u!1 &1354390515699072
 GameObject:
   m_ObjectHideFlags: 0
