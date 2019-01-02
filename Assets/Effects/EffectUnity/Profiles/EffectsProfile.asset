@@ -89,7 +89,7 @@ MonoBehaviour:
       lowPercent: 37.172024
       highPercent: 99
       minLuminance: 1
-      maxLuminance: -3
+      maxLuminance: -3.5
       keyValue: 0.25
       dynamicKeyValue: 1
       adaptationType: 0

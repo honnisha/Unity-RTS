@@ -292,7 +292,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 tempHealth = health;
             }
         }
-        if (live && UnityEngine.Input.anyKeyDown)
+        if (UnityEngine.Input.anyKeyDown)
             UICommand(null);
 
         if (sendToDestroy == true && !sendToUnderground)
@@ -339,6 +339,20 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (objectUIInfo != null)
             objectUIInfo.Destroy();
+        DestroyPointMarker();
+    }
+
+    public bool IsMasterClient()
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            if (PhotonNetwork.LocalPlayer.IsMasterClient)
+                return true;
+            return false;
+        }
+        else
+            return true;
+        
     }
 
     public void TextBubble(string message, int timer)
@@ -549,6 +563,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         {
             statistics.Add(String.Format("Att. type: {0}", attackTypeName));
             statistics.Add(String.Format("Damage: {0:F0}", damage));
+            statistics.Add(String.Format("Attack speed: {0:F1} sec", attackTime));
         }
 
         statistics.Add(String.Format("Stabbing resist: {0:F0}%", stabbingResist));

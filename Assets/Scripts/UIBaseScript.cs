@@ -118,6 +118,11 @@ public class UIBaseScript : MonoBehaviour
                 description = DisplayDescription(activeElement.className, skillUIImages);
             else if (activeElement.className.Contains("descrCommand"))
                 description = DisplayDescription(activeElement.className, commands);
+            else if (UnityEngine.Input.GetMouseButtonUp(0) && activeElement.className.Contains("detailInfo"))
+            {
+                if (selectegObjects.Count > 0)
+                    cameraController.MoveCaeraToUnit(selectegObjects[0]);
+            }
         }
         if (!description)
             DestroyDescription();
@@ -437,12 +442,15 @@ public class UIBaseScript : MonoBehaviour
 
         if (discriptable)
         {
-            createdImage.className += " discriptable ";
+            createdImage.className += " discriptable";
             createdImage.className += unitImageInfo.name;
         }
 
         if (detailInfo)
         {
+            if (createdImage != null)
+                createdImage.className += " detailInfo";
+
             Dom.Element infoDiv = UI.document.createElement("div");
             infoDiv.className = "info";
             parentElement.appendChild(infoDiv);

@@ -512,6 +512,7 @@ MonoBehaviour:
   resourceCapacity: 0
   storedResources: 
   state: 3
+  farm: 0
   producedUnits: []
   spawnPoint: {fileID: 0}
   unitsQuery: []

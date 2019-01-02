@@ -62,7 +62,7 @@ Camera:
   m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 32768
+    m_Bits: 98304
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -196,8 +196,8 @@ MonoBehaviour:
   gold: 200
   wood: 200
   isSelecting: 0
-  team: 1
-  userId: 1
+  team: 2
+  userId: 2
   userNumber: 1
   tagsToSelect:
   - name: Unit
@@ -207,13 +207,14 @@ MonoBehaviour:
   - name: Ambient
     healthVisibleOnlyWhenSelect: 1
   buildedObject: {fileID: 0}
-  createSpawnBuilding: {fileID: 1849125382684708, guid: 601738f4d30038c4db1250fba0a66f48,
-    type: 3}
-  startUnits:
-  - {fileID: 1433930624698878, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
-  - {fileID: 1433930624698878, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
-  - {fileID: 1433930624698878, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
-  - {fileID: 3155895443718321516, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
+  createSpawnBuilding: {fileID: 769, guid: 601738f4d30038c4db1250fba0a66f48, type: 3}
+  startUnitsInfo:
+  - prefab: {fileID: 1150, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
+    number: 3
+    distance: 3
+  - prefab: {fileID: 822, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
+    number: 1
+    distance: 0
 --- !u!114 &114047147111761268
 MonoBehaviour:
   m_ObjectHideFlags: 0

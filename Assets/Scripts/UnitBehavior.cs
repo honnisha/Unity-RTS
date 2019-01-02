@@ -157,7 +157,7 @@ public class UnitBehavior : BaseBehavior
                             }
                             else
                             {
-                                resourceInfo = resourceGatherInfo.Find(x => x.type == baseObjectBehaviorComponent.resourceCapacityType);
+                                resourceInfo = resourceGatherInfo.Find(x => x.type == objectResourceType);
                                 transform.LookAt(interactObject.transform.position);
                             }
 
@@ -263,10 +263,13 @@ public class UnitBehavior : BaseBehavior
         if (target == null && targetOldPosition != null)
             targetOldPosition = new Vector3();
 
+        BaseBehavior targetBaseBehavior = null;
+        if (target != null)
+            targetBaseBehavior = target.GetComponent<BaseBehavior>();
+
         // Move to target
         if (interactType == InteractigType.None && target != null)
         {
-            BaseBehavior targetBaseBehavior = target.GetComponent<BaseBehavior>();
             if (Vector3.Distance(targetOldPosition, target.transform.position) > 0.4f)
             {
                 var targetPoint = target.transform.position;
@@ -364,7 +367,6 @@ public class UnitBehavior : BaseBehavior
         // Attack
         if (interactType == InteractigType.Attacking && target != null)
         {
-            BaseBehavior targetBaseBehavior = target.GetComponent<BaseBehavior>();
             if (IsTeamEnemy(targetBaseBehavior.team))
             {
                 base.attackDelayTimer = base.attackDelayTimer - Time.deltaTime;
@@ -693,6 +695,7 @@ public class UnitBehavior : BaseBehavior
 
     public void StopAction(bool deleteObject)
     {
+        interactDistance = 0.0f;
         DestroyPointMarker();
         base.agent.isStopped = true;
         base.tempDestinationPoint = Vector3.zero;
@@ -812,8 +815,6 @@ public class UnitBehavior : BaseBehavior
     public override List<string> GetStatistics()
     {
         List<string> statistics = base.GetStatistics();
-        if (attackType != AttackType.None)
-            statistics.Add(String.Format("Attack speed: {0:F1} sec", attackTime));
         return statistics;
     }
 

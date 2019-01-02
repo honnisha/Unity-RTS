@@ -1395,6 +1395,17 @@ MonoBehaviour:
   resourceGatherInfo: []
   resourceHold: 0
   resourceType: 0
+  farmInfo:
+    type: 0
+    gatherPerSecond: 0.5
+    maximumCapacity: 10
+    carryObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
+    toolObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
+  interactObject: {fileID: 0}
 --- !u!195 &195995932468047560
 NavMeshAgent:
   m_ObjectHideFlags: 0

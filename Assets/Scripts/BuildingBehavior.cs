@@ -63,27 +63,39 @@ public class BuildingBehavior : BaseBehavior
             DestroyPointMarker();
     }
 
-    public GameObject ProduceUnit(GameObject createdPrefab)
+    public List<GameObject> ProduceUnit(GameObject createdPrefab)
     {
-        // Create object
-        GameObject createdObject = PhotonNetwork.Instantiate(createdPrefab.name, spawnPoint.transform.position, spawnPoint.transform.rotation);
+        return ProduceUnit(createdPrefab, 1, 0.0f);
+    }
 
-        BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
-        PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();
-        // Set owner
-        if (PhotonNetwork.InRoom)
-            createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
-        else
-            createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
+    public List<GameObject> ProduceUnit(GameObject createdPrefab, int number, float distance)
+    {
+        List<GameObject> createdObjects = new List<GameObject>();
+        Vector3 dirToTarget = (spawnPoint.transform.position - transform.position).normalized;
 
-        // createdObjectBehaviorComponent.Awake();
+        for (int i = 1; i <= number; i++)
+        {
+            // Create object
+            GameObject createdObject = PhotonNetwork.Instantiate(createdPrefab.name, spawnPoint.transform.position, spawnPoint.transform.rotation);
 
-        //Send command to created object to spawn target 
-        if (PhotonNetwork.InRoom)
-            createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget, 2.0f), true);
-        else
-            createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget, 2.0f), true);
-        return createdObject;
+            BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
+            PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();
+            // Set owner
+            if (PhotonNetwork.InRoom)
+                createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
+            else
+                createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
+
+            // createdObjectBehaviorComponent.Awake();
+
+            //Send command to created object to spawn target 
+            if (PhotonNetwork.InRoom)
+                createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true);
+            else
+                createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true);
+            createdObjects.Add(createdObject);
+        }
+        return createdObjects;
     }
 
     public override void AlertAttacking(GameObject attacker)

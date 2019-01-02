@@ -53,8 +53,17 @@ public class CameraController : MonoBehaviour
     [HideInInspector]
     private GameObject selectedObject;
 
+    [System.Serializable]
+    public class SpawnUnitInfo
+    {
+        public GameObject prefab;
+        public int number;
+        public float distance = 3.0f;
+    }
     public GameObject createSpawnBuilding;
-    public List<GameObject> startUnits = new List<GameObject>();
+    public List<SpawnUnitInfo> startUnitsInfo = new List<SpawnUnitInfo>();
+
+    private float clickTimer = 0.0f;
 
     // Use this for initialization
     void Start()
@@ -94,11 +103,6 @@ public class CameraController : MonoBehaviour
             if (spawnBehavior.number == userNumber)
             {
                 createdUnit = PhotonNetwork.Instantiate(createSpawnBuilding.name, spawnPoint.transform.position, spawnPoint.transform.rotation, 0);
-                foreach (var startUnit in startUnits)
-                {
-                    BuildingBehavior createdUnitBuildingBehavior = createdUnit.GetComponent<BuildingBehavior>();
-                    createdUnitBuildingBehavior.ProduceUnit(startUnit);
-                }
                 break;
             }
         }
@@ -115,9 +119,19 @@ public class CameraController : MonoBehaviour
             else
                 baseBehaviorComponent.ChangeOwner(userId, team);
 
-            transform.position = new Vector3(createdUnit.transform.position.x, transform.position.y, createdUnit.transform.position.z);
-            transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
+            MoveCaeraToUnit(createdUnit);
         }
+        foreach (var startUnitInfo in startUnitsInfo)
+        {
+            BuildingBehavior createdUnitBuildingBehavior = createdUnit.GetComponent<BuildingBehavior>();
+            createdUnitBuildingBehavior.ProduceUnit(startUnitInfo.prefab, startUnitInfo.number, startUnitInfo.distance);
+        }
+    }
+
+    public void MoveCaeraToUnit(GameObject unit)
+    {
+        transform.position = new Vector3(unit.transform.position.x, transform.position.y, unit.transform.position.z);
+        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
     }
 
     public class ObjectWithDistance
@@ -246,6 +260,7 @@ public class CameraController : MonoBehaviour
             }
         }
 
+        clickTimer -= Time.deltaTime;
         bool selectObject = false;
         if (UnityEngine.Input.GetMouseButtonUp(0) || UnityEngine.Input.GetMouseButtonDown(1))
         {
@@ -265,9 +280,22 @@ public class CameraController : MonoBehaviour
                             if (isCanBeSelected)
                             {
                                 DeselectAllUnits();
-
-                                UnitSelectionComponent selectionComponent = hit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-                                selectionComponent.isSelected = true;
+                                
+                                // If user click twice
+                                if (clickTimer > 0.0f)
+                                {
+                                    foreach (GameObject selectedUnit in GetSelectUnitsOnScreen(hit.transform.gameObject))
+                                    {
+                                        UnitSelectionComponent selection = selectedUnit.GetComponent<UnitSelectionComponent>();
+                                        selection.isSelected = true;
+                                    }
+                                }
+                                else
+                                {
+                                    clickTimer = 0.5f;
+                                    UnitSelectionComponent selectionComponent = hit.transform.gameObject.GetComponent<UnitSelectionComponent>();
+                                    selectionComponent.isSelected = true;
+                                }
                                 selectObject = true;
                                 isSelecting = false;
                             }
@@ -324,6 +352,27 @@ public class CameraController : MonoBehaviour
                 selection.isSelected = true;
             }
         }
+    }
+
+    public List<GameObject> GetSelectUnitsOnScreen(GameObject selectUnit)
+    {
+        BaseBehavior baseBehaviorComponent = selectUnit.GetComponent<BaseBehavior>();
+        List<GameObject> objects = new List<GameObject>();
+        foreach (TagToSelect tag in tagsToSelect)
+        {
+            var allUnits = GameObject.FindGameObjectsWithTag(selectUnit.transform.tag);
+            foreach (GameObject unit in allUnits)
+            {
+                BaseBehavior baseUnitBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                if (baseUnitBehaviorComponent.uniqueName == baseBehaviorComponent.uniqueName)
+                {
+                    UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
+                    if (selection != null && IsWithinSelectionBounds(unit, new Vector3(0, 0, 0), new Vector3(Screen.width, Screen.height, 0)))
+                        objects.Add(unit);
+                }
+            }
+        }
+        return GetFilteredObjects(objects);
     }
 
     public List<GameObject> GetFilteredObjects(List<GameObject> selectegObjects)
@@ -388,7 +437,7 @@ public class CameraController : MonoBehaviour
             foreach (GameObject unit in allUnits)
             {
                 UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-                if (selection != null && IsWithinSelectionBounds(unit))
+                if (selection != null && IsWithinSelectionBounds(unit, mousePosition1, UnityEngine.Input.mousePosition))
                     objects.Add(unit);
             }
         }
@@ -482,6 +531,11 @@ public class CameraController : MonoBehaviour
 
     public bool IsWithinSelectionBounds(GameObject gameObject)
     {
+        return IsWithinSelectionBounds(gameObject, mousePosition1, UnityEngine.Input.mousePosition);
+    }
+
+    public bool IsWithinSelectionBounds(GameObject gameObject, Vector3 pos1, Vector3 pos2)
+    {
         // At a time selected can be: the same team units, or buildings, or enemy team units
         var is_team_selected = false;
         var is_unit_selected = false;
@@ -507,7 +561,7 @@ public class CameraController : MonoBehaviour
             return false;
 
         var viewportBounds =
-            GetViewportBounds(GetComponent<Camera>(), mousePosition1, UnityEngine.Input.mousePosition);
+            GetViewportBounds(GetComponent<Camera>(), pos1, pos2);
 
         return viewportBounds.Contains(
             GetComponent<Camera>().WorldToViewportPoint(gameObject.transform.position));
