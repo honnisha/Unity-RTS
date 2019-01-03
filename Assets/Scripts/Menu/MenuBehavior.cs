@@ -6,6 +6,7 @@ using PowerUI;
 using System.Collections;
 using System;
 using System.Text.RegularExpressions;
+using UnityEngine.SceneManagement;
 
 namespace GangaGame
 {
@@ -66,6 +67,10 @@ namespace GangaGame
 
             if (UnityEngine.Input.GetMouseButtonUp(0) || UnityEngine.Input.GetKeyDown(KeyCode.Return))
             {
+                if (className.Contains("singleplayer"))
+                {
+                    SceneManager.LoadScene("Levels/Map1/Map1");
+                }
                 if (className.Contains("multiplayer"))
                     CreateConnectDialog();
                 else if (className.Contains("dialogOK") && !PhotonNetwork.IsConnected)

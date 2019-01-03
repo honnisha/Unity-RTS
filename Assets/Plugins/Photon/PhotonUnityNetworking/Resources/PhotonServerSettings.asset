@@ -39,4 +39,9 @@ MonoBehaviour:
   - ChangeOwner
   - GiveOrder
   - GiveOrderViewID
+  - SetAsProject
+  - UnitStartBuildUserId
+  - SetAsBuilding
+  - SetAsSelected
+  - StartInteractViewID
   DisableAutoOpenWizard: 1

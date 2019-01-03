@@ -150,6 +150,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     [HideInInspector]
     public GameObject holderObject;
     [HideInInspector]
+    public float timerToCreateHolder = 0.0f;
+    [HideInInspector]
     public ToolInfo holderToolInfo;
 
     #endregion
@@ -170,13 +172,11 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (stream.IsWriting)
         {
-            stream.SendNext(this.team);
-            stream.SendNext(this.ownerId);
+            stream.SendNext(this.interactType);
         }
         else
         {
-            this.team = (int)stream.ReceiveNext();
-            this.ownerId = (string)stream.ReceiveNext();
+            this.interactType = (InteractigType)stream.ReceiveNext();
         }
     }
 
@@ -510,6 +510,11 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     [PunRPC]
+    public virtual void StartInteractViewID(int targetViewId)
+    {
+        StartInteract(PhotonNetwork.GetPhotonView(targetViewId).gameObject);
+    }
+    [PunRPC]
     public virtual void GiveOrderViewID(int targetViewId, bool displayMarker)
     {
         GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker);
@@ -519,7 +524,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public virtual void GiveOrder(GameObject targetObject, bool displayMarker) { }
     public virtual void TakeDamage(float damage, GameObject attacker) { }
     public virtual void BecomeDead() { }
-    public virtual bool StartInteract(GameObject target) { return false; }
+    public virtual void StartInteract(GameObject targetObject) { }
     public virtual bool[] UICommand(string commandName) { return new bool[2] { false, false}; }
     public virtual bool IsHealthVisible() { return false; }
     public virtual List<string> GetCostInformation() { return new List<string>(); }

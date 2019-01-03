@@ -179,7 +179,6 @@ MonoBehaviour:
   costGold: 50
   costWood: 50
   productionHotkey: 103
-  canAttack: 1
   damage: 50
   rangeAttack: 2
   interactType: 0
@@ -228,6 +227,7 @@ MonoBehaviour:
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
+  timerToCreateHolder: 0
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
@@ -235,11 +235,13 @@ MonoBehaviour:
   resourceCapacity: 0
   storedResources: 
   state: 3
+  farm: 0
   producedUnits: []
   spawnPoint: {fileID: 0}
   unitsQuery: []
   uqeryLimit: 5
   buildTimer: 0
+  tempMaterialsMode: 
 --- !u!208 &208238353904566160
 NavMeshObstacle:
   m_ObjectHideFlags: 0

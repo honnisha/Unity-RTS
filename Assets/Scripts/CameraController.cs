@@ -56,11 +56,11 @@ public class CameraController : MonoBehaviour
     [System.Serializable]
     public class SpawnUnitInfo
     {
-        public GameObject prefab;
+        public string prefabName;
         public int number;
         public float distance = 3.0f;
     }
-    public GameObject createSpawnBuilding;
+    public string createSpawnBuildingName;
     public List<SpawnUnitInfo> startUnitsInfo = new List<SpawnUnitInfo>();
 
     private float clickTimer = 0.0f;
@@ -102,7 +102,7 @@ public class CameraController : MonoBehaviour
             PhotonView spawnPhotonView = spawnPoint.GetComponent<PhotonView>();
             if (spawnBehavior.number == userNumber)
             {
-                createdUnit = PhotonNetwork.Instantiate(createSpawnBuilding.name, spawnPoint.transform.position, spawnPoint.transform.rotation, 0);
+                createdUnit = PhotonNetwork.Instantiate(createSpawnBuildingName, spawnPoint.transform.position, spawnPoint.transform.rotation, 0);
                 break;
             }
         }
@@ -124,7 +124,7 @@ public class CameraController : MonoBehaviour
         foreach (var startUnitInfo in startUnitsInfo)
         {
             BuildingBehavior createdUnitBuildingBehavior = createdUnit.GetComponent<BuildingBehavior>();
-            createdUnitBuildingBehavior.ProduceUnit(startUnitInfo.prefab, startUnitInfo.number, startUnitInfo.distance);
+            createdUnitBuildingBehavior.ProduceUnit(startUnitInfo.prefabName, startUnitInfo.number, startUnitInfo.distance);
         }
     }
 
@@ -162,21 +162,23 @@ public class CameraController : MonoBehaviour
             {
                 if (hit.collider != null && hit.transform.gameObject.layer == LayerMask.NameToLayer("Terrain"))
                 {
+                    BuildingBehavior buildedObjectBuildingBehavior = null;
                     if (selectedObject == null)
                     {
                         selectedObject = PhotonNetwork.Instantiate(buildedObject.name, hit.point, buildedObject.transform.rotation);
-                        BuildingBehavior buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
-                        buildedObjectBuildingBehavior.state = BuildingBehavior.BuildingState.Selected;
-                        buildedObjectBuildingBehavior.canBeSelected = false;
-                        buildedObjectBuildingBehavior.health = 0;
-                        buildedObjectBuildingBehavior.team = team;
-                        buildedObjectBuildingBehavior.ownerId = userId;
-                        buildedObjectBuildingBehavior.live = false;
-                        selectedObject.layer = LayerMask.NameToLayer("Project");
+                        buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
 
-                        UnityEngine.AI.NavMeshObstacle navMesh = selectedObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
-                        if (navMesh != null)
-                            navMesh.enabled = false;
+                        // Set owner
+                        if (PhotonNetwork.InRoom)
+                            selectedObject.GetComponent<PhotonView>().RPC("ChangeOwner", PhotonTargets.All, userId, team);
+                        else
+                            buildedObjectBuildingBehavior.ChangeOwner(userId, team);
+
+                        // Set owner
+                        if (PhotonNetwork.InRoom)
+                            selectedObject.GetComponent<PhotonView>().RPC("SetAsSelected", PhotonTargets.All);
+                        else
+                            buildedObjectBuildingBehavior.SetAsSelected();
                     }
                     BuildingBehavior buildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
                     selectedObject.transform.position = hit.point;
@@ -187,25 +189,14 @@ public class CameraController : MonoBehaviour
                     if (intersection != null)
                         newColor = new Color(1f, 0.1f, 0.1f, 0.45f);
 
+                    buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
                     GameObject projector = selectedObject.GetComponent<UnitSelectionComponent>().projector;
                     if (UnityEngine.Input.GetMouseButtonDown(0))
                     {
                         if (intersection == null)
                         {
                             // Create building in project state
-
-                            buildingBehavior.canBeSelected = true;
-                            newColor = new Color(1, 1, 1, 0.45f);
-                            projector.active = false;
-                            projector.GetComponent<Projector>().material.color = newColor;
-
-                            var allRenders = selectedObject.GetComponents<Renderer>().Concat(selectedObject.GetComponentsInChildren<Renderer>()).ToArray();
-                            foreach (var render in allRenders)
-                                foreach (var material in render.materials)
-                                    material.color = newColor;
-
-                            BuildingBehavior buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
-                            buildedObjectBuildingBehavior.state = BuildingBehavior.BuildingState.Project;
+                            buildedObjectBuildingBehavior.SetAsProject();
 
                             List<GameObject> selectedUnits = GetSelectedObjects();
                             foreach (GameObject unit in selectedUnits)
@@ -217,6 +208,7 @@ public class CameraController : MonoBehaviour
                                 else
                                     baseBehaviorComponent.GiveOrder(selectedObject, true);
                             }
+
                             buildedObject = null;
                             selectedObject = null;
                             return;
@@ -229,11 +221,7 @@ public class CameraController : MonoBehaviour
                     }
                     if (UnityEngine.Input.GetMouseButtonDown(1))
                     {
-                        BuildingBehavior buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
-                        CameraController cameraController = Camera.main.GetComponent<CameraController>();
-                        cameraController.gold += buildedObjectBuildingBehavior.costGold;
-                        cameraController.wood += buildedObjectBuildingBehavior.costWood;
-                        Destroy(selectedObject);
+                        buildedObjectBuildingBehavior.StopAction();
                         buildedObject = null;
                         selectedObject = null;
                         return;
@@ -292,7 +280,7 @@ public class CameraController : MonoBehaviour
                                 }
                                 else
                                 {
-                                    clickTimer = 0.5f;
+                                    clickTimer = 0.25f;
                                     UnitSelectionComponent selectionComponent = hit.transform.gameObject.GetComponent<UnitSelectionComponent>();
                                     selectionComponent.isSelected = true;
                                 }

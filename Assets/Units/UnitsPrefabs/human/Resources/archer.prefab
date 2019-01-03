@@ -2179,6 +2179,7 @@ GameObject:
   - component: {fileID: 114627725476260020}
   - component: {fileID: 7001713218763256348}
   - component: {fileID: 1552057875877178680}
+  - component: {fileID: 4705574387134164419}
   m_Layer: 12
   m_Name: archer
   m_TagString: Unit
@@ -2300,7 +2301,6 @@ MonoBehaviour:
   costGold: 30
   costWood: 30
   productionHotkey: 119
-  canAttack: 1
   damage: 20
   rangeAttack: 10
   interactType: 0
@@ -2368,6 +2368,7 @@ MonoBehaviour:
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
+  timerToCreateHolder: 0
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
@@ -2411,7 +2412,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 1552057875877178680}
-  viewIdField: 25
+  viewIdField: 0
   InstantiationId: 25
   isRuntimeInstantiated: 0
 --- !u!114 &1552057875877178680
@@ -2429,6 +2430,39 @@ MonoBehaviour:
   m_SynchronizePosition: 1
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
+--- !u!114 &4705574387134164419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1731176499304606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowLayerWeightsInspector: 1
+  ShowParameterInspector: 1
+  m_SynchronizeParameters:
+  - Type: 9
+    SynchronizeType: 0
+    Name: Die
+  - Type: 9
+    SynchronizeType: 0
+    Name: Damaged
+  - Type: 1
+    SynchronizeType: 0
+    Name: AttackSpeed
+  - Type: 1
+    SynchronizeType: 0
+    Name: Speed
+  - Type: 9
+    SynchronizeType: 0
+    Name: Attack
+  m_SynchronizeLayers:
+  - SynchronizeType: 0
+    LayerIndex: 0
 --- !u!1 &1733009405756084
 GameObject:
   m_ObjectHideFlags: 0

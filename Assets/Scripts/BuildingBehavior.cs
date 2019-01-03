@@ -24,6 +24,8 @@ public class BuildingBehavior : BaseBehavior
     public int uqeryLimit = 5;
     public float buildTimer = 0.0f;
 
+    public List<int> tempMaterialsMode = new List<int>();
+
     #endregion
 
     public override void Awake()
@@ -46,7 +48,7 @@ public class BuildingBehavior : BaseBehavior
             buildTimer -= Time.deltaTime;
             if (buildTimer <= 0.0f)
             {
-                ProduceUnit(unitsQuery[0]);
+                ProduceUnit(unitsQuery[0].name);
                 unitsQuery.Remove(unitsQuery[0]);
                 if (unitsQuery.Count > 0)
                 {
@@ -63,12 +65,12 @@ public class BuildingBehavior : BaseBehavior
             DestroyPointMarker();
     }
 
-    public List<GameObject> ProduceUnit(GameObject createdPrefab)
+    public List<GameObject> ProduceUnit(string createdPrefabName)
     {
-        return ProduceUnit(createdPrefab, 1, 0.0f);
+        return ProduceUnit(createdPrefabName, 1, 0.0f);
     }
 
-    public List<GameObject> ProduceUnit(GameObject createdPrefab, int number, float distance)
+    public List<GameObject> ProduceUnit(string createdPrefabName, int number, float distance)
     {
         List<GameObject> createdObjects = new List<GameObject>();
         Vector3 dirToTarget = (spawnPoint.transform.position - transform.position).normalized;
@@ -76,7 +78,7 @@ public class BuildingBehavior : BaseBehavior
         for (int i = 1; i <= number; i++)
         {
             // Create object
-            GameObject createdObject = PhotonNetwork.Instantiate(createdPrefab.name, spawnPoint.transform.position, spawnPoint.transform.rotation);
+            GameObject createdObject = PhotonNetwork.Instantiate(createdPrefabName, spawnPoint.transform.position, spawnPoint.transform.rotation);
 
             BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
             PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();
@@ -135,6 +137,11 @@ public class BuildingBehavior : BaseBehavior
     public override bool IsVisible()
     {
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (state == BuildingState.Selected || state == BuildingState.Project)
+        {
+            if (cameraController.userId != ownerId)
+                return false;
+        }
         if (team == cameraController.team)
             return true;
         else
@@ -157,7 +164,117 @@ public class BuildingBehavior : BaseBehavior
         return false;
     }
 
-    public bool UnitStartBuild(GameObject builder)
+    [PunRPC]
+    public void SetAsSelected()
+    {
+        state = BuildingBehavior.BuildingState.Selected;
+        canBeSelected = false;
+        health = 0;
+        live = false;
+        gameObject.layer = LayerMask.NameToLayer("Project");
+
+        UnityEngine.AI.NavMeshObstacle navMesh = GetComponent<UnityEngine.AI.NavMeshObstacle>();
+        if (navMesh != null)
+            navMesh.enabled = false;
+
+        var allNewRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
+        foreach (var render in allNewRenders)
+            foreach (var material in render.materials)
+                tempMaterialsMode.Add((int)material.GetFloat("_Mode"));
+    }
+
+    public void SetAsProject()
+    {
+        canBeSelected = true;
+        Color newColor = new Color(1, 1, 1, 0.45f);
+
+        GameObject projector = GetComponent<UnitSelectionComponent>().projector;
+        projector.active = false;
+        projector.GetComponent<Projector>().material.color = newColor;
+
+        var allRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
+        foreach (var render in allRenders)
+            foreach (var material in render.materials)
+                material.color = newColor;
+
+        state = BuildingBehavior.BuildingState.Project;
+    }
+    
+
+    [PunRPC]
+    public void SetAsBuilding()
+    {
+        gameObject.layer = LayerMask.NameToLayer("Building");
+        live = true;
+        UnityEngine.AI.NavMeshObstacle navMesh = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
+        if (navMesh != null)
+            navMesh.enabled = true;
+
+        state = BuildingState.Building;
+        canBeSelected = true;
+        var allRenders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
+        int index = 0;
+        foreach (var render in allRenders)
+            foreach (var material in render.materials)
+            {
+                // https://github.com/jamesjlinden/unity-decompiled/blob/master/UnityEditor/UnityEditor/StandardShaderGUI.cs
+                material.SetFloat("_Mode", tempMaterialsMode[index]);
+                #region Standard shaders setters
+
+                if (tempMaterialsMode[index] == 0)
+                {
+                    material.SetOverrideTag("RenderType", "");
+                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                    material.SetInt("_ZWrite", 1);
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    material.renderQueue = -1;
+                }
+                if (tempMaterialsMode[index] == 1)
+                {
+                    material.SetOverrideTag("RenderType", "TransparentCutout");
+                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                    material.SetInt("_ZWrite", 1);
+                    material.EnableKeyword("_ALPHATEST_ON");
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+                }
+                if (tempMaterialsMode[index] == 2)
+                {
+                    material.SetOverrideTag("RenderType", "Transparent");
+                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.SetInt("_ZWrite", 0);
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                }
+                if (tempMaterialsMode[index] == 2)
+                {
+                    material.SetOverrideTag("RenderType", "Transparent");
+                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.SetInt("_ZWrite", 0);
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                }
+
+                #endregion
+                index++;
+                material.color = new Color(1, 1, 1, 1.0f);
+            }
+        if (spawnPoint != null)
+            spawnTarget = spawnPoint.transform.position;
+    }
+
+    public bool IsUnitCanBuild(GameObject builder)
     {
         if (state == BuildingState.Project && !live)
         {
@@ -166,30 +283,6 @@ public class BuildingBehavior : BaseBehavior
                 return false;
             else
             {
-                gameObject.layer = LayerMask.NameToLayer("Building");
-                live = true;
-                UnityEngine.AI.NavMeshObstacle navMesh = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
-                if (navMesh != null)
-                    navMesh.enabled = true;
-
-                state = BuildingState.Building;
-                canBeSelected = true;
-                var allRenders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
-                foreach (var render in allRenders)
-                    foreach (var material in render.materials)
-                    {
-                        material.SetFloat("_Mode", 1);
-                        material.SetInt("_SrcBlend", 1);
-                        material.SetInt("_DstBlend", 0);
-                        material.SetInt("_ZWrite", 1);
-                        material.EnableKeyword("_ALPHATEST_ON");
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-                        material.renderQueue = 3000;
-                        material.color = new Color(1, 1, 1, 1.0f);
-                    }
-                if (spawnPoint != null)
-                    spawnTarget = spawnPoint.transform.position;
                 return true;
             }
         }
@@ -251,7 +344,7 @@ public class BuildingBehavior : BaseBehavior
     public bool StopAction()
     {
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        if (state == BuildingState.Building || state == BuildingState.Project)
+        if (state == BuildingState.Building || state == BuildingState.Project || state == BuildingState.Selected)
         {
             cameraController.food += costFood;
             cameraController.gold += costGold;

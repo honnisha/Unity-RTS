@@ -196,8 +196,8 @@ MonoBehaviour:
   gold: 200
   wood: 200
   isSelecting: 0
-  team: 2
-  userId: 2
+  team: 1
+  userId: 1
   userNumber: 1
   tagsToSelect:
   - name: Unit
@@ -207,14 +207,14 @@ MonoBehaviour:
   - name: Ambient
     healthVisibleOnlyWhenSelect: 1
   buildedObject: {fileID: 0}
-  createSpawnBuilding: {fileID: 769, guid: 601738f4d30038c4db1250fba0a66f48, type: 3}
+  createSpawnBuildingName: townCenter
   startUnitsInfo:
-  - prefab: {fileID: 1150, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
+  - prefabName: worker
     number: 3
-    distance: 3
-  - prefab: {fileID: 822, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
+    distance: 4
+  - prefabName: carrier
     number: 1
-    distance: 0
+    distance: 1
 --- !u!114 &114047147111761268
 MonoBehaviour:
   m_ObjectHideFlags: 0

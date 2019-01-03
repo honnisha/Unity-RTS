@@ -20,7 +20,7 @@ public class UnitSelectionComponent : MonoBehaviour
     {
         var camera = Camera.main;
         CameraController cameraController = camera.GetComponent<CameraController>();
-        BaseBehavior baseBehaviorComponent = this.GetComponent<BaseBehavior>();
+        BaseBehavior baseBehaviorComponent = gameObject.GetComponent<BaseBehavior>();
         bool isWithinSelectionBounds = false;
         if (cameraController.isSelecting)
             isWithinSelectionBounds = cameraController.IsWithinSelectionBounds(gameObject);

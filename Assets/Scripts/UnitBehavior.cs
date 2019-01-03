@@ -77,13 +77,18 @@ public class UnitBehavior : BaseBehavior
         // Create tool in hand
         if (toolInfo != null && holderObject == null && toolInfo.prefab != null)
         {
-            holderToolInfo = toolInfo;
-            holderObject = (GameObject)Instantiate(toolInfo.prefab, toolInfo.holder.transform.position, toolInfo.holder.transform.rotation);
-            holderObject.transform.SetParent(toolInfo.holder.transform);
+            timerToCreateHolder += Time.deltaTime;
+            if(timerToCreateHolder >= 0.5f)
+            {
+                holderToolInfo = toolInfo;
+                holderObject = (GameObject)Instantiate(toolInfo.prefab, toolInfo.holder.transform.position, toolInfo.holder.transform.rotation);
+                holderObject.transform.SetParent(toolInfo.holder.transform);
+            }
         }
         // Destroy
         if ((toolInfo == null || holderToolInfo != toolInfo) && holderObject != null)
         {
+            timerToCreateHolder = 0.0f;
             holderToolInfo = null;
             Destroy(holderObject);
         }
@@ -268,9 +273,12 @@ public class UnitBehavior : BaseBehavior
             }
             else
             {
-                bool newCommand = ActionIsDone();
-                if(!newCommand)
-                    StopAction(true);
+                StopAction(true);
+                ActionIsDone();
+                if (PhotonNetwork.InRoom)
+                    GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
+                else
+                    StartInteract(target);
             }
         }
 
@@ -352,25 +360,28 @@ public class UnitBehavior : BaseBehavior
                 else
                 {
                     ActionIsDone();
-                    bool newOrder = StartInteract(target);
-                    if (!newOrder)
-                    {
-                        target = null;
-                        //agent.ResetPath();
-                        base.agent.isStopped = true;
-                    }
+                    base.agent.isStopped = true;
+
+                    if (PhotonNetwork.InRoom)
+                        GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
+                    else
+                        StartInteract(target);
                 }
             }
         }
         else if (target == null && !base.agent.isStopped && Vector3.Distance(gameObject.transform.position, base.agent.destination) <= 0.2f)
         {
             ActionIsDone();
+            base.agent.isStopped = true;
             if (interactObject != null)
             {
-                bool newOrder = StartInteract(interactObject);
-                if (!newOrder)
-                    base.agent.isStopped = true;
+                if (PhotonNetwork.InRoom)
+                    GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID);
+                else
+                    StartInteract(interactObject);
             }
+            else
+                target = null;
         }
         if (tempDestinationPoint != Vector3.zero && target == null)
         {
@@ -405,13 +416,14 @@ public class UnitBehavior : BaseBehavior
 
                     if (!targetBaseBehavior.live || tempDestinationPoint != Vector3.zero)
                     {
-                        bool newOrder = StartInteract(target);
-                        if (!newOrder)
-                        {
-                            base.agent.ResetPath();
-                            target = null;
-                            ActionIsDone();
-                        }
+                        base.agent.ResetPath();
+                        target = null;
+                        ActionIsDone();
+
+                        if (PhotonNetwork.InRoom)
+                            GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
+                        else
+                            StartInteract(target);
                     }
                 }
             }
@@ -437,18 +449,27 @@ public class UnitBehavior : BaseBehavior
             {
                 toolInfo = resourceInfo.toolObject;
             }
+            if (interactType == InteractigType.Farming)
+            {
+                toolInfo = farmInfo.toolObject;
+            }
         }
         if (toolInfo == null)
         {
             if (interactType == InteractigType.Bulding && buildingTool != null)
-                toolInfo = buildingTool;
+            {
+                if(interactObject != null && interactObject.GetComponent<BuildingBehavior>().farm)
+                    toolInfo = farmInfo.toolObject;
+                else
+                    toolInfo = buildingTool;
+            }
             if (interactType == InteractigType.Attacking && weapon != null)
                 toolInfo = weapon;
         }
         return toolInfo;
     }
 
-    public bool ActionIsDone()
+    public void ActionIsDone()
     {
         if (interactType == InteractigType.Bulding || interactType == InteractigType.CuttingTree || interactType == InteractigType.Gathering)
         {
@@ -486,26 +507,33 @@ public class UnitBehavior : BaseBehavior
                     GiveOrder(building, false);
 
                 Destroy(pointMarker);
-                return true;
+                return;
             }
         }
         Destroy(pointMarker);
-        return false;
+        return;
     }
 
-    public override bool StartInteract(GameObject target)
+    public override void StartInteract(GameObject targetObject)
     {
         // Start build object
-        BuildingBehavior targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
+        BuildingBehavior targetBuildingBehavior = targetObject.GetComponent<BuildingBehavior>();
+        BaseBehavior targetBaseBehavior = targetObject.GetComponent<BaseBehavior>();
+        UnitBehavior unitBehaviorComponent = targetObject.GetComponent<UnitBehavior>();
         if (targetBuildingBehavior != null && buildHpPerSecond > 0 && targetBuildingBehavior.team == team)
         {
             if (targetBuildingBehavior.health < targetBuildingBehavior.maxHealth)
             {
-                bool canBuild = targetBuildingBehavior.UnitStartBuild(gameObject);
+                bool canBuild = targetBuildingBehavior.IsUnitCanBuild(gameObject);
                 if (canBuild)
                 {
+                    if (PhotonNetwork.InRoom)
+                        targetObject.GetComponent<PhotonView>().RPC("SetAsBuilding", PhotonTargets.All);
+                    else
+                        targetBuildingBehavior.SetAsBuilding();
+
                     interactTimer = 1.0f;
-                    transform.LookAt(target.transform.position);
+                    transform.LookAt(targetObject.transform.position);
 
                     if (targetBuildingBehavior.farm)
                         interactAnimation = "Farming";
@@ -513,15 +541,12 @@ public class UnitBehavior : BaseBehavior
                         interactAnimation = "Builded";
 
                     anim.SetBool(interactAnimation, true);
-                    interactObject = target;
+                    interactObject = targetObject;
                     interactType = InteractigType.Bulding;
-                    return false;
                 }
             }
         }
         // Start gathering food
-        BaseBehavior targetBaseBehavior = target.GetComponent<BaseBehavior>();
-        UnitBehavior unitBehaviorComponent = target.GetComponent<UnitBehavior>();
         if ((targetBaseBehavior != null && targetBaseBehavior.resourceCapacity > 0) || (targetBuildingBehavior != null && targetBuildingBehavior.farm))
         {
             ResourceGatherInfo resourceInfo;
@@ -530,7 +555,7 @@ public class UnitBehavior : BaseBehavior
             else
                 resourceInfo = resourceGatherInfo.Find(x => x.type == targetBaseBehavior.resourceCapacityType);
 
-            if(resourceInfo != null)
+            if(resourceInfo != null && targetBuildingBehavior.state == BuildingBehavior.BuildingState.Builded)
             {
                 interactType = InteractigType.None;
                 if (targetBuildingBehavior != null && targetBuildingBehavior.farm && targetBaseBehavior.live)
@@ -550,11 +575,10 @@ public class UnitBehavior : BaseBehavior
                 }
                 if (interactType != InteractigType.None)
                 {
-                    interactObject = target;
+                    interactObject = targetObject;
                     anim.SetBool(interactAnimation, true);
-                    transform.LookAt(target.transform.position);
+                    transform.LookAt(targetObject.transform.position);
                     interactTimer = 1.0f;
-                    return false;
                 }
             }
         }
@@ -565,7 +589,10 @@ public class UnitBehavior : BaseBehavior
             if (storedResource != ResourceType.None && resourceHold > 0 && targetBaseBehavior.live)
             {
                 if (targetBuildingBehavior != null && targetBuildingBehavior.state != BuildingBehavior.BuildingState.Builded)
-                    return false;
+                {
+                    target = null;
+                    return;
+                }
 
                 CameraController cameraController = Camera.main.GetComponent<CameraController>();
                 if (resourceType == ResourceType.Food)
@@ -583,12 +610,12 @@ public class UnitBehavior : BaseBehavior
                         unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false);
                     else
                         GiveOrder(interactObject, false);
+                    return;
 
-                    return true;
                 }
             }
         }
-        return false;
+        target = null;
     }
 
     public void GoToStoreResources()
@@ -744,9 +771,9 @@ public class UnitBehavior : BaseBehavior
         {
             if(interactAnimation != "")
                 anim.SetBool(interactAnimation, false);
-            if (deleteObject)
-                interactObject = null;
         }
+        if (deleteObject)
+            interactObject = null;
         workingTimer = 0.0f;
         interactType = InteractigType.None;
     }
