@@ -602,7 +602,7 @@ public class UnitBehavior : BaseBehavior
                     interactAnimation = "Farming";
                 }
                 else if (
-                    targetBuildingBehavior.sourceType == SourceType.Default &&
+                    targetBaseBehavior.sourceType == SourceType.Default &&
                     targetBaseBehavior.resourceCapacityType == BaseBehavior.ResourceType.Food && !targetBaseBehavior.live ||
                     targetBaseBehavior.resourceCapacityType == BaseBehavior.ResourceType.Gold)
                 {

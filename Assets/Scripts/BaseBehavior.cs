@@ -207,8 +207,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         foreach (Renderer render in gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray())
             render.enabled = IsVisible() || beenSeen;
 
-        foreach (Collider collider in gameObject.GetComponents<Collider>().Concat(gameObject.GetComponentsInChildren<Collider>()).ToArray())
-            collider.enabled = IsVisible() || beenSeen;
+        // foreach (Collider collider in gameObject.GetComponents<Collider>().Concat(gameObject.GetComponentsInChildren<Collider>()).ToArray())
+        //     collider.enabled = IsVisible() || beenSeen;
 
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         if (team == cameraController.team && ownerId == cameraController.userId && live)
@@ -406,9 +406,13 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
             var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
             foreach (GameObject unit in allUnits)
             {
-                Collider unitCollider = unit.GetComponent<Collider>();
-                if (gameObject != unit && exceptionUnit != unit && collider.bounds.Intersects(unitCollider.bounds))
-                    return unit;
+                BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
+                if (unitBaseBehavior.IsVisible())
+                {
+                    Collider unitCollider = unit.GetComponent<Collider>();
+                    if (gameObject != unit && exceptionUnit != unit && collider.bounds.Intersects(unitCollider.bounds))
+                        return unit;
+                }
             }
         }
         return null;
