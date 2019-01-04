@@ -132,7 +132,7 @@ public class UIBaseScript : MonoBehaviour
                 var mapPoint = (mousePos - elementPos) / new Vector2(element.getBoundingClientRect().Width, element.getBoundingClientRect().Height);
                 if (UnityEngine.Input.GetMouseButton(0))
                 {
-                    cameraController.MoveCameraToMapPoint(mapPoint);
+                    cameraController.MoveCameraToPoint(cameraController.mapPointToPosition(mapPoint));
                 }
                 else if (UnityEngine.Input.GetMouseButtonDown(1))
                 {
@@ -146,6 +146,16 @@ public class UIBaseScript : MonoBehaviour
                             unitBaseBehaviorComponent.GiveOrder(cameraController.mapPointToPosition(mapPoint), true, true);
                     }
                 }
+            }
+            else if (activeElement.className.Contains("unit") && UnityEngine.Input.GetMouseButton(0))
+            {
+                GameObject unit = PhotonNetwork.GetPhotonView(int.Parse(activeElement.id)).gameObject;
+                cameraController.DeselectAllUnits();
+
+                UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
+                selection.isSelected = true;
+
+                cameraController.MoveCameraToPoint(unit.transform.position);
             }
         }
         if (!description)

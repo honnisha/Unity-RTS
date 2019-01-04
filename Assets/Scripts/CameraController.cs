@@ -143,9 +143,8 @@ public class CameraController : MonoBehaviour
         return new Vector3(terrain.terrainData.size.x * mapPosition.x, 0, terrain.terrainData.size.z - terrain.terrainData.size.z * mapPosition.y);
     }
 
-    public void MoveCameraToMapPoint(Vector2 mapPosition)
+    public void MoveCameraToPoint(Vector3 position)
     {
-        var position = mapPointToPosition(mapPosition);
         transform.position = new Vector3(position.x, transform.position.y, position.z);
         transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
     }
@@ -203,7 +202,8 @@ public class CameraController : MonoBehaviour
                 if (unitBaseBehavior.IsDisplayOnMap())
                 {
                     Dom.Element unitDiv = UI.document.createElement("div");
-                    unitDiv.className = "unit";
+                    unitDiv.className = "unit clckable";
+                    unitDiv.id = unit.GetComponent<PhotonView>().ViewID.ToString();
                     Vector2 positionOnMap = GetPositionOnMap(unit);
                     unitDiv.style.left = String.Format("{0}%", positionOnMap.x * 100.0f - 1.5);
                     unitDiv.style.bottom = String.Format("{0}%", positionOnMap.y * 100.0f - 1.5);

@@ -53,6 +53,8 @@ public class UnitBehavior : BaseBehavior
         health = maxHealth;
         resourceHold = 0.0f;
         interactType = InteractigType.None;
+
+        tempSpeed = agent.speed;
     }
     
     override public void Update()
@@ -142,18 +144,22 @@ public class UnitBehavior : BaseBehavior
         #endregion
 
         #region Interact with something
-        if (interactObject != null && workingTimer >= 5.0f)
+        if (workingTimer >= 5.0f)
         {
-            BuildingBehavior interactObjectBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
-            if (interactObjectBuildingBehavior != null && interactObjectBuildingBehavior.sourceType == SourceType.Farm)
+            Debug.Log(interactObject);
+            if (interactObject != null)
             {
-                PhotonView unitPhotonView = GetComponent<PhotonView>();
-                if (PhotonNetwork.InRoom)
-                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false, false);
-                else
-                    GiveOrder(interactObject, false, false);
-                workingTimer = 0.0f;
-                return;
+                BuildingBehavior interactObjectBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
+                if (interactObjectBuildingBehavior != null && interactObjectBuildingBehavior.sourceType == SourceType.Farm)
+                {
+                    PhotonView unitPhotonView = GetComponent<PhotonView>();
+                    if (PhotonNetwork.InRoom)
+                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false, false);
+                    else
+                        GiveOrder(interactObject, false, false);
+                    workingTimer = 0.0f;
+                    return;
+                }
             }
         }
         // Interact with something
@@ -439,6 +445,27 @@ public class UnitBehavior : BaseBehavior
             }
         }
         #endregion
+        
+        if (isWalkAround && IsMasterClient())
+        {
+            if (target == null)
+            {
+                if (timeToWalk <= 0.0f)
+                    timeToWalk = UnityEngine.Random.Range(5.0f, 20.0f);
+
+                timerToWalk += Time.deltaTime;
+                if (timerToWalk >= timeToWalk)
+                {
+                    PhotonView unitPhotonView = GetComponent<PhotonView>();
+                    if (PhotonNetwork.InRoom)
+                        unitPhotonView.RPC("GiveOrderWithSpeed", PhotonTargets.All, GetRandomPoint(unitPosition, 10.0f), false, false, UnityEngine.Random.Range(0.9f, 1.3f));
+                    else
+                        GiveOrderWithSpeed(GetRandomPoint(unitPosition, 10.0f), false, false, UnityEngine.Random.Range(0.9f, 1.3f));
+                    timerToWalk = 0.0f;
+                    timeToWalk = 0.0f;
+                }
+            }
+        }
 
         if (pointMarkerPrefab != null)
             if (!unitSelectionComponent.isSelected || !live)
@@ -727,9 +754,9 @@ public class UnitBehavior : BaseBehavior
 
             PhotonView unitPhotonView = GetComponent<PhotonView>();
             if (PhotonNetwork.InRoom)
-                unitPhotonView.RPC("GiveOrder", PhotonTargets.All, GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, false);
+                unitPhotonView.RPC("GiveOrder", PhotonTargets.All, GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, true);
             else
-                GiveOrder(GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, false);
+                GiveOrder(GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, true);
         }
     }
 
@@ -832,7 +859,20 @@ public class UnitBehavior : BaseBehavior
     }
 
     [PunRPC]
+    public void GiveOrderWithSpeed(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed)
+    {
+        agent.speed = speed;
+        SendToPoint(point, displayMarker, overrideQueueCommands);
+    }
+
+    [PunRPC]
     public override void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands)
+    {
+        agent.speed = tempSpeed;
+        SendToPoint(point, displayMarker, overrideQueueCommands);
+    }
+
+    public void SendToPoint(Vector3 point, bool displayMarker, bool overrideQueueCommands)
     {
         if (overrideQueueCommands)
             queueCommands.Clear();
@@ -841,7 +881,10 @@ public class UnitBehavior : BaseBehavior
             return;
 
         StopAction(true);
- 
+
+        if (overrideQueueCommands)
+            unitPosition = point;
+
         base.tempDestinationPoint = point;
         if (displayMarker)
             CreateOrUpdatePointMarker(Color.green, point, 1.5f, true);

@@ -22,6 +22,12 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public bool live = true;
     public GameObject pointToInteract;
 
+    public bool isWalkAround = false;
+    [HideInInspector]
+    public float timeToWalk = 0.0f;
+    [HideInInspector]
+    public float timerToWalk = 0.0f;
+
     public float visionDistanve = 10.0f;
 
     [Header("UI")]
@@ -35,6 +41,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public float costGold = 10.0f;
     public float costWood = 10.0f;
     public KeyCode productionHotkey;
+
+    [HideInInspector]
+    public Vector3 unitPosition = new Vector3();
 
     #endregion
 
@@ -153,6 +162,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public float timerToCreateHolder = 0.0f;
     [HideInInspector]
     public ToolInfo holderToolInfo;
+    [HideInInspector]
+    public float tempSpeed;
 
     [HideInInspector]
     public List<object> queueCommands = new List<object>();
@@ -200,6 +211,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         photonView = GetComponent<PhotonView>();
         anim = GetComponent<Animator>();
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+
+        unitPosition = transform.position;
     }
 
     virtual public void Update()
@@ -256,19 +269,17 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 objectUIInfo.document.innerHTML = HTMLHealthFile.text;
                 objectUIInfo.Layer = LayerMask.NameToLayer("HP");
 
-                if (team == cameraController.team)
+                if (team <= 0)
+                    objectUIInfo.document.getElementById("health").style.background = "yellow";
+                else if (cameraController.team != team)
+                    objectUIInfo.document.getElementById("health").style.background = "red";
+                else
                 {
-                    if (ownerId == cameraController.userId)
-                        // If its your unit
+                    if (cameraController.userId == ownerId)
                         objectUIInfo.document.getElementById("health").style.background = "green";
                     else
-                        // If unit of your allies
                         objectUIInfo.document.getElementById("health").style.background = "yellow";
                 }
-                else
-                    // Enemy unit
-                    objectUIInfo.document.getElementById("health").style.background = "red";
-
                 tempHealth = 0.0f;
             }
         }
@@ -470,7 +481,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     public bool AttackNearEnemies(Vector3 centerOfSearch, float range, int attackTeam = 999)
     {
-        if (attackType != AttackType.None && interactType != InteractigType.Attacking)
+        if (attackType == AttackType.None && interactType != InteractigType.Attacking)
             return false;
 
         var allUnits = GameObject.FindGameObjectsWithTag("Unit");

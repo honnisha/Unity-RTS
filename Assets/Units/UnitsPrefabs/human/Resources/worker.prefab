@@ -185,7 +185,7 @@ MonoBehaviour:
   rangeAttack: 2
   interactType: 2
   attackTime: 1.2
-  attackDelay: 0
+  attackDelay: 0.7
   damageAfterTimer: 1
   attackTimer: -0.00851091
   attackDelayTimer: -1.2085108
@@ -406,7 +406,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2675}
-  viewIdField: 8
+  viewIdField: 0
   InstantiationId: 8
   isRuntimeInstantiated: 0
 --- !u!114 &2675

@@ -213,7 +213,7 @@ namespace RTS_Cam
                 if (Input.GetKey(KeyCode.LeftShift))
                     boost = 2.0f;
                 desiredMove *= keyboardMovementSpeed * boost;
-                desiredMove *= Time.deltaTime;
+                desiredMove *= Time.fixedDeltaTime;
                 desiredMove = Quaternion.Euler(new Vector3(0f, transform.eulerAngles.y, 0f)) * desiredMove;
                 desiredMove = m_Transform.InverseTransformDirection(desiredMove);
 
@@ -233,7 +233,7 @@ namespace RTS_Cam
                 desiredMove.z = upRect.Contains(MouseInput) ? 1 : downRect.Contains(MouseInput) ? -1 : 0;
 
                 desiredMove *= screenEdgeMovementSpeed;
-                desiredMove *= Time.deltaTime;
+                desiredMove *= Time.fixedDeltaTime;
                 desiredMove = Quaternion.Euler(new Vector3(0f, transform.eulerAngles.y, 0f)) * desiredMove;
                 desiredMove = m_Transform.InverseTransformDirection(desiredMove);
 
@@ -245,7 +245,7 @@ namespace RTS_Cam
                 Vector3 desiredMove = new Vector3(-MouseAxis.x, 0, -MouseAxis.y);
 
                 desiredMove *= panningSpeed;
-                desiredMove *= Time.deltaTime;
+                desiredMove *= Time.fixedDeltaTime;
                 desiredMove = Quaternion.Euler(new Vector3(0f, transform.eulerAngles.y, 0f)) * desiredMove;
                 desiredMove = m_Transform.InverseTransformDirection(desiredMove);
 

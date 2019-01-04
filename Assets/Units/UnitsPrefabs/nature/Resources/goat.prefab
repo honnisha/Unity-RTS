@@ -1322,6 +1322,9 @@ MonoBehaviour:
   health: 50
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 1
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 10
   uniqueName: Goat
   readableName: Goat
@@ -1332,7 +1335,7 @@ MonoBehaviour:
   costGold: 0
   costWood: 0
   productionHotkey: 0
-  canAttack: 1
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 10
   rangeAttack: 1.5
   interactType: 0
@@ -1382,11 +1385,14 @@ MonoBehaviour:
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
+  timerToCreateHolder: 0
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   resourceCapacityType: 1
   resourceCapacity: 100
+  resourceEndless: 0
+  sourceType: 0
   storedResources: 
   buildHpPerSecond: 2.5
   buildingTool:
@@ -1461,8 +1467,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 6685409450178812008}
-  viewIdField: 0
-  InstantiationId: 12
+  viewIdField: 34
+  InstantiationId: 34
   isRuntimeInstantiated: 0
 --- !u!114 &6685409450178812008
 MonoBehaviour:
