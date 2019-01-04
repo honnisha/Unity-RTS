@@ -1,5 +1,21 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &7785412189719482960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3340862564371950366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbf3575480402db40813e763382412fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: 0
+  eraseRenderer: 0
+  originalLayer: 0
+  originalMaterials: []
 --- !u!1 &5504168624254288632
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,7 +182,6 @@ MonoBehaviour:
   costGold: 50
   costWood: 50
   productionHotkey: 0
-  canAttack: 0
   damage: 50
   rangeAttack: 2
   interactType: 0
@@ -215,6 +230,7 @@ MonoBehaviour:
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
+  timerToCreateHolder: 0
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
@@ -228,6 +244,7 @@ MonoBehaviour:
   unitsQuery: []
   uqeryLimit: 5
   buildTimer: 0
+  tempMaterialsMode: 
 --- !u!114 &5617069432703191062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -262,7 +279,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 6898031380812819277}
   viewIdField: 0
-  InstantiationId: 0
+  InstantiationId: 25
   isRuntimeInstantiated: 0
 --- !u!114 &6898031380812819277
 MonoBehaviour:
@@ -348,10 +365,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2346822, guid: 9b8fc966f95ea9c4194dc091fc40b478, type: 3}
       propertyPath: m_SelectedEditorRenderState
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9b8fc966f95ea9c4194dc091fc40b478, type: 3}
+--- !u!1 &3340862564371950366 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 114418, guid: 9b8fc966f95ea9c4194dc091fc40b478,
+    type: 3}
+  m_PrefabInstance: {fileID: 3340862564372043244}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3340862564372087300 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 481256, guid: 9b8fc966f95ea9c4194dc091fc40b478,

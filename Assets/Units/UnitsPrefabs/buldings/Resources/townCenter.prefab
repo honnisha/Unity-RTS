@@ -171,7 +171,7 @@ MonoBehaviour:
   readableName: Town center
   readableDescription: Main building, can produce workers and store resources from
     workers.
-  imagePath: house.png
+  imagePath: family-house.png
   timeToBuild: 10
   costFood: 0
   costGold: 100
@@ -233,9 +233,11 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
+  resourceEndless: 0
+  sourceType: 0
   storedResources: 010000000200000003000000
   state: 3
-  farm: 0
+  magnitDistance: 5
   producedUnits:
   - {fileID: 815, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
   - {fileID: 802, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
@@ -277,8 +279,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2670}
-  viewIdField: 5
-  InstantiationId: 5
+  viewIdField: 9
+  InstantiationId: 9
   isRuntimeInstantiated: 0
 --- !u!114 &2670
 MonoBehaviour:

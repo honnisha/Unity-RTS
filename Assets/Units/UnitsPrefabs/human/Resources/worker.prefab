@@ -177,7 +177,7 @@ MonoBehaviour:
   readableDescription: Can build, repair, eat.
   imagePath: stone-crafting.png
   timeToBuild: 30
-  costFood: 25
+  costFood: 60
   costGold: 0
   costWood: 0
   productionHotkey: 115
@@ -226,9 +226,19 @@ MonoBehaviour:
   previousPosition: {x: 0.49584627, y: 0.08150244, z: 70.49363}
   curSpeed: 0
   skillList:
-  - uniqueName: buildStorage
+  - uniqueName: buildWGStorage
     hotkey: 0
     skillObject: {fileID: 1936309040469112, guid: e32f972dbbee7ab419739c91fc918ec6,
+      type: 3}
+    imagePath: 
+    readableName: 
+    readableDescription: 
+    costFood: 10
+    costGold: 10
+    costWood: 10
+  - uniqueName: buildFoodStorage
+    hotkey: 0
+    skillObject: {fileID: 8540848253650812173, guid: 84864e8678640f049a78b1bc289461cb,
       type: 3}
     imagePath: 
     readableName: 
@@ -292,6 +302,8 @@ MonoBehaviour:
     holder: {fileID: 816}
   resourceCapacityType: 0
   resourceCapacity: 0
+  resourceEndless: 0
+  sourceType: 0
   storedResources: 
   buildHpPerSecond: 10
   buildingTool:
@@ -316,6 +328,15 @@ MonoBehaviour:
     toolObject:
       prefab: {fileID: 1960420655220560, guid: c075b3766584c07409b8758ee2f83879, type: 3}
       holder: {fileID: 818}
+  - type: 2
+    gatherPerSecond: 0.5
+    maximumCapacity: 15
+    carryObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
+    toolObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
   resourceHold: 0
   resourceType: 3
   farmInfo:

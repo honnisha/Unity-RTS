@@ -233,9 +233,11 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
+  resourceEndless: 0
+  IsAFarm: 0
   storedResources: 
   state: 3
-  farm: 0
+  magnitDistance: 2
   producedUnits: []
   spawnPoint: {fileID: 0}
   unitsQuery: []

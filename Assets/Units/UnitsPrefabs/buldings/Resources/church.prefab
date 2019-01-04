@@ -232,9 +232,11 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
+  resourceEndless: 0
+  sourceType: 0
   storedResources: 
   state: 3
-  farm: 0
+  magnitDistance: 5
   producedUnits: []
   spawnPoint: {fileID: 1353}
   unitsQuery: []
@@ -274,8 +276,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2839}
-  viewIdField: 13
-  InstantiationId: 13
+  viewIdField: 7
+  InstantiationId: 7
   isRuntimeInstantiated: 0
 --- !u!114 &2839
 MonoBehaviour:

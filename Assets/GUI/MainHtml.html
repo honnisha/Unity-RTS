@@ -222,6 +222,32 @@ padding-bottom: 5px;
 	display: inline-block;
 	text-align: center;
 }
+
+.mapBlock {
+	background-size: 100%;
+	margin-left: 50%;
+	margin-top: 5%;
+	height: 100%;
+	width: 45%;
+}
+.map {
+	position: relative;
+	-spark-filter: opacity(40%), invert(100%);
+}
+.units {
+	margin-top: -100%;
+	position: relative;
+	height: 100%;
+	width: 100%;
+}
+.units > .unit {
+	bottom: 25%;
+	position: absolute;
+	height: 1.5%;
+	width: 1.5%;
+	background: white;
+    border: 1px solid black;
+}
 </style>
 <script>
 	function CreateMessage(message, timeout) {
@@ -250,6 +276,12 @@ padding-bottom: 5px;
 			Food: &food;<br>
 			Gold: &gold;<br>
 			Wood: &wood;
+			</div>
+		</div>
+		<div class="mapBlock">
+			<img class="map clckable">
+			</img>
+			<div class="units clckable">
 			</div>
 		</div>
 	</div>

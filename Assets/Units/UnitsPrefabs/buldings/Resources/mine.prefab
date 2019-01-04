@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1234786408475336}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.0299}
+  m_LocalPosition: {x: 0.00082, y: -0.00009, z: 0.0356}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4073889924124066}
@@ -441,7 +441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: -1
-  ownerId: 1
+  ownerId: -1
   maxHealth: 100
   health: 100
   live: 1
@@ -508,11 +508,13 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
-  resourceCapacityType: 0
-  resourceCapacity: 0
+  resourceCapacityType: 2
+  resourceCapacity: 1000
+  resourceEndless: 0
+  IsAFarm: 0
   storedResources: 
   state: 3
-  farm: 0
+  magnitDistance: 2
   producedUnits: []
   spawnPoint: {fileID: 0}
   unitsQuery: []
@@ -545,7 +547,7 @@ NavMeshObstacle:
   m_Shape: 1
   m_Extents: {x: 0.018000001, y: 0.027, z: 0.028}
   m_MoveThreshold: 0.1
-  m_Carve: 0
+  m_Carve: 1
   m_CarveOnlyStationary: 1
   m_Center: {x: 0.018000001, y: 0.0050000004, z: -0.004}
   m_TimeToStationary: 0.5
@@ -569,7 +571,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 8964997363262689653}
   viewIdField: 0
-  InstantiationId: 0
+  InstantiationId: 27
   isRuntimeInstantiated: 0
 --- !u!114 &8964997363262689653
 MonoBehaviour:
@@ -593,7 +595,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1517551109366952}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fbf3575480402db40813e763382412fb, type: 3}
   m_Name: 

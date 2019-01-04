@@ -2532,6 +2532,8 @@ MonoBehaviour:
     holder: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
+  resourceEndless: 0
+  sourceType: 0
   storedResources: 01000000
   buildHpPerSecond: 2.5
   buildingTool:
@@ -2584,8 +2586,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2672}
-  viewIdField: 7
-  InstantiationId: 7
+  viewIdField: 22
+  InstantiationId: 22
   isRuntimeInstantiated: 0
 --- !u!114 &2672
 MonoBehaviour:

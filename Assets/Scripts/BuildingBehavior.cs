@@ -14,7 +14,7 @@ public class BuildingBehavior : BaseBehavior
     public enum BuildingState { Selected, Project, Building, Builded };
     [Header("Building info")]
     public BuildingState state = BuildingState.Builded;
-    public bool farm = false;
+    public float magnitDistance = 2.0f;
 
     [Header("Units production")]
     public List<GameObject> producedUnits = new List<GameObject>();
@@ -60,7 +60,7 @@ public class BuildingBehavior : BaseBehavior
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         UnitSelectionComponent unitSelectionComponent = GetComponent<UnitSelectionComponent>();
         if (unitSelectionComponent.isSelected && team == cameraController.team)
-            CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f);
+            CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true);
         if (!unitSelectionComponent.isSelected)
             DestroyPointMarker();
     }
@@ -90,9 +90,9 @@ public class BuildingBehavior : BaseBehavior
 
             //Send command to created object to spawn target 
             if (PhotonNetwork.InRoom)
-                createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true);
+                createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
             else
-                createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true);
+                createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
             createdObjects.Add(createdObject);
         }
         return createdObjects;
@@ -214,62 +214,66 @@ public class BuildingBehavior : BaseBehavior
         canBeSelected = true;
         var allRenders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
         int index = 0;
-        foreach (var render in allRenders)
-            foreach (var material in render.materials)
-            {
-                // https://github.com/jamesjlinden/unity-decompiled/blob/master/UnityEditor/UnityEditor/StandardShaderGUI.cs
-                material.SetFloat("_Mode", tempMaterialsMode[index]);
-                #region Standard shaders setters
+        if (tempMaterialsMode.Count > 0)
+        {
+            foreach (var render in allRenders)
+                foreach (var material in render.materials)
+                {
+                    // https://github.com/jamesjlinden/unity-decompiled/blob/master/UnityEditor/UnityEditor/StandardShaderGUI.cs
+                    material.SetFloat("_Mode", tempMaterialsMode[index]);
+                    #region Standard shaders setters
 
-                if (tempMaterialsMode[index] == 0)
-                {
-                    material.SetOverrideTag("RenderType", "");
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                    material.SetInt("_ZWrite", 1);
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    material.renderQueue = -1;
-                }
-                if (tempMaterialsMode[index] == 1)
-                {
-                    material.SetOverrideTag("RenderType", "TransparentCutout");
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                    material.SetInt("_ZWrite", 1);
-                    material.EnableKeyword("_ALPHATEST_ON");
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
-                }
-                if (tempMaterialsMode[index] == 2)
-                {
-                    material.SetOverrideTag("RenderType", "Transparent");
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    material.SetInt("_ZWrite", 0);
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    material.EnableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-                }
-                if (tempMaterialsMode[index] == 2)
-                {
-                    material.SetOverrideTag("RenderType", "Transparent");
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    material.SetInt("_ZWrite", 0);
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-                }
+                    if (tempMaterialsMode[index] == 0)
+                    {
+                        material.SetOverrideTag("RenderType", "");
+                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                        material.SetInt("_ZWrite", 1);
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                        material.renderQueue = -1;
+                    }
+                    if (tempMaterialsMode[index] == 1)
+                    {
+                        material.SetOverrideTag("RenderType", "TransparentCutout");
+                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                        material.SetInt("_ZWrite", 1);
+                        material.EnableKeyword("_ALPHATEST_ON");
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+                    }
+                    if (tempMaterialsMode[index] == 2)
+                    {
+                        material.SetOverrideTag("RenderType", "Transparent");
+                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                        material.SetInt("_ZWrite", 0);
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        material.EnableKeyword("_ALPHABLEND_ON");
+                        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                    }
+                    if (tempMaterialsMode[index] == 2)
+                    {
+                        material.SetOverrideTag("RenderType", "Transparent");
+                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                        material.SetInt("_ZWrite", 0);
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                    }
 
-                #endregion
-                index++;
-                material.color = new Color(1, 1, 1, 1.0f);
-            }
+                    #endregion
+                    index++;
+                    material.color = new Color(1, 1, 1, 1.0f);
+                }
+        }
+        tempMaterialsMode.Clear();
         if (spawnPoint != null)
             spawnTarget = spawnPoint.transform.position;
     }
@@ -306,7 +310,7 @@ public class BuildingBehavior : BaseBehavior
     }
 
     [PunRPC]
-    public override void GiveOrder(Vector3 point, bool displayMarker)
+    public override void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands)
     {
         if (!live)
             return;
@@ -314,7 +318,7 @@ public class BuildingBehavior : BaseBehavior
         spawnTarget = point;
     }
     
-    public override void GiveOrder(GameObject targetObject, bool displayMarker)
+    public override void GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands)
     {
         if (!live)
             return;

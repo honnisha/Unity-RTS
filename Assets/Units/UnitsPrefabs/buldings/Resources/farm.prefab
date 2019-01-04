@@ -3415,11 +3415,13 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
-  resourceCapacityType: 0
+  resourceCapacityType: 1
   resourceCapacity: 0
+  resourceEndless: 1
+  sourceType: 1
   storedResources: 
   state: 3
-  farm: 1
+  magnitDistance: 2
   producedUnits: []
   spawnPoint: {fileID: 0}
   unitsQuery: []
@@ -3459,8 +3461,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2806}
-  viewIdField: 27
-  InstantiationId: 27
+  viewIdField: 26
+  InstantiationId: 26
   isRuntimeInstantiated: 0
 --- !u!114 &2806
 MonoBehaviour:

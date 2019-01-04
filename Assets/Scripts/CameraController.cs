@@ -9,6 +9,7 @@ using PowerUI;
 using System.Text.RegularExpressions;
 using Photon.Pun;
 using GangaGame;
+using UnityEngine.SceneManagement;
 
 public class CameraController : MonoBehaviour
 {
@@ -64,6 +65,8 @@ public class CameraController : MonoBehaviour
     public List<SpawnUnitInfo> startUnitsInfo = new List<SpawnUnitInfo>();
 
     private float clickTimer = 0.0f;
+
+    public Texture mapTexture;
 
     // Use this for initialization
     void Start()
@@ -134,6 +137,19 @@ public class CameraController : MonoBehaviour
         transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
     }
 
+    public Vector3 mapPointToPosition(Vector2 mapPosition)
+    {
+        Terrain terrain = Terrain.activeTerrain;
+        return new Vector3(terrain.terrainData.size.x * mapPosition.x, 0, terrain.terrainData.size.z - terrain.terrainData.size.z * mapPosition.y);
+    }
+
+    public void MoveCameraToMapPoint(Vector2 mapPosition)
+    {
+        var position = mapPointToPosition(mapPosition);
+        transform.position = new Vector3(position.x, transform.position.y, position.z);
+        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
+    }
+
     public class ObjectWithDistance
     {
         public ObjectWithDistance(GameObject _unit, float _distance) {
@@ -143,12 +159,78 @@ public class CameraController : MonoBehaviour
         public GameObject unit;
         public float distance;
     }
+
+    public Vector2 GetPositionOnMap(GameObject unit)
+    {
+        Terrain terrain = Terrain.activeTerrain;
+        Vector3 positionOnTerrain = unit.transform.position - terrain.GetPosition();
+        return new Vector2(positionOnTerrain.x / terrain.terrainData.size.x, positionOnTerrain.z / terrain.terrainData.size.z);
+    }
+
+    public void UpdateMapsAndStatistic()
+    {
+        foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
+        {
+            // Draw map
+            mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
+            var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
+            mapImage.image = mapTexture;
+            mapImage.style.height = "100%";
+            mapImage.style.width = "100%";
+
+            var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
+            unitsBlock.innerHTML = "";
+
+            workedOnFood = 0; workedOnGold = 0; workedOnWood = 0;
+            // Draw units + calculate statistic
+            foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
+            {
+                UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
+                if (unitUnitBehavior.interactObject != null)
+                {
+                    BaseBehavior interactObjectBehaviorComponent = unitUnitBehavior.interactObject.GetComponent<BaseBehavior>();
+                    if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId)
+                    {
+                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Food)
+                            workedOnFood += 1;
+                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Gold)
+                            workedOnGold += 1;
+                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Wood)
+                            workedOnWood += 1;
+                    }
+                }
+                BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
+                if (unitBaseBehavior.IsDisplayOnMap())
+                {
+                    Dom.Element unitDiv = UI.document.createElement("div");
+                    unitDiv.className = "unit";
+                    Vector2 positionOnMap = GetPositionOnMap(unit);
+                    unitDiv.style.left = String.Format("{0}%", positionOnMap.x * 100.0f - 1.5);
+                    unitDiv.style.bottom = String.Format("{0}%", positionOnMap.y * 100.0f - 1.5);
+                    unitDiv.style.backgroundColor = unitBaseBehavior.GetDisplayMapColor();
+                    unitsBlock.appendChild(unitDiv);
+                }
+            }
+        }
+    }
+
+    private int workedOnFood, workedOnGold, workedOnWood = 0;
+    private float countWorkersTimer = 0.0f;
     // Update is called once per frame
     void Update()
     {
+        countWorkersTimer -= Time.deltaTime;
+        if(countWorkersTimer <= 0)
+        {
+            UpdateMapsAndStatistic();
+            countWorkersTimer = 1.0f;
+        }
         UI.Variables["food"] = String.Format("{0:F0}", food);
+        if (workedOnFood > 0) UI.Variables["food"] += String.Format(" ({0})", workedOnFood);
         UI.Variables["gold"] = String.Format("{0:F0}", gold);
+        if (workedOnGold > 0) UI.Variables["gold"] += String.Format(" ({0})", workedOnGold);
         UI.Variables["wood"] = String.Format("{0:F0}", wood);
+        if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
 
         bool isClickGUI = false;
         if (PowerUI.CameraPointer.All[0].ActiveOver != null && PowerUI.CameraPointer.All[0].ActiveOver.className.Contains("clckable"))
@@ -206,7 +288,7 @@ public class CameraController : MonoBehaviour
                                 if (PhotonNetwork.InRoom)
                                     unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, selectedObject.GetComponent<PhotonView>().ViewID, true);
                                 else
-                                    baseBehaviorComponent.GiveOrder(selectedObject, true);
+                                    baseBehaviorComponent.GiveOrder(selectedObject, true, true);
                             }
 
                             buildedObject = null;
@@ -293,6 +375,7 @@ public class CameraController : MonoBehaviour
                 {
                     foreach (TagToSelect tag in tagsToSelect)
                     {
+                        bool sendToQueue = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
                         List<ObjectWithDistance> formationList = new List<ObjectWithDistance>();
                         var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
                         foreach (GameObject unit in allUnits)
@@ -305,13 +388,18 @@ public class CameraController : MonoBehaviour
                             {
                                 if (tagsToSelect.Exists(x => (x.name == hit.transform.gameObject.tag)))
                                 {
-                                    PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
-                                    if (PhotonNetwork.InRoom)
-                                    {
-                                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, hit.transform.gameObject.GetComponent<PhotonView>().ViewID, true);
-                                    }
+                                    if (sendToQueue)
+                                        baseBehaviorComponent.AddCommandToQueue(hit.transform.gameObject);
                                     else
-                                        baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true);
+                                    {
+                                        PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
+                                        if (PhotonNetwork.InRoom)
+                                        {
+                                            unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, hit.transform.gameObject.GetComponent<PhotonView>().ViewID, true);
+                                        }
+                                        else
+                                            baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true, true);
+                                    }
                                 }
                                 else
                                 {
@@ -321,7 +409,7 @@ public class CameraController : MonoBehaviour
                                 }
                             }
                         }
-                        SetOrderInFormation(formationList, hit.point, 1.7f);
+                        SetOrderInFormation(formationList, hit.point, 1.7f, sendToQueue);
                     }
                 }
             }
@@ -458,7 +546,7 @@ public class CameraController : MonoBehaviour
         return new Vector2((float)x, (float)y);
     }
 
-    public void SetOrderInFormation(List<ObjectWithDistance> formationList, Vector3 point, float distance)
+    public void SetOrderInFormation(List<ObjectWithDistance> formationList, Vector3 point, float distance, bool sendToQueue)
     {
         float count = formationList.Count;
         if (count == 0)
@@ -498,10 +586,17 @@ public class CameraController : MonoBehaviour
             var rotatedPoint = Rotate(new Vector2(newPoint.x, newPoint.z), new Vector2(point.x, point.z), angle);
 
             PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
-            if (PhotonNetwork.InRoom)
-                unitPhotonView.RPC("GiveOrder", PhotonTargets.All, new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true);
+            if (sendToQueue)
+            {
+                baseBehaviorComponent.AddCommandToQueue(new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y));
+            }
             else
-                baseBehaviorComponent.GiveOrder(new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true);
+            {
+                if (PhotonNetwork.InRoom)
+                    unitPhotonView.RPC("GiveOrder", PhotonTargets.All, new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true, true);
+                else
+                    baseBehaviorComponent.GiveOrder(new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true, true);
+            }
 
             indexCount += 1;
         }

@@ -154,6 +154,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     [HideInInspector]
     public ToolInfo holderToolInfo;
 
+    [HideInInspector]
+    public List<object> queueCommands = new List<object>();
+
     #endregion
 
     #region Gatering hold info
@@ -162,6 +165,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     [Header("Gatering hold info")]
     public ResourceType resourceCapacityType = ResourceType.None;
     public float resourceCapacity = 0.0f;
+    public bool resourceEndless = false;
+    public enum SourceType { Default, Farm, GoldMine, Wood };
+    public SourceType sourceType = SourceType.Default;
     public List<ResourceType> storedResources = new List<ResourceType>();
 
     #endregion
@@ -198,24 +204,18 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     virtual public void Update()
     {
-        Renderer[] unitMeshRenders = gameObject.GetComponents<Renderer>();
-        Renderer[] unitChildrenMeshRenders = gameObject.GetComponentsInChildren<Renderer>();
-        foreach (Renderer unitMeshRender in unitMeshRenders.Concat(unitChildrenMeshRenders).ToArray())
-            if (IsVisible() || beenSeen)
-            {
-                if (!unitMeshRender.enabled)
-                    unitMeshRender.enabled = true;
-            }
-            else
-                if (unitMeshRender.enabled)
-                unitMeshRender.enabled = false;
+        foreach (Renderer render in gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray())
+            render.enabled = IsVisible() || beenSeen;
+
+        foreach (Collider collider in gameObject.GetComponents<Collider>().Concat(gameObject.GetComponentsInChildren<Collider>()).ToArray())
+            collider.enabled = IsVisible() || beenSeen;
 
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         if (team == cameraController.team && ownerId == cameraController.userId && live)
         {
             if (visionTool == null && visionToolPrefab != null)
             {
-                visionTool = (GameObject)Instantiate(visionToolPrefab, gameObject.transform.transform.position + new Vector3(0, 0.2f, 0), gameObject.transform.rotation);
+                visionTool = (GameObject)Instantiate(visionToolPrefab, gameObject.transform.transform.position + new Vector3(0, 1.5f, 0), gameObject.transform.rotation);
                 visionTool.transform.SetParent(gameObject.transform);
                 FieldOfView fieldOfView = visionTool.GetComponent<FieldOfView>();
                 fieldOfView.viewRadius = visionDistanve;
@@ -334,6 +334,27 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
+    public bool IsDisplayOnMap()
+    {
+        return IsVisible();
+    }
+
+    public string GetDisplayMapColor()
+    {
+        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (team <= 0)
+            return "#FFF";
+        else if (cameraController.team != team)
+            return "#F00";
+        else
+        {
+            if (cameraController.userId == ownerId)
+                return "#0F0";
+            else
+                return "#FFF";
+        }
+    }
+
     void OnDestroy()
     {
         if (objectUIInfo != null)
@@ -402,20 +423,22 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         return true;
     }
 
-    public void CreateOrUpdatePointMarker(Color color, Vector3 target, float timer)
+    public void CreateOrUpdatePointMarker(Color color, Vector3 target, float timer, bool saveMarker)
     {
-        if (pointMarker != null)
+        if (pointMarker != null && saveMarker)
             DestroyPointMarker();
 
         // Show point marker
-        if (pointMarker == null && pointMarkerPrefab != null)
+        if ((pointMarker == null || !saveMarker) && pointMarkerPrefab != null)
         {
-            pointMarker = (GameObject)Instantiate(pointMarkerPrefab, target, pointMarkerPrefab.transform.rotation);
-            PointMarker pointMarkerScript = pointMarker.GetComponent<PointMarker>();
+            var createdMarker = (GameObject)Instantiate(pointMarkerPrefab, target, pointMarkerPrefab.transform.rotation);
+            PointMarker pointMarkerScript = createdMarker.GetComponent<PointMarker>();
             Projector projectorComponent = pointMarkerScript.projector.GetComponent<Projector>();
             projectorComponent.material.color = color;
             if (timer > 0)
-                Destroy(pointMarker, timer);
+                Destroy(createdMarker, timer);
+            if (saveMarker)
+                pointMarker = createdMarker;
         }
     }
 
@@ -471,7 +494,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
             if (PhotonNetwork.InRoom)
                 createdPhotonView.RPC("GiveOrder", PhotonTargets.All, targetUnit, true);
             else
-                GiveOrder(targetUnit, true);
+                GiveOrder(targetUnit, true, false);
             return true;
         }
         return false;
@@ -509,19 +532,24 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         return new Vector3();
     }
 
+    public virtual void AddCommandToQueue(object newTarget)
+    {
+        queueCommands.Add(newTarget);
+    }
+
     [PunRPC]
     public virtual void StartInteractViewID(int targetViewId)
     {
         StartInteract(PhotonNetwork.GetPhotonView(targetViewId).gameObject);
     }
     [PunRPC]
-    public virtual void GiveOrderViewID(int targetViewId, bool displayMarker)
+    public virtual void GiveOrderViewID(int targetViewId, bool displayMarker, bool overrideQueueCommands)
     {
-        GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker);
+        GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker, overrideQueueCommands);
     }
 
-    public virtual void GiveOrder(Vector3 point, bool displayMarker) { }
-    public virtual void GiveOrder(GameObject targetObject, bool displayMarker) { }
+    public virtual void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands) { }
+    public virtual void GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands) { }
     public virtual void TakeDamage(float damage, GameObject attacker) { }
     public virtual void BecomeDead() { }
     public virtual void StartInteract(GameObject targetObject) { }

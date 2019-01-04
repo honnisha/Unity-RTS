@@ -215,6 +215,7 @@ MonoBehaviour:
   - prefabName: carrier
     number: 1
     distance: 1
+  mapTexture: {fileID: 8400000, guid: 56adb43fe41a4764c9143e58c71146e9, type: 2}
 --- !u!114 &114047147111761268
 MonoBehaviour:
   m_ObjectHideFlags: 0

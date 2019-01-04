@@ -7,6 +7,7 @@ using System.Text;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using Photon.Pun;
 
 public class UIBaseScript : MonoBehaviour
 {
@@ -122,6 +123,29 @@ public class UIBaseScript : MonoBehaviour
             {
                 if (selectegObjects.Count > 0)
                     cameraController.MoveCaeraToUnit(selectegObjects[0]);
+            }
+            else if (activeElement.className.Contains("units"))
+            {
+                var element = (HtmlDivElement)activeElement;
+                var elementPos = new Vector2(element.getBoundingClientRect().X, element.getBoundingClientRect().Y);
+                var mousePos = PowerUI.CameraPointer.All[0].Position;
+                var mapPoint = (mousePos - elementPos) / new Vector2(element.getBoundingClientRect().Width, element.getBoundingClientRect().Height);
+                if (UnityEngine.Input.GetMouseButton(0))
+                {
+                    cameraController.MoveCameraToMapPoint(mapPoint);
+                }
+                else if (UnityEngine.Input.GetMouseButtonDown(1))
+                {
+                    foreach (var unit in cameraController.GetSelectedObjects())
+                    {
+                        BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                        PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
+                        if (PhotonNetwork.InRoom)
+                            unitPhotonView.RPC("GiveOrder", PhotonTargets.All, cameraController.mapPointToPosition(mapPoint), true);
+                        else
+                            unitBaseBehaviorComponent.GiveOrder(cameraController.mapPointToPosition(mapPoint), true, true);
+                    }
+                }
             }
         }
         if (!description)
