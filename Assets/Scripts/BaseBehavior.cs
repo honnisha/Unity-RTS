@@ -270,7 +270,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 objectUIInfo.Layer = LayerMask.NameToLayer("HP");
 
                 if (team <= 0)
-                    objectUIInfo.document.getElementById("health").style.background = "yellow";
+                    objectUIInfo.document.getElementById("health").style.background = "white";
                 else if (cameraController.team != team)
                     objectUIInfo.document.getElementById("health").style.background = "red";
                 else
@@ -278,7 +278,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                     if (cameraController.userId == ownerId)
                         objectUIInfo.document.getElementById("health").style.background = "green";
                     else
-                        objectUIInfo.document.getElementById("health").style.background = "yellow";
+                        objectUIInfo.document.getElementById("health").style.background = "white";
                 }
                 tempHealth = 0.0f;
             }

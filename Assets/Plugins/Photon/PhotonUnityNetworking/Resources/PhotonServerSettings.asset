@@ -44,4 +44,6 @@ MonoBehaviour:
   - SetAsBuilding
   - SetAsSelected
   - StartInteractViewID
+  - GiveOrderWithSpeed
+  - SendChatMessage
   DisableAutoOpenWizard: 1

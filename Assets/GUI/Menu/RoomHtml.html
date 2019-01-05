@@ -6,7 +6,7 @@
 	width: 30px;
 	background: black;
 	float: right;
-    background: url(menu/hand-ok.png) no-repeat;
+    background: url("menu/hand-ok.png") no-repeat;
 	background-size: 100%;
     border: 2px solid green;
 	display: inline-block;
@@ -16,7 +16,7 @@
 	width: 30px;
 	background: black;
 	float: right;
-    background: url(menu/cross-mark.png) no-repeat;
+    background: url("menu/cross-mark.png") no-repeat;
 	background-size: 100%;
     border: 2px solid red;
 	display: inline-block;
@@ -31,8 +31,34 @@
 	left: 40%;
 	position: absolute;
 }
+.button {
+    background: url("button gray.png") no-repeat;
+	background-size: 100%;
+}
+.button-red {
+    background: url("button red") no-repeat;
+	background-size: 100%;
+}
+.players {
+    background-image: url("paper noborder.png");
+    border: 1px solid #4e4c49;
+}
+.players > div {
+    background-image: url("wood background.png");
+    border: 2px solid #75736e;
+}
 .green {
-	background: #006612;
+    border: 2px solid green;
+}
+.chat {
+    border: 1px solid #75736e;
+	display: table-cell;
+	vertical-align: bottom;
+	overflow: hide;
+}
+.roomInfo {
+    background-image: url("paper noborder.png");
+    border: 1px solid #4e4c49;
 }
 </style>
 
@@ -50,7 +76,7 @@
 		<div class="roomInfo">
 		</div>
 		<div class="button backToMenu">Back</div>
-		<div class="button setReady">Set ready</div>
+		<div class="button button-red setReady">Set ready</div>
 	</div>
 
 </div>

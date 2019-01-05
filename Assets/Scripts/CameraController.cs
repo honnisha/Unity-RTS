@@ -10,8 +10,9 @@ using System.Text.RegularExpressions;
 using Photon.Pun;
 using GangaGame;
 using UnityEngine.SceneManagement;
+using Photon.Realtime;
 
-public class CameraController : MonoBehaviour
+public class CameraController : MonoBehaviourPunCallbacks
 {
     [Header("Resources")]
     public float food = 0;
@@ -25,6 +26,9 @@ public class CameraController : MonoBehaviour
     public int team = 1;
     public string userId = "1";
     public int userNumber = 1;
+
+    public bool chatInput = false;
+    public bool menuOpen = false;
 
     [System.Serializable]
     public class TagToSelect
@@ -214,13 +218,30 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        SendChatMessage("You are dissconected from server");
+    }
+    public override void OnLeftRoom()
+    {
+        SendChatMessage("You are dissconected from room");
+    }
+    public override void OnPlayerEnteredRoom(Player player)
+    {
+        SendChatMessage(String.Format("<b>Player <b>{0}</b> connected", player.NickName));
+    }
+    public override void OnPlayerLeftRoom(Player player)
+    {
+        SendChatMessage(String.Format("<b>Player <b>{0}</b> left", player.NickName));
+    }
+
     private int workedOnFood, workedOnGold, workedOnWood = 0;
     private float countWorkersTimer = 0.0f;
     // Update is called once per frame
     void Update()
     {
         countWorkersTimer -= Time.deltaTime;
-        if(countWorkersTimer <= 0)
+        if (countWorkersTimer <= 0)
         {
             UpdateMapsAndStatistic();
             countWorkersTimer = 1.0f;
@@ -232,8 +253,72 @@ public class CameraController : MonoBehaviour
         UI.Variables["wood"] = String.Format("{0:F0}", wood);
         if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
 
+        var activeOver = PowerUI.CameraPointer.All[0].ActiveOver;
+
+        // Chat
+        if (PhotonNetwork.InRoom)
+        {
+            if ((activeOver != null && activeOver.className.Contains("chatSend") && UnityEngine.Input.GetMouseButtonDown(0) ||
+                UnityEngine.Input.GetKeyDown(KeyCode.Return) || UnityEngine.Input.GetKeyDown(KeyCode.Escape)))
+            {
+                if (chatInput && !UnityEngine.Input.GetKeyDown(KeyCode.Escape))
+                {
+                    var chatElement = UI.document.getElementsByClassName("chatBox")[0];
+                    var inputElement = UI.document.getElementsByClassName("chatInput")[0];
+                    var buttonElement = UI.document.getElementsByClassName("chatSend")[0];
+                    string message = inputElement.innerText;
+                    inputElement.remove();
+                    buttonElement.remove();
+                    if (message.Length > 0)
+                    {
+                        if (PhotonNetwork.InRoom)
+                            GetComponent<PhotonView>().RPC("SendChatMessage", PhotonTargets.All, String.Format("<b>{0}</b>: {1}", PhotonNetwork.LocalPlayer.NickName, message));
+                        else
+                            SendChatMessage(String.Format("<b>{0}</b>: {1}", PhotonNetwork.LocalPlayer.NickName, message));
+                    }
+                    chatInput = false;
+                }
+                else
+                {
+                    UI.document.Run("CreateInput");
+                    chatInput = true;
+                }
+            }
+        }
+
+        // Menu
+        if (activeOver != null && activeOver.className.Contains("buttonMenu") && UnityEngine.Input.GetMouseButtonDown(0) || 
+            UnityEngine.Input.GetKeyDown(KeyCode.F10) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (!menuOpen && !UnityEngine.Input.GetKeyDown(KeyCode.Escape))
+            {
+                UI.document.Run("CreateMenu");
+                menuOpen = true;
+            }
+            else
+            {
+                UI.document.getElementsByClassName("menu")[0].innerHTML = "";
+                menuOpen = false;
+            }
+        }
+        if (activeOver != null && activeOver.className.Contains("CloseMenu") && UnityEngine.Input.GetMouseButtonDown(0))
+        {
+            UI.document.getElementsByClassName("menu")[0].innerHTML = "";
+            menuOpen = false;
+        }
+        else if(activeOver != null && activeOver.className.Contains("GoToMainMenu") && UnityEngine.Input.GetMouseButtonDown(0))
+        {
+            PhotonNetwork.Disconnect();
+            PhotonNetwork.LoadLevel("Levels/menu");
+        }
+        else if (activeOver != null && activeOver.className.Contains("CloseTheGame") && UnityEngine.Input.GetMouseButtonDown(0))
+        {
+            Application.Quit();
+            return;
+        }
+
         bool isClickGUI = false;
-        if (PowerUI.CameraPointer.All[0].ActiveOver != null && PowerUI.CameraPointer.All[0].ActiveOver.className.Contains("clckable"))
+        if (activeOver != null && activeOver.className.Contains("clckable"))
             isClickGUI = true;
 
         // Place building on terrain
@@ -286,7 +371,7 @@ public class CameraController : MonoBehaviour
                                 BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
                                 PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
                                 if (PhotonNetwork.InRoom)
-                                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, selectedObject.GetComponent<PhotonView>().ViewID, true);
+                                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, selectedObject.GetComponent<PhotonView>().ViewID, true, true);
                                 else
                                     baseBehaviorComponent.GiveOrder(selectedObject, true, true);
                             }
@@ -395,7 +480,7 @@ public class CameraController : MonoBehaviour
                                         PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
                                         if (PhotonNetwork.InRoom)
                                         {
-                                            unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, hit.transform.gameObject.GetComponent<PhotonView>().ViewID, true);
+                                            unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, hit.transform.gameObject.GetComponent<PhotonView>().ViewID, true, true);
                                         }
                                         else
                                             baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true, true);
@@ -432,6 +517,12 @@ public class CameraController : MonoBehaviour
                 selection.isSelected = true;
             }
         }
+    }
+
+    [PunRPC]
+    public void SendChatMessage(string messageHTML)
+    {
+        UI.document.Run("SendChatMessage", messageHTML);
     }
 
     public List<GameObject> GetSelectUnitsOnScreen(GameObject selectUnit)

@@ -1,0 +1,81 @@
+<link rel="stylesheet" type="text/css" href="css/menu.css">
+<link rel="stylesheet" type="text/css" href="css/settings.css">
+<script type='text/javascript' src="js/settings.js"></script>
+<style type='text/css'>
+.button {
+    background: url("button gray.png") no-repeat;
+	background-size: 100%;
+}
+.button-red {
+    background: url("button red") no-repeat;
+	background-size: 100%;
+}
+.settingsBlock {
+	padding-top: 20px;
+	height: 67%;
+	width: 100%;
+    background-image: url("paper dark.png") no-repeat;
+	background-size: 100%;
+}
+.title {
+    background: url("title.png") no-repeat;
+	background-size: 100%;
+	padding: 10px;
+	width: 40%;
+	margin-bottom: 5px;
+	text-align: center;
+}
+.settingsBlock > div {
+	height: 25px;
+	width: 100%;
+	position: relative;
+}
+p {
+	margin: 3px;
+	width: 45%;
+	height: 10px;
+	text-align: right;
+}
+input {
+	margin: 1px;
+	position: absolute;
+	top: 0px;
+	left: 50%;
+	height: 20px;
+	width: 40%;
+}
+.settingsContainer {
+	height: 91%!important;
+	width: 100%;
+}
+.messageSettings {
+	width: 100%;
+}
+</style>
+<script>
+	function CreateSettings(settingsClass) {
+		var settingsElement = document.getElementsByClassName(settingsClass)[0];
+		
+        var divSetting = document.createElement("div");
+        settingsElement.appendChild(divSetting);
+
+        var setting = document.createElement("p");
+        setting.innerHTML = "Username:";
+        divSetting.appendChild(setting);
+		
+        var setting = document.createElement("input");
+        setting.innerHTML = "";
+        setting.className = "username";
+        divSetting.appendChild(setting);
+	}
+</script>
+
+<div class="content">
+	<div class="title">Settings</div>
+	<div class="settingsBlock">
+		<div class="settingsContainer"></div>
+		<div class="messageSettings"></div>
+	</div>
+	<div class="button backToMenu">Back</div>
+	<div class="button button-red saveSettings">Save</div>
+</div>

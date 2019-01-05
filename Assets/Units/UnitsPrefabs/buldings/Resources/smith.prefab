@@ -249,6 +249,9 @@ MonoBehaviour:
   health: 500
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 10
   uniqueName: Smith
   readableName: Barracks
@@ -259,6 +262,7 @@ MonoBehaviour:
   costGold: 0
   costWood: 100
   productionHotkey: 100
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
   interactType: 0
@@ -313,6 +317,7 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0

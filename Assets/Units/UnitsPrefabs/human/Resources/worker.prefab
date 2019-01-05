@@ -171,6 +171,9 @@ MonoBehaviour:
   health: 60
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 13
   uniqueName: Worker
   readableName: Worker
@@ -181,6 +184,7 @@ MonoBehaviour:
   costGold: 0
   costWood: 0
   productionHotkey: 115
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 10
   rangeAttack: 2
   interactType: 2
@@ -195,7 +199,7 @@ MonoBehaviour:
   cuttingResist: 20
   bitingResist: 40
   magicResist: 20
-  behaviorType: 1
+  behaviorType: 0
   agrRange: 15
   alertRange: 10
   actionEffect: {fileID: 0}
@@ -300,6 +304,7 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 1266908089214646, guid: 0d6787997193dc34882796b0a1a05748, type: 3}
     holder: {fileID: 816}
+  tempSpeed: 0
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -406,7 +411,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2675}
-  viewIdField: 0
+  viewIdField: 8
   InstantiationId: 8
   isRuntimeInstantiated: 0
 --- !u!114 &2675

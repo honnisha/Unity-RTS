@@ -180,7 +180,7 @@ NavMeshObstacle:
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 0
-  m_Center: {x: 0.001, y: 0.009, z: 0.011000001}
+  m_Center: {x: 0.006, y: 0.009, z: 0.011000001}
   m_TimeToStationary: 0.5
 --- !u!65 &8533077371227750457
 BoxCollider:
@@ -193,8 +193,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.035519402, y: 0.039585702, z: 0.021754913}
-  m_Center: {x: 0.0010936159, y: 0.008800564, z: 0.010877459}
+  m_Size: {x: 0.037, y: 0.039585702, z: 0.021754913}
+  m_Center: {x: 0.006, y: 0.008800564, z: 0.010877459}
 --- !u!114 &8581569689415320749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,6 +213,9 @@ MonoBehaviour:
   health: 250
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 10
   uniqueName: StorageFood
   readableName: Storage food
@@ -223,6 +226,7 @@ MonoBehaviour:
   costGold: 0
   costWood: 30
   productionHotkey: 118
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
   interactType: 0
@@ -276,6 +280,7 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -338,8 +343,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2274483802049673732}
-  viewIdField: 13
-  InstantiationId: 13
+  viewIdField: 40
+  InstantiationId: 40
   isRuntimeInstantiated: 0
 --- !u!114 &2274483802049673732
 MonoBehaviour:

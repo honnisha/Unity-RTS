@@ -2465,6 +2465,9 @@ MonoBehaviour:
   health: 100
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 6
   uniqueName: "\u0421arrier"
   readableName: "\u0421arrier"
@@ -2475,6 +2478,7 @@ MonoBehaviour:
   costGold: 0
   costWood: 0
   productionHotkey: 100
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 10
   rangeAttack: 1.5
   interactType: 0
@@ -2530,6 +2534,7 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0

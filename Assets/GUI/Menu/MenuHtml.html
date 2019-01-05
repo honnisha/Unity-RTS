@@ -1,26 +1,58 @@
 <link rel="stylesheet" type="text/css" href="css/menu.css">
 <style type='text/css'>
 
+.mainMenu > .menuElement {
+	margin-left: 10px;
+    background: url("button red") no-repeat;
+	background-size: 100%;
+}
+.menu > .menuElement:hover {
+	color: #2B2B2B;
+}
+.mainMenuInput {
+    background-image: url("paper dark.png") no-repeat;
+	background-size: 100%;
+	height: 20%;
+}
+.menu {
+    background-image: url("paper background.png") no-repeat;
+	background-size: 100%;
+}
+.button {
+    background: url("button gray.png") no-repeat;
+	background-size: 100%;
+}
+.button-red {
+    background: url("button red") no-repeat;
+	background-size: 100%;
+}
+.message {
+	text-align: center;
+    background: url("title.png") no-repeat;
+	background-size: 100%;
+	height: auto;
+}
 </style>
 <script>
 	function CreateMessage(message) {
         var div = document.createElement("div");
-        div.className = "crateRoomForm info";
+        div.className = "crateRoomForm message";
         div.textContent = message;
 		document.getElementsByTagName("html")[0].appendChild(div);
 	}
-	function CreateConnectDialog() {
+	function CreateConnectDialog(okClass) {
         var roomDiv = document.createElement("div");
-        roomDiv.className = "crateRoomForm";
+        roomDiv.className = "crateRoomForm info mainMenuInput";
 
         var innerDiv = document.createElement("p");
-        innerDiv.textContent = "Username:";
+        innerDiv.innerHTML = "Username<br>(you can change in settings):";
         roomDiv.appendChild(innerDiv);
 
         var innerDiv = document.createElement("input");
         innerDiv.type = "text";
-        innerDiv.className = "inputName";
+        innerDiv.className = "username";
         roomDiv.appendChild(innerDiv);
+		innerDiv.focus();
 
         var innerDiv = document.createElement("p");
         innerDiv.className = "error";
@@ -31,7 +63,8 @@
         innerDiv.textContent = "Cancel";
         roomDiv.appendChild(innerDiv);
         var innerDiv = document.createElement("div");
-        innerDiv.className = "button dialogOK";
+        innerDiv.className = "button button-red";
+        innerDiv.className += " " + okClass;
         innerDiv.textContent = "Create";
         roomDiv.appendChild(innerDiv);
 		document.getElementsByTagName("html")[0].appendChild(roomDiv);
@@ -42,7 +75,7 @@
 	<div class="mainMenu">
 		<div class="menuElement singleplayer">Single game</div>
 		<div class="menuElement multiplayer">Multiplayer game</div>
-		<div class="menuElement">Settings</div>
-		<div class="menuElement">Exit</div>
+		<div class="menuElement settings">Settings</div>
+		<div class="menuElement exit">Exit</div>
 	</div>
 </div>

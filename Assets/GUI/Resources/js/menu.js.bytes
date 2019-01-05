@@ -3,7 +3,7 @@ function CreateChatMessage(message) {
 	var chat = document.getElementsByClassName("chat")[0];
 	var div = document.createElement("div");
 	div.textContent = message;
-	chat.prepend(div);
+	chat.appendChild(div);
 }
 
 function selectFunction() {
@@ -54,7 +54,7 @@ function AddInfo(info) {
 	document.getElementsByClassName("roomInfo")[0].appendChild(div);
 }
 
-function CreateRoomDialog() {
+function CreateRoomDialog(okClass) {
 	var roomDiv = document.createElement("div");
 	roomDiv.className = "crateRoomForm";
 
@@ -66,6 +66,7 @@ function CreateRoomDialog() {
 	innerDiv.type = "text";
 	innerDiv.className = "inputName";
 	roomDiv.appendChild(innerDiv);
+	innerDiv.focus();
 
 	var innerDiv = document.createElement("p");
 	innerDiv.textContent = "Max players:";
@@ -86,14 +87,15 @@ function CreateRoomDialog() {
 	innerDiv.textContent = "Cancel";
 	roomDiv.appendChild(innerDiv);
 	var innerDiv = document.createElement("div");
-	innerDiv.className = "button dialogOK";
+	innerDiv.className = "button button-red";
+    innerDiv.className += " " + okClass;
 	innerDiv.textContent = "Create";
 	roomDiv.appendChild(innerDiv);
 	document.getElementsByTagName("html")[0].appendChild(roomDiv);
 }
 function CreateMessage(message) {
 	var div = document.createElement("div");
-	div.className = "crateRoomForm info";
+	div.className = "crateRoomForm message";
 	div.textContent = message;
 	document.getElementsByTagName("html")[0].appendChild(div);
 }

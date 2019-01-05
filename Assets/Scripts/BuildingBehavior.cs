@@ -20,6 +20,7 @@ public class BuildingBehavior : BaseBehavior
     public List<GameObject> producedUnits = new List<GameObject>();
     public GameObject spawnPoint;
     private Vector3 spawnTarget = Vector3.zero;
+    private GameObject spawnTargetObject;
     public List<GameObject> unitsQuery = new List<GameObject>();
     public int uqeryLimit = 5;
     public float buildTimer = 0.0f;
@@ -60,7 +61,12 @@ public class BuildingBehavior : BaseBehavior
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         UnitSelectionComponent unitSelectionComponent = GetComponent<UnitSelectionComponent>();
         if (unitSelectionComponent.isSelected && team == cameraController.team)
-            CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true);
+        {
+            if (spawnTargetObject != null)
+                CreateOrUpdatePointMarker(Color.green, spawnTargetObject.transform.position, 0.0f, true);
+            else
+                CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true);
+        }
         if (!unitSelectionComponent.isSelected)
             DestroyPointMarker();
     }
@@ -90,9 +96,19 @@ public class BuildingBehavior : BaseBehavior
 
             //Send command to created object to spawn target
             if (PhotonNetwork.InRoom)
-                createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
+            {
+                if (spawnTargetObject != null)
+                    createdPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, spawnTargetObject.GetComponent<PhotonView>().ViewID, true, false);
+                else
+                    createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
+            }
             else
-                createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
+            {
+                if (spawnTargetObject != null)
+                    createdObjectBehaviorComponent.GiveOrder(spawnTargetObject, true, false);
+                else
+                    createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
+            }
             createdObjects.Add(createdObject);
         }
         return createdObjects;
@@ -315,6 +331,7 @@ public class BuildingBehavior : BaseBehavior
         if (!live)
             return;
 
+        spawnTargetObject = null;
         spawnTarget = point;
     }
     
@@ -323,8 +340,8 @@ public class BuildingBehavior : BaseBehavior
         if (!live)
             return;
 
-        // Order to target
-        //target = targetObject;
+        spawnTarget = new Vector3();
+        spawnTargetObject = targetObject;
     }
 
     public bool DeleteFromProductionQuery(int index)
@@ -375,7 +392,7 @@ public class BuildingBehavior : BaseBehavior
 
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-        if (team != cameraController.team)
+        if (team != cameraController.team || cameraController.chatInput)
             return result;
 
         foreach (GameObject unit in producedUnits)

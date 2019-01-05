@@ -2291,6 +2291,9 @@ MonoBehaviour:
   health: 0
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 15
   uniqueName: Archer
   readableName: Archer
@@ -2301,6 +2304,7 @@ MonoBehaviour:
   costGold: 30
   costWood: 30
   productionHotkey: 119
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 20
   rangeAttack: 10
   interactType: 0
@@ -2372,8 +2376,11 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
   resourceCapacityType: 0
   resourceCapacity: 0
+  resourceEndless: 0
+  sourceType: 0
   storedResources: 
   buildHpPerSecond: 2.5
   buildingTool:
@@ -2412,8 +2419,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 1552057875877178680}
-  viewIdField: 0
-  InstantiationId: 25
+  viewIdField: 13
+  InstantiationId: 13
   isRuntimeInstantiated: 0
 --- !u!114 &1552057875877178680
 MonoBehaviour:

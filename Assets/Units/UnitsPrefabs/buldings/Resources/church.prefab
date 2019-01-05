@@ -166,6 +166,9 @@ MonoBehaviour:
   health: 600
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 15
   uniqueName: Church
   readableName: Church
@@ -176,6 +179,7 @@ MonoBehaviour:
   costGold: 100
   costWood: 150
   productionHotkey: 99
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
   interactType: 0
@@ -230,6 +234,7 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0

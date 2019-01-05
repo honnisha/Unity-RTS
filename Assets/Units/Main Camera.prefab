@@ -199,6 +199,7 @@ MonoBehaviour:
   team: 1
   userId: 1
   userNumber: 1
+  chatInput: 0
   tagsToSelect:
   - name: Unit
     healthVisibleOnlyWhenSelect: 0
@@ -240,7 +241,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28ef8c68bade09b41aca258d42a632f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lastTab: 0
+  lastTab: 1
   movementSettingsFoldout: 0
   zoomingSettingsFoldout: 0
   rotationSettingsFoldout: 0
@@ -281,7 +282,7 @@ MonoBehaviour:
   zoomOutKey: 45
   useScrollwheelZooming: 1
   zoomingAxis: Mouse ScrollWheel
-  useKeyboardRotation: 1
+  useKeyboardRotation: 0
   rotateRightKey: 120
   rotateLeftKey: 122
   useMouseRotation: 1

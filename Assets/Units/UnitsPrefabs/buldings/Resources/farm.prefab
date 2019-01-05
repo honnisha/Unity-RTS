@@ -3333,8 +3333,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 4.2663975, y: 0.32911825, z: 4.558296}
-  m_Center: {x: 0.41151524, y: 0.029051542, z: 0.04339218}
+  m_Size: {x: 4.2663975, y: 0.32911825, z: 5.142227}
+  m_Center: {x: 0.41151524, y: 0.029051542, z: 0.0679245}
 --- !u!114 &2783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3353,6 +3353,9 @@ MonoBehaviour:
   health: 0
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 0
   uniqueName: Farm
   readableName: Farm
@@ -3363,6 +3366,7 @@ MonoBehaviour:
   costGold: 0
   costWood: 50
   productionHotkey: 102
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
   interactType: 0
@@ -3415,6 +3419,7 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
   resourceCapacityType: 1
   resourceCapacity: 0
   resourceEndless: 1
@@ -3461,8 +3466,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2806}
-  viewIdField: 26
-  InstantiationId: 26
+  viewIdField: 1
+  InstantiationId: 1
   isRuntimeInstantiated: 0
 --- !u!114 &2806
 MonoBehaviour:

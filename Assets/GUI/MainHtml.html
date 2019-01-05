@@ -248,6 +248,102 @@ padding-bottom: 5px;
 	background: white;
     border: 1px solid black;
 }
+.chatBox {
+    height: 20%;
+    width: 30%;
+	position: absolute;
+}
+.chat {
+    text-shadow: 1px 1px 1px #000;
+    height: 90%;
+    width: 100%;
+	display: table-cell;
+	vertical-align: bottom;
+	overflow: hide;
+}
+.chat > div {
+}
+.chatBox > input {
+	top: 90%;
+	background: grey;
+    height: 20px;
+	position: absolute;
+    width: 74%;
+	display: block;
+}
+.chatBox > .button {
+	top: 90%;
+	color: #BABABA;
+	background: #363636;
+	text-align: center;
+    height: 20px;
+	position: absolute;
+	left: 75%;
+    width: 25%;
+	display: inline-block;
+    border: 1px solid black;
+}
+.chatBox > .button:hover {
+	color: white;
+	background: #595959;
+}
+.cblock > .proceduralContent > .elementsBlock > .title {
+    width: 50%;
+    height: 70%;
+	overflow: ellipsis;
+}
+.buttons {
+    height: 10%;
+    width: 100%;
+	position: absolute;
+}
+.buttons > .buttonMenu{
+	right: 0px;
+    float: right;
+	padding: 1px 3px;
+	text-align: center;
+	margin-right: 20px;
+    font-size: 8pt;
+    height: 14px;
+    width: 80px;
+    background: url("button gray.png") no-repeat;
+	background-size: 100%;
+}
+.menu {
+	top: 40%;
+	width: 100%;
+	height: 40%;
+	position: absolute;
+	text-align: center;
+}
+.menu > div {
+	text-align: center;
+	display: inline-block;
+	width: 25%;
+	padding: 10px;
+	height: auto;
+    background: url("paper simple.png") no-repeat;
+	background-size: 100%;
+}
+.menu > div > div {
+	margin: 5px 0px;
+	color: #B0B0B0;
+	display: inline-block;
+	width: 80%;
+	padding: 5px;
+    background: url("button gray.png") no-repeat;
+	background-size: 100%;
+}
+.menu > div > div:hover {
+	color: white;
+}
+.gameInfo{
+	position: absolute;
+    border: 1px solid black;
+	top: 70%;
+	height: 8%;
+	width: 60%;
+}
 </style>
 <script>
 	function CreateMessage(message, timeout) {
@@ -264,6 +360,44 @@ padding-bottom: 5px;
 		setTimeout(function() {
 			msgboxDiv.remove();
 		}, timeout)
+	}
+	function SendChatMessage(message) {
+        var chatElement = document.getElementsByClassName("chat")[0];
+        var messageDiv = document.createElement("div");
+        messageDiv.innerHTML = message;
+        chatElement.appendChild(messageDiv);
+	}
+	function CreateInput() {
+        var chatElement = document.getElementsByClassName("chatBox")[0];
+        var inputElement = document.createElement("input");
+        inputElement.className = "chatInput clckable";
+        chatElement.appendChild(inputElement);
+		inputElement.focus();
+
+        var buttonElement = document.createElement("div");
+        buttonElement.className = "button chatSend clckable";
+        buttonElement.innerText = "Send";
+        chatElement.appendChild(buttonElement);
+	}
+	function CreateMenu() {
+        var menuHolder = document.getElementsByClassName("menu")[0];
+        var element = document.createElement("div");
+        menuHolder.appendChild(element);
+		
+        var menuElement = document.createElement("div");
+        menuElement.className = "clckable CloseMenu";
+        menuElement.innerText = "Return to game";
+        element.appendChild(menuElement);
+		
+        var menuElement = document.createElement("div");
+        menuElement.className = "clckable GoToMainMenu";
+        menuElement.innerText = "Return to main menu";
+        element.appendChild(menuElement);
+		
+        var menuElement = document.createElement("div");
+        menuElement.className = "clckable CloseTheGame";
+        menuElement.innerText = "Exit from the game";
+        element.appendChild(menuElement);
 	}
 </script>
 
@@ -295,4 +429,15 @@ padding-bottom: 5px;
 	</div>
 </div>
 <div class="containerDescription">
+</div>
+<div class="chatBox">
+	<div class="chat">
+	</div>
+</div>
+<div class="buttons">
+	<div class="buttonMenu">Menu (f10)</div>
+</div>
+<div class="menu">
+</div>
+<div class="gameInfo">
 </div>

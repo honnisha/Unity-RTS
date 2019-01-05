@@ -45,6 +45,7 @@ public class UnitBehavior : BaseBehavior
     #endregion
 
     private float workingTimer = 0.0f;
+    private bool blockedBuilding = false;
     
     public override void Awake()
     {
@@ -76,6 +77,9 @@ public class UnitBehavior : BaseBehavior
         // Find target
         if (target == null && !base.agent.pathPending && !base.agent.hasPath)
         {
+            if (blockedBuilding && interactObject != null)
+                StartInteract(interactObject);
+
             if (behaviorType == BehaviorType.Aggressive)
                 AttackNearEnemies(gameObject.transform.position, agrRange);
             SendOrderFromQueue();
@@ -146,7 +150,6 @@ public class UnitBehavior : BaseBehavior
         #region Interact with something
         if (workingTimer >= 5.0f)
         {
-            Debug.Log(interactObject);
             if (interactObject != null)
             {
                 BuildingBehavior interactObjectBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
@@ -606,6 +609,14 @@ public class UnitBehavior : BaseBehavior
                     interactObject = targetObject;
                     interactType = InteractigType.Bulding;
                     target = null;
+                    blockedBuilding = false;
+                    return;
+                }
+                else
+                {
+                    interactObject = targetObject;
+                    target = null;
+                    blockedBuilding = true;
                     return;
                 }
             }
@@ -922,7 +933,7 @@ public class UnitBehavior : BaseBehavior
 
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-        if (team != cameraController.team)
+        if (team != cameraController.team || cameraController.chatInput)
             return result;
    
         foreach (BaseSkillScript skill in skillList)

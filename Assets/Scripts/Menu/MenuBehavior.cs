@@ -27,6 +27,7 @@ namespace GangaGame
         public TextAsset MenuHTMLFile;
         public TextAsset LobbyHTMLFile;
         public TextAsset RoomHTMLFile;
+        public TextAsset SettingsHTMLFile;
 
         private float timeToStart = 10.0f;
         private float timerToStart = 0.0f;
@@ -37,7 +38,12 @@ namespace GangaGame
         private bool gameStarted = false;
         private int playerTeam = 1;
 
-        [PunRPC]
+        AudioSource audioSource;
+        private void Start()
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
+
         private void Update()
         {
             if (timerActive && !gameStarted)
@@ -69,22 +75,55 @@ namespace GangaGame
             {
                 if (className.Contains("singleplayer"))
                 {
+                    audioSource.Play(0);
                     SceneManager.LoadScene("Levels/Map1/Map1");
                 }
                 if (className.Contains("multiplayer"))
-                    CreateConnectDialog();
-                else if (className.Contains("dialogOK") && !PhotonNetwork.IsConnected)
                 {
-                    string userName = UI.document.getElementsByClassName("inputName")[0].innerText;
-                    if (userName.Length <= 0)
-                    {
-                        UI.document.getElementsByClassName("error")[0].innerText = "Wrong username";
-                    }
+                    audioSource.Play(0);
+                    if (PlayerPrefs.GetString("username") == "")
+                        CreateConnectDialog();
+                    else
+                        Connect(PlayerPrefs.GetString("username"));
+                }
+                if (className.Contains("menuElement settings"))
+                {
+                    audioSource.Play(0);
+                    UI.document.innerHTML = SettingsHTMLFile.text;
+                    UI.document.Run("CreateSettings", "settingsContainer");
+                    SetSettings();
+                    return;
+                }
+                if (className.Contains("exit"))
+                {
+                    audioSource.Play(0);
+                    Application.Quit();
+                    return;
+                }
+                else if (className.Contains("ConnectDialog") || UI.document.getElementsByClassName("ConnectDialog").length > 0 && UnityEngine.Input.GetKeyDown(KeyCode.Return))
+                {
+                    string error = SaveSettings();
+                    if (error != "")
+                        UI.document.getElementsByClassName("error")[0].innerText = error;
                     else
                     {
                         DeleteDialog();
-                        Connect(userName);
+                        Connect(PlayerPrefs.GetString("username"));
                     }
+                }
+                else if (className.Contains("backToMenu") && UI.document.getElementsByClassName("settingsBlock").length > 0)
+                {
+                    UI.document.innerHTML = MenuHTMLFile.text;
+                    return;
+                }
+                else if (className.Contains("saveSettings") && UI.document.getElementsByClassName("saveSettings").length > 0)
+                {
+                    string error = SaveSettings();
+                    if (error != "")
+                        UI.document.getElementsByClassName("messageSettings")[0].innerHTML = error;
+                    else
+                        UI.document.getElementsByClassName("messageSettings")[0].innerHTML = "Settings saved!";
+                    return;
                 }
                 else if (className.Contains("backToMenu") && !PhotonNetwork.InRoom)
                 {
@@ -106,7 +145,7 @@ namespace GangaGame
                 else if (className.Contains("deleteDialog"))
                     DeleteDialog();
 
-                else if (className.Contains("dialogOK") && PhotonNetwork.IsConnected)
+                else if (className.Contains("RoomDialog") || UI.document.getElementsByClassName("inputMaxplayers").length > 0 && UnityEngine.Input.GetKeyDown(KeyCode.Return))
                 {
                     string roomName = UI.document.getElementsByClassName("inputName")[0].innerText;
                     string maxplayers = UI.document.getElementsByClassName("inputMaxplayers")[0].innerText;
@@ -133,7 +172,7 @@ namespace GangaGame
                 else if (PhotonNetwork.InRoom && (UnityEngine.Input.GetKeyDown(KeyCode.Return) || className.Contains("chatSend")))
                 {
                     string chatInput = UI.document.getElementsByClassName("chatInput")[0].getAttribute("value");
-                    if (chatInput.Length > 0)
+                    if (chatInput != null && chatInput.Length > 0)
                     {
                         UI.document.getElementsByClassName("chatInput")[0].setAttribute("value", "");
                         GetComponent<PhotonView>().RPC(
@@ -157,13 +196,33 @@ namespace GangaGame
             }
         }
 
+        public void SetSettings()
+        {
+            if (UI.document.getElementsByClassName("username").length > 0)
+                UI.document.getElementsByClassName("username")[0].innerText = PlayerPrefs.GetString("username");
+        }
+
+        public string SaveSettings()
+        {
+            if (UI.document.getElementsByClassName("username").length > 0)
+            {
+                string username = UI.document.getElementsByClassName("username")[0].innerText;
+                if (username.Length <= 0)
+                    return "Wrong username";
+
+                PlayerPrefs.SetString("username", username);
+            }
+            PlayerPrefs.Save();
+            return "";
+        }
+
         void CreateConnectDialog()
         {
-            UI.document.Run("CreateConnectDialog");
+            UI.document.Run("CreateConnectDialog", "ConnectDialog");
         }
         void CreateRoomMenu()
         {
-            UI.document.Run("CreateRoomDialog");
+            UI.document.Run("CreateRoomDialog", "RoomDialog");
         }
         void DeleteDialog()
         {
