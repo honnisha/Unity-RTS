@@ -27,8 +27,11 @@ public class CameraController : MonoBehaviourPunCallbacks
     public string userId = "1";
     public int userNumber = 1;
 
+    [HideInInspector]
     public bool chatInput = false;
+    [HideInInspector]
     public bool menuOpen = false;
+    private int workersIterate = 0;
 
     [System.Serializable]
     public class TagToSelect
@@ -72,9 +75,16 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public Texture mapTexture;
 
+    private Dictionary<KeyCode, List<GameObject>> unitsBinds = new Dictionary<KeyCode, List<GameObject>>();
+    private KeyCode tempKey;
+    private float keyTimer = 0.0f;
+
     // Use this for initialization
     void Start()
     {
+        for (int number = 1; number <= 9; number++)
+            unitsBinds.Add(KeyCode.Alpha0 + number, new List<GameObject>());
+
         GameObject createdUnit = null;
 
         // Multiplayer
@@ -135,106 +145,6 @@ public class CameraController : MonoBehaviourPunCallbacks
         }
     }
 
-    public void MoveCaeraToUnit(GameObject unit)
-    {
-        transform.position = new Vector3(unit.transform.position.x, transform.position.y, unit.transform.position.z);
-        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
-    }
-
-    public Vector3 mapPointToPosition(Vector2 mapPosition)
-    {
-        Terrain terrain = Terrain.activeTerrain;
-        return new Vector3(terrain.terrainData.size.x * mapPosition.x, 0, terrain.terrainData.size.z - terrain.terrainData.size.z * mapPosition.y);
-    }
-
-    public void MoveCameraToPoint(Vector3 position)
-    {
-        transform.position = new Vector3(position.x, transform.position.y, position.z);
-        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
-    }
-
-    public class ObjectWithDistance
-    {
-        public ObjectWithDistance(GameObject _unit, float _distance) {
-            unit = _unit;
-            distance = _distance;
-        }
-        public GameObject unit;
-        public float distance;
-    }
-
-    public Vector2 GetPositionOnMap(GameObject unit)
-    {
-        Terrain terrain = Terrain.activeTerrain;
-        Vector3 positionOnTerrain = unit.transform.position - terrain.GetPosition();
-        return new Vector2(positionOnTerrain.x / terrain.terrainData.size.x, positionOnTerrain.z / terrain.terrainData.size.z);
-    }
-
-    public void UpdateMapsAndStatistic()
-    {
-        foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
-        {
-            // Draw map
-            mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
-            var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
-            mapImage.image = mapTexture;
-            mapImage.style.height = "100%";
-            mapImage.style.width = "100%";
-
-            var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
-            unitsBlock.innerHTML = "";
-
-            workedOnFood = 0; workedOnGold = 0; workedOnWood = 0;
-            // Draw units + calculate statistic
-            foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
-            {
-                UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
-                if (unitUnitBehavior.interactObject != null)
-                {
-                    BaseBehavior interactObjectBehaviorComponent = unitUnitBehavior.interactObject.GetComponent<BaseBehavior>();
-                    if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId)
-                    {
-                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Food)
-                            workedOnFood += 1;
-                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Gold)
-                            workedOnGold += 1;
-                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Wood)
-                            workedOnWood += 1;
-                    }
-                }
-                BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
-                if (unitBaseBehavior.IsDisplayOnMap())
-                {
-                    Dom.Element unitDiv = UI.document.createElement("div");
-                    unitDiv.className = "unit clckable";
-                    unitDiv.id = unit.GetComponent<PhotonView>().ViewID.ToString();
-                    Vector2 positionOnMap = GetPositionOnMap(unit);
-                    unitDiv.style.left = String.Format("{0}%", positionOnMap.x * 100.0f - 1.5);
-                    unitDiv.style.bottom = String.Format("{0}%", positionOnMap.y * 100.0f - 1.5);
-                    unitDiv.style.backgroundColor = unitBaseBehavior.GetDisplayMapColor();
-                    unitsBlock.appendChild(unitDiv);
-                }
-            }
-        }
-    }
-
-    public override void OnDisconnected(DisconnectCause cause)
-    {
-        SendChatMessage("You are dissconected from server");
-    }
-    public override void OnLeftRoom()
-    {
-        SendChatMessage("You are dissconected from room");
-    }
-    public override void OnPlayerEnteredRoom(Player player)
-    {
-        SendChatMessage(String.Format("<b>Player <b>{0}</b> connected", player.NickName));
-    }
-    public override void OnPlayerLeftRoom(Player player)
-    {
-        SendChatMessage(String.Format("<b>Player <b>{0}</b> left", player.NickName));
-    }
-
     private int workedOnFood, workedOnGold, workedOnWood = 0;
     private float countWorkersTimer = 0.0f;
     // Update is called once per frame
@@ -286,8 +196,79 @@ public class CameraController : MonoBehaviourPunCallbacks
             }
         }
 
+        // Select free workers
+        if (UnityEngine.Input.GetKeyDown(KeyCode.F1))
+        {
+            List<GameObject> freeWorkers = new List<GameObject>();
+            foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
+            {
+                UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
+                if (unitUnitBehavior.resourceGatherInfo.Count > 0 && unitUnitBehavior.IsIdle())
+                    freeWorkers.Add(unit);
+            }
+            if (freeWorkers.Count > 0)
+            {
+                if (freeWorkers.Count <= workersIterate)
+                    workersIterate = 0;
+                DeselectAllUnits();
+
+                UnitSelectionComponent selection = freeWorkers[workersIterate].GetComponent<UnitSelectionComponent>();
+                selection.isSelected = true;
+                MoveCaeraToUnit(freeWorkers[workersIterate]);
+                workersIterate++;
+            }
+        }
+
+        // Select binds
+        if(keyTimer > 0)
+            keyTimer -= Time.fixedDeltaTime;
+        for (int number = 1; number <= 9; number++)
+        {
+            var key = KeyCode.Alpha0 + number;
+            if (UnityEngine.Input.GetKeyDown(key))
+            {
+                bool recreate = UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl);
+                bool addNew = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
+                bool remove = UnityEngine.Input.GetKey(KeyCode.LeftAlt) || UnityEngine.Input.GetKey(KeyCode.RightAlt);
+
+                var selectedUnits = GetSelectedObjects();
+                if (recreate || addNew || remove)
+                {
+                    if (recreate)
+                        unitsBinds[key].Clear();
+
+                    foreach (GameObject selectedUnit in selectedUnits)
+                    {
+                        if ((addNew || recreate) && !unitsBinds[key].Contains(selectedUnit))
+                            unitsBinds[key].Add(selectedUnit);
+                        else if (remove)
+                            unitsBinds[key].Remove(selectedUnit);
+                        
+                        unitsBinds[key] = GetFilteredObjects(unitsBinds[key]);
+                    }
+                }
+                else
+                {
+                    var units = unitsBinds[key];
+                    if (units.Count > 0)
+                    {
+                        DeselectAllUnits();
+                        foreach (GameObject unit in units)
+                        {
+                            UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
+                            selection.isSelected = true;
+                        }
+                        if (keyTimer > 0)
+                            MoveCameraToPoint(GetCenterOfObjects(units));
+                        tempKey = key;
+                        keyTimer = 0.25f;
+                    }
+                }
+            }
+        }
+
         // Menu
-        if (activeOver != null && activeOver.className.Contains("buttonMenu") && UnityEngine.Input.GetMouseButtonDown(0) || 
+        if (activeOver != null && activeOver.className.Contains("buttonMenu") && UnityEngine.Input.GetMouseButtonDown(0) ||
             UnityEngine.Input.GetKeyDown(KeyCode.F10) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
         {
             if (!menuOpen && !UnityEngine.Input.GetKeyDown(KeyCode.Escape))
@@ -306,7 +287,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             UI.document.getElementsByClassName("menu")[0].innerHTML = "";
             menuOpen = false;
         }
-        else if(activeOver != null && activeOver.className.Contains("GoToMainMenu") && UnityEngine.Input.GetMouseButtonDown(0))
+        else if (activeOver != null && activeOver.className.Contains("GoToMainMenu") && UnityEngine.Input.GetMouseButtonDown(0))
         {
             PhotonNetwork.Disconnect();
             PhotonNetwork.LoadLevel("Levels/menu");
@@ -435,7 +416,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                             if (isCanBeSelected)
                             {
                                 DeselectAllUnits();
-                                
+
                                 // If user click twice
                                 if (clickTimer > 0.0f)
                                 {
@@ -461,7 +442,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                     foreach (TagToSelect tag in tagsToSelect)
                     {
                         bool sendToQueue = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
-                        List<ObjectWithDistance> formationList = new List<ObjectWithDistance>();
+                        Dictionary<GameObject, float> formationList = new Dictionary<GameObject, float>();
                         var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
                         foreach (GameObject unit in allUnits)
                         {
@@ -490,7 +471,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                                 {
                                     //baseBehaviorComponent.GiveOrder(hit.point);
                                     float distance = Vector3.Distance(unit.transform.position, hit.point);
-                                    formationList.Add(new ObjectWithDistance(unit, distance));
+                                    formationList.Add(unit, distance);
                                 }
                             }
                         }
@@ -511,12 +492,135 @@ public class CameraController : MonoBehaviourPunCallbacks
         {
             DeselectAllUnits();
             isSelecting = false;
-            foreach(GameObject unit in GetSelectingObjects())
+            foreach (GameObject unit in GetSelectingObjects())
             {
                 UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
                 selection.isSelected = true;
             }
         }
+    }
+
+    public void MoveCaeraToUnit(GameObject unit)
+    {
+        transform.position = new Vector3(unit.transform.position.x, transform.position.y, unit.transform.position.z);
+        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
+    }
+
+    public Vector3 mapPointToPosition(Vector2 mapPosition)
+    {
+        Terrain terrain = Terrain.activeTerrain;
+        return new Vector3(terrain.terrainData.size.x * mapPosition.x, 0, terrain.terrainData.size.z - terrain.terrainData.size.z * mapPosition.y);
+    }
+
+    public void MoveCameraToPoint(Vector3 position)
+    {
+        transform.position = new Vector3(position.x, transform.position.y, position.z);
+        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
+    }
+
+    public Vector2 GetPositionOnMap(GameObject unit)
+    {
+        Terrain terrain = Terrain.activeTerrain;
+        Vector3 positionOnTerrain = unit.transform.position - terrain.GetPosition();
+        return new Vector2(positionOnTerrain.x / terrain.terrainData.size.x, positionOnTerrain.z / terrain.terrainData.size.z);
+    }
+
+    public void UpdateMapsAndStatistic()
+    {
+        List<GameObject> freeWorkers = new List<GameObject>();
+        foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
+        {
+            // Draw map
+            mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
+            var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
+            mapImage.image = mapTexture;
+            mapImage.style.height = "100%";
+            mapImage.style.width = "100%";
+
+            var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
+            unitsBlock.innerHTML = "";
+
+            workedOnFood = 0; workedOnGold = 0; workedOnWood = 0;
+            // Draw units + calculate statistic
+            foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
+            {
+                UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
+                if (unitUnitBehavior.interactObject != null)
+                {
+                    BaseBehavior interactObjectBehaviorComponent = unitUnitBehavior.interactObject.GetComponent<BaseBehavior>();
+                    if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId)
+                    {
+                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Food)
+                            workedOnFood += 1;
+                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Gold)
+                            workedOnGold += 1;
+                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Wood)
+                            workedOnWood += 1;
+                    }
+                }
+                BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
+                if (unitBaseBehavior.IsDisplayOnMap())
+                {
+                    Dom.Element unitDiv = UI.document.createElement("div");
+                    unitDiv.className = "unit clckable";
+                    unitDiv.id = unit.GetComponent<PhotonView>().ViewID.ToString();
+                    Vector2 positionOnMap = GetPositionOnMap(unit);
+                    unitDiv.style.left = String.Format("{0}%", positionOnMap.x * 100.0f - 1.5);
+                    unitDiv.style.bottom = String.Format("{0}%", positionOnMap.y * 100.0f - 1.5);
+                    unitDiv.style.backgroundColor = unitBaseBehavior.GetDisplayMapColor();
+                    unitsBlock.appendChild(unitDiv);
+                }
+                if (unitUnitBehavior.resourceGatherInfo.Count > 0 && unitBaseBehavior.IsIdle())
+                    freeWorkers.Add(unit);
+            }
+        }
+
+        var gameInfoBlock = (HtmlElement)UI.document.getElementsByClassName("gameInfo")[0];
+        gameInfoBlock.innerHTML = "";
+
+        // Display free workers
+        if (freeWorkers.Count > 0)
+            UI.document.Run("CreateInfoButton", "workers", freeWorkers.Count, "F1");
+
+        // Display binds
+        for (int number = 1; number <= 9; number++)
+        {
+            var units = unitsBinds[KeyCode.Alpha0 + number];
+
+            foreach (GameObject unit in units)
+            {
+                if (unit == null)
+                    units.Remove(unit);
+
+                BaseBehavior unitBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                if (!unitBehaviorComponent.live)
+                    units.Remove(unit);
+            }
+            if (units.Count > 0)
+            {
+                if (units[0].GetComponent<UnitBehavior>() != null)
+                    UI.document.Run("CreateInfoButton", "solders", units.Count, number);
+                else
+                    UI.document.Run("CreateInfoButton", "bilding", units.Count, number);
+            }
+        }
+    }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        SendChatMessage("You are dissconected from server");
+    }
+    public override void OnLeftRoom()
+    {
+        SendChatMessage("You are dissconected from room");
+    }
+    public override void OnPlayerEnteredRoom(Player player)
+    {
+        SendChatMessage(String.Format("<b>Player <b>{0}</b> connected", player.NickName));
+    }
+    public override void OnPlayerLeftRoom(Player player)
+    {
+        SendChatMessage(String.Format("<b>Player <b>{0}</b> left", player.NickName));
     }
 
     [PunRPC]
@@ -637,22 +741,31 @@ public class CameraController : MonoBehaviourPunCallbacks
         return new Vector2((float)x, (float)y);
     }
 
-    public void SetOrderInFormation(List<ObjectWithDistance> formationList, Vector3 point, float distance, bool sendToQueue)
+    public Vector3 GetCenterOfObjects(List<GameObject> units)
     {
-        float count = formationList.Count;
+        float totalX = 0, totalY = 0, totalZ = 0;
+        foreach (GameObject unit in units)
+        {
+            totalX += unit.transform.position.x;
+            totalY += unit.transform.position.y;
+            totalZ += unit.transform.position.z;
+        }
+        return new Vector3(totalX / units.Count, totalY / units.Count, totalZ / units.Count);
+    }
+
+    public void SetOrderInFormation(Dictionary<GameObject, float> formationDict, Vector3 point, float distance, bool sendToQueue)
+    {
+        float count = formationDict.Count;
         if (count == 0)
             return;
 
-        float totalX = 0, totalZ = 0;
-        foreach (ObjectWithDistance unitWiithDistance in formationList.OrderBy(v => v.distance).ToArray())
-        {
-            var unit = unitWiithDistance.unit;
-            totalX += unit.transform.position.x;
-            totalZ += unit.transform.position.z;
-        }
+        var formationList = formationDict.ToList();
+        formationList.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+
+        var center = GetCenterOfObjects(new List<GameObject>(formationDict.Keys));
         // From where coorinates
-        float centerX = totalX / formationList.Count;
-        float centerZ = totalZ / formationList.Count;
+        float centerX = center.x;
+        float centerZ = center.z;
 
         float angle = GetAngle(
             new Vector2(point.x + 100, point.z),
@@ -661,9 +774,9 @@ public class CameraController : MonoBehaviourPunCallbacks
             angle *= -1;
 
         int indexCount = 0;
-        foreach (ObjectWithDistance unitWiithDistance in formationList.OrderBy(v => v.distance).ToArray())
+        foreach (var unitInfo in formationList)
         {
-            var unit = unitWiithDistance.unit;
+            var unit = unitInfo.Key;
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
 
             int formationSize = (int)Math.Ceiling(Math.Sqrt(count));

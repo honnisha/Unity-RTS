@@ -565,6 +565,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     public virtual void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands) { }
     public virtual void GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands) { }
+    public virtual bool IsIdle() { return true; }
     public virtual void TakeDamage(float damage, GameObject attacker) { }
     public virtual void BecomeDead() { }
     public virtual void StartInteract(GameObject targetObject) { }

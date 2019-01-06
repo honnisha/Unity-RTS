@@ -339,10 +339,42 @@ padding-bottom: 5px;
 }
 .gameInfo{
 	position: absolute;
-    border: 1px solid black;
-	top: 70%;
-	height: 8%;
+	top: 73%;
+	left: 2%;
+	height: 5%;
 	width: 60%;
+}
+.workers {
+    background: url("stone-crafting.png") no-repeat;
+	background-size: 100%;
+}
+.solders {
+    background: url("battle-gear.png") no-repeat;
+	background-size: 100%;
+}
+.bilding {
+    background: url("family-house.png") no-repeat;
+	background-size: 100%;
+}
+.gameInfo > .elementsContent {
+	position: relative;
+	height: 25px;
+	width: 25px;
+}
+.gameInfo > .elementsContent > img {
+	height: 25px;
+	width: 25px;
+}
+.gameInfo > .elementsContent > .hotkey {
+	color: white;
+    font-size: 7pt;
+	position: absolute;
+	margin-left: 15px;
+	height: 10px;
+	width: 10px;
+}
+.gameInfo > .elementsContent > .info {
+	top: 15px;
 }
 </style>
 <script>
@@ -399,6 +431,26 @@ padding-bottom: 5px;
         menuElement.innerText = "Exit from the game";
         element.appendChild(menuElement);
 	}
+	function CreateInfoButton(className, count, hotkey) {
+        var infoHolder = document.getElementsByClassName("gameInfo")[0];
+        var elementHolder = document.createElement("div");
+        elementHolder.className = "clckable elementsContent";
+        infoHolder.appendChild(elementHolder);
+		
+        var element = document.createElement("img");
+        element.className = className;
+        elementHolder.appendChild(element);
+		
+        var menuElement = document.createElement("div");
+        menuElement.className = "clckable hotkey";
+        menuElement.innerText = count;
+        elementHolder.appendChild(menuElement);
+		
+        var menuElement = document.createElement("div");
+        menuElement.className = "clckable hotkey info";
+        menuElement.innerText = hotkey;
+        elementHolder.appendChild(menuElement);
+	}
 </script>
 
 <div class="messages">
@@ -434,10 +486,13 @@ padding-bottom: 5px;
 	<div class="chat">
 	</div>
 </div>
+
 <div class="buttons">
 	<div class="buttonMenu">Menu (f10)</div>
 </div>
+
 <div class="menu">
 </div>
+
 <div class="gameInfo">
 </div>

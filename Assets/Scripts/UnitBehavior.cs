@@ -75,7 +75,7 @@ public class UnitBehavior : BaseBehavior
         UnitSelectionComponent unitSelectionComponent = GetComponent<UnitSelectionComponent>();
 
         // Find target
-        if (target == null && !base.agent.pathPending && !base.agent.hasPath)
+        if (IsIdle())
         {
             if (blockedBuilding && interactObject != null)
                 StartInteract(interactObject);
@@ -386,7 +386,7 @@ public class UnitBehavior : BaseBehavior
                 }
             }
         }
-        else if (target == null && !base.agent.isStopped && Vector3.Distance(gameObject.transform.position, base.agent.destination) <= 0.2f)
+        else if (target == null && !base.agent.isStopped && Vector3.Distance(gameObject.transform.position, base.agent.destination) <= 0.5f)
         {
             base.agent.isStopped = true;
             if (interactObject != null)
@@ -475,6 +475,13 @@ public class UnitBehavior : BaseBehavior
                 DestroyPointMarker();
     }
 
+    public override bool IsIdle()
+    {
+        if (target == null && (!base.agent.pathPending && !base.agent.hasPath || base.agent.isStopped) && interactObject == null)
+            return true;
+        return false;
+    }
+
     public ToolInfo GetToolInfo()
     {
         ToolInfo toolInfo = null;
@@ -515,7 +522,7 @@ public class UnitBehavior : BaseBehavior
         PhotonView unitPhotonView = GetComponent<PhotonView>();
         if (interactType == InteractigType.Bulding || interactType == InteractigType.CuttingTree || interactType == InteractigType.Gathering)
         {
-            List<CameraController.ObjectWithDistance> buildings = new List<CameraController.ObjectWithDistance>();
+            Dictionary<GameObject, float> buildings = new Dictionary<GameObject, float>();
             var allUnits = GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Ambient")).ToArray();
             foreach (GameObject building in allUnits)
             {
@@ -527,7 +534,7 @@ public class UnitBehavior : BaseBehavior
                 if (interactType == InteractigType.CuttingTree || interactType == InteractigType.Gathering)
                 {
                     if (buildingBuildingBehavior.resourceCapacityType == resourceType && buildingBuildingBehavior.resourceCapacity > 0)
-                        buildings.Add(new CameraController.ObjectWithDistance(building, distance));
+                        buildings.Add(building, distance);
                 }
                 if (interactType == InteractigType.Bulding)
                 {
@@ -535,12 +542,14 @@ public class UnitBehavior : BaseBehavior
                             buildingBuildingBehavior.state == BuildingBehavior.BuildingState.Building || 
                             buildingBuildingBehavior.state == BuildingBehavior.BuildingState.Project
                             ))
-                        buildings.Add(new CameraController.ObjectWithDistance(building, distance));
+                        buildings.Add(building, distance);
                 }
             }
             if (buildings.Count > 0)
             {
-                GameObject building = buildings.OrderBy(v => v.distance).ToArray()[0].unit;
+                var buildingsList = buildings.ToList();
+                buildingsList.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+                GameObject building = buildingsList.First().Key;
 
                 if (PhotonNetwork.InRoom)
                     unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, building.GetComponent<PhotonView>().ViewID, false, false);
@@ -551,6 +560,7 @@ public class UnitBehavior : BaseBehavior
                 return;
             }
         }
+        base.agent.isStopped = true;
         Destroy(pointMarker);
         SendOrderFromQueue();
         return;
@@ -702,7 +712,7 @@ public class UnitBehavior : BaseBehavior
 
     public void GoToStoreResources()
     {
-        List<CameraController.ObjectWithDistance> buildings = new List<CameraController.ObjectWithDistance>();
+        Dictionary<GameObject, float> buildings = new Dictionary<GameObject, float>();
         var allUnits = GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")).ToArray();
         foreach (GameObject building in allUnits)
         {
@@ -715,12 +725,14 @@ public class UnitBehavior : BaseBehavior
                     continue;
 
                 float distance = Vector3.Distance(gameObject.transform.position, building.transform.position);
-                buildings.Add(new CameraController.ObjectWithDistance(building, distance));
+                buildings.Add(building, distance);
             }
         }
         if (buildings.Count > 0)
         {
-            GameObject building = buildings.OrderBy(v => v.distance).ToArray()[0].unit;
+            var buildingsList = buildings.ToList();
+            buildingsList.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+            GameObject building = buildingsList.First().Key;
 
             PhotonView unitPhotonView = GetComponent<PhotonView>();
             if (PhotonNetwork.InRoom)
@@ -761,13 +773,16 @@ public class UnitBehavior : BaseBehavior
     {
         if (behaviorType == BehaviorType.Run)
         {
-            Vector3 dirToTarget = (transform.position - attacker.transform.position).normalized;
+            if (IsIdle() || interactObject != null)
+            {
+                Vector3 dirToTarget = (transform.position - attacker.transform.position).normalized;
 
-            PhotonView unitPhotonView = GetComponent<PhotonView>();
-            if (PhotonNetwork.InRoom)
-                unitPhotonView.RPC("GiveOrder", PhotonTargets.All, GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, true);
-            else
-                GiveOrder(GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, true);
+                PhotonView unitPhotonView = GetComponent<PhotonView>();
+                if (PhotonNetwork.InRoom)
+                    unitPhotonView.RPC("GiveOrder", PhotonTargets.All, GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, true);
+                else
+                    GiveOrder(GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, true);
+            }
         }
     }
 
