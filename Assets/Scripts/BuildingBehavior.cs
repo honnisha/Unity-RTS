@@ -201,7 +201,6 @@ public class BuildingBehavior : BaseBehavior
 
     public void SetAsProject()
     {
-        canBeSelected = true;
         Color newColor = new Color(1, 1, 1, 0.45f);
 
         GameObject projector = GetComponent<UnitSelectionComponent>().projector;
@@ -214,6 +213,7 @@ public class BuildingBehavior : BaseBehavior
                 material.color = newColor;
 
         state = BuildingBehavior.BuildingState.Project;
+        canBeSelected = true;
     }
     
 

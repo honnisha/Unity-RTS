@@ -714,7 +714,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1323032547063684}
-  m_LocalRotation: {x: -0, y: 0.9961947, z: -0, w: -0.08715578}
+  m_LocalRotation: {x: 0, y: 0.9961947, z: -0, w: -0.08715578}
   m_LocalPosition: {x: -1.04, y: 1.018, z: 66.55}
   m_LocalScale: {x: 0.1000001, y: 0.099999994, z: 0.1000001}
   m_Children:
@@ -811,6 +811,9 @@ MonoBehaviour:
   health: 0
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 15
   uniqueName: Knight
   readableName: Knight
@@ -821,10 +824,11 @@ MonoBehaviour:
   costGold: 70
   costWood: 0
   productionHotkey: 115
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 10
   rangeAttack: 2
   interactType: 0
-  attackTime: 0.9
+  attackTime: 1.5
   attackDelay: 0.4
   damageAfterTimer: 1
   attackTimer: 0
@@ -870,12 +874,9 @@ MonoBehaviour:
   InfoHTMLOffset: {x: 0, y: 1.2, z: 0}
   pointMarkerPrefab: {fileID: 1174494487606054, guid: 7723961c7b4a2cf4cbfa8e9a6c45ba62,
     type: 3}
-  pointMarker: {fileID: 0}
   HTMLHealthSize: {x: 40, y: 40}
   visionToolPrefab: {fileID: 1311408724359970, guid: fc937d29efbc7d146a830e8e4d19ea62,
     type: 3}
-  visionTool: {fileID: 0}
-  canBeSelected: 1
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
@@ -883,8 +884,15 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
+  attackedTeam: 0
+  pointMarker: {fileID: 0}
+  canBeSelected: 1
+  visionTool: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
+  resourceEndless: 0
+  sourceType: 0
   storedResources: 
   buildHpPerSecond: 2.5
   buildingTool:
@@ -923,8 +931,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 240754948708690846}
-  viewIdField: 0
-  InstantiationId: 1
+  viewIdField: 83
+  InstantiationId: 83
   isRuntimeInstantiated: 0
 --- !u!114 &240754948708690846
 MonoBehaviour:

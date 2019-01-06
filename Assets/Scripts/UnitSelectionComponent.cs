@@ -28,7 +28,7 @@ public class UnitSelectionComponent : MonoBehaviour
         RaycastHit hit;
         bool outlineDraw = false;
         if (baseBehaviorComponent.team > 0 &&
-            baseBehaviorComponent.IsVisible() && baseBehaviorComponent.live &&
+            baseBehaviorComponent.IsVisible() && baseBehaviorComponent.live && gameObject.GetComponent<BuildingBehavior>() == null &&
             Physics.Linecast(transform.position + new Vector3(0, 1.0f, 0), camera.transform.position))
             outlineDraw = true;
         else if (isWithinSelectionBounds && baseBehaviorComponent.IsVisible())

@@ -155,13 +155,14 @@ public class CameraController : MonoBehaviourPunCallbacks
         {
             UpdateMapsAndStatistic();
             countWorkersTimer = 1.0f;
+
+            UI.Variables["food"] = String.Format("{0:F0}", food);
+            if (workedOnFood > 0) UI.Variables["food"] += String.Format(" ({0})", workedOnFood);
+            UI.Variables["gold"] = String.Format("{0:F0}", gold);
+            if (workedOnGold > 0) UI.Variables["gold"] += String.Format(" ({0})", workedOnGold);
+            UI.Variables["wood"] = String.Format("{0:F0}", wood);
+            if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
         }
-        UI.Variables["food"] = String.Format("{0:F0}", food);
-        if (workedOnFood > 0) UI.Variables["food"] += String.Format(" ({0})", workedOnFood);
-        UI.Variables["gold"] = String.Format("{0:F0}", gold);
-        if (workedOnGold > 0) UI.Variables["gold"] += String.Format(" ({0})", workedOnGold);
-        UI.Variables["wood"] = String.Format("{0:F0}", wood);
-        if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
 
         var activeOver = PowerUI.CameraPointer.All[0].ActiveOver;
 
@@ -219,53 +220,12 @@ public class CameraController : MonoBehaviourPunCallbacks
             }
         }
 
-        // Select binds
-        if(keyTimer > 0)
-            keyTimer -= Time.fixedDeltaTime;
-        for (int number = 1; number <= 9; number++)
-        {
-            var key = KeyCode.Alpha0 + number;
-            if (UnityEngine.Input.GetKeyDown(key))
-            {
-                bool recreate = UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl);
-                bool addNew = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
-                bool remove = UnityEngine.Input.GetKey(KeyCode.LeftAlt) || UnityEngine.Input.GetKey(KeyCode.RightAlt);
+        bool isClickGUI = false;
+        if (activeOver != null && activeOver.className.Contains("clckable"))
+            isClickGUI = true;
 
-                var selectedUnits = GetSelectedObjects();
-                if (recreate || addNew || remove)
-                {
-                    if (recreate)
-                        unitsBinds[key].Clear();
-
-                    foreach (GameObject selectedUnit in selectedUnits)
-                    {
-                        if ((addNew || recreate) && !unitsBinds[key].Contains(selectedUnit))
-                            unitsBinds[key].Add(selectedUnit);
-                        else if (remove)
-                            unitsBinds[key].Remove(selectedUnit);
-                        
-                        unitsBinds[key] = GetFilteredObjects(unitsBinds[key]);
-                    }
-                }
-                else
-                {
-                    var units = unitsBinds[key];
-                    if (units.Count > 0)
-                    {
-                        DeselectAllUnits();
-                        foreach (GameObject unit in units)
-                        {
-                            UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
-                            selection.isSelected = true;
-                        }
-                        if (keyTimer > 0)
-                            MoveCameraToPoint(GetCenterOfObjects(units));
-                        tempKey = key;
-                        keyTimer = 0.25f;
-                    }
-                }
-            }
-        }
+        if (!isClickGUI)
+            SelectBinds();
 
         // Menu
         if (activeOver != null && activeOver.className.Contains("buttonMenu") && UnityEngine.Input.GetMouseButtonDown(0) ||
@@ -298,104 +258,14 @@ public class CameraController : MonoBehaviourPunCallbacks
             return;
         }
 
-        bool isClickGUI = false;
-        if (activeOver != null && activeOver.className.Contains("clckable"))
-            isClickGUI = true;
+        bool objectPlaced = PlaceBuildingOnTerrainUpdate();
+        
+        if (!objectPlaced && buildedObject == null)
+            SelectUnitsUpdate(isClickGUI);
+    }
 
-        // Place building on terrain
-        if (buildedObject != null && !isClickGUI)
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition), out hit, 100, LayerMask.GetMask("Terrain")))
-            {
-                if (hit.collider != null && hit.transform.gameObject.layer == LayerMask.NameToLayer("Terrain"))
-                {
-                    BuildingBehavior buildedObjectBuildingBehavior = null;
-                    if (selectedObject == null)
-                    {
-                        selectedObject = PhotonNetwork.Instantiate(buildedObject.name, hit.point, buildedObject.transform.rotation);
-                        buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
-
-                        // Set owner
-                        if (PhotonNetwork.InRoom)
-                            selectedObject.GetComponent<PhotonView>().RPC("ChangeOwner", PhotonTargets.All, userId, team);
-                        else
-                            buildedObjectBuildingBehavior.ChangeOwner(userId, team);
-
-                        // Set owner
-                        if (PhotonNetwork.InRoom)
-                            selectedObject.GetComponent<PhotonView>().RPC("SetAsSelected", PhotonTargets.All);
-                        else
-                            buildedObjectBuildingBehavior.SetAsSelected();
-                    }
-                    BuildingBehavior buildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
-                    selectedObject.transform.position = hit.point;
-
-                    GameObject intersection = buildingBehavior.GetIntersection(null);
-
-                    Color newColor = new Color(0.1f, 1f, 0.1f, 0.45f);
-                    if (intersection != null)
-                        newColor = new Color(1f, 0.1f, 0.1f, 0.45f);
-
-                    buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
-                    GameObject projector = selectedObject.GetComponent<UnitSelectionComponent>().projector;
-                    if (UnityEngine.Input.GetMouseButtonDown(0))
-                    {
-                        if (intersection == null)
-                        {
-                            // Create building in project state
-                            buildedObjectBuildingBehavior.SetAsProject();
-
-                            List<GameObject> selectedUnits = GetSelectedObjects();
-                            foreach (GameObject unit in selectedUnits)
-                            {
-                                BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-                                PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
-                                if (PhotonNetwork.InRoom)
-                                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, selectedObject.GetComponent<PhotonView>().ViewID, true, true);
-                                else
-                                    baseBehaviorComponent.GiveOrder(selectedObject, true, true);
-                            }
-
-                            buildedObject = null;
-                            selectedObject = null;
-                            return;
-                        }
-                        else
-                        {
-                            UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-                            cameraUIBaseScript.DisplayMessage("Something is blocked", 3000);
-                        }
-                    }
-                    if (UnityEngine.Input.GetMouseButtonDown(1))
-                    {
-                        buildedObjectBuildingBehavior.StopAction();
-                        buildedObject = null;
-                        selectedObject = null;
-                        return;
-                    }
-
-                    projector.active = true;
-                    projector.GetComponent<Projector>().material.color = newColor;
-                    var allNewRenders = selectedObject.GetComponents<Renderer>().Concat(selectedObject.GetComponentsInChildren<Renderer>()).ToArray();
-                    foreach (var render in allNewRenders)
-                        foreach (var material in render.materials)
-                        {
-                            material.SetFloat("_Mode", 2);
-                            material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                            material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                            material.SetInt("_ZWrite", 0);
-                            material.DisableKeyword("_ALPHATEST_ON");
-                            material.EnableKeyword("_ALPHABLEND_ON");
-                            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                            material.renderQueue = 3000;
-                            material.SetColor("_Color", newColor);
-                        }
-                    return;
-                }
-            }
-        }
-
+    public void SelectUnitsUpdate(bool isClickGUI)
+    {
         clickTimer -= Time.deltaTime;
         bool selectObject = false;
         if (UnityEngine.Input.GetMouseButtonUp(0) || UnityEngine.Input.GetMouseButtonDown(1))
@@ -499,6 +369,160 @@ public class CameraController : MonoBehaviourPunCallbacks
             }
         }
     }
+    
+    public bool PlaceBuildingOnTerrainUpdate()
+    {
+        if (buildedObject != null)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition), out hit, 100, LayerMask.GetMask("Terrain")))
+            {
+                if (hit.collider != null && hit.transform.gameObject.layer == LayerMask.NameToLayer("Terrain"))
+                {
+                    BuildingBehavior buildedObjectBuildingBehavior = null;
+                    if (selectedObject == null)
+                    {
+                        selectedObject = PhotonNetwork.Instantiate(buildedObject.name, hit.point, buildedObject.transform.rotation);
+                        buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
+
+                        // Set owner
+                        if (PhotonNetwork.InRoom)
+                            selectedObject.GetComponent<PhotonView>().RPC("ChangeOwner", PhotonTargets.All, userId, team);
+                        else
+                            buildedObjectBuildingBehavior.ChangeOwner(userId, team);
+
+                        // Set building as selected
+                        if (PhotonNetwork.InRoom)
+                            selectedObject.GetComponent<PhotonView>().RPC("SetAsSelected", PhotonTargets.All);
+                        else
+                            buildedObjectBuildingBehavior.SetAsSelected();
+                    }
+                    BuildingBehavior buildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
+                    selectedObject.transform.position = hit.point;
+
+                    GameObject intersection = buildingBehavior.GetIntersection(null);
+
+                    Color newColor = new Color(0.1f, 1f, 0.1f, 0.45f);
+                    if (intersection != null)
+                        newColor = new Color(1f, 0.1f, 0.1f, 0.45f);
+
+                    buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
+                    GameObject projector = selectedObject.GetComponent<UnitSelectionComponent>().projector;
+                    if (UnityEngine.Input.GetMouseButtonDown(0))
+                    {
+                        if (intersection == null)
+                        {
+                            // Create building in project state
+                            buildedObjectBuildingBehavior.SetAsProject();
+
+                            List<GameObject> selectedUnits = GetSelectedObjects();
+                            foreach (GameObject unit in selectedUnits)
+                            {
+                                BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                                PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
+                                bool sendToQueue = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
+                                if (sendToQueue)
+                                {
+                                    baseBehaviorComponent.AddCommandToQueue(selectedObject);
+                                }
+                                else
+                                {
+                                    if (PhotonNetwork.InRoom)
+                                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, selectedObject.GetComponent<PhotonView>().ViewID, true, true);
+                                    else
+                                        baseBehaviorComponent.GiveOrder(selectedObject, true, true);
+                                    buildedObject = null;
+                                }
+                            }
+                            selectedObject = null;
+                            return true;
+                        }
+                        else
+                        {
+                            UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+                            cameraUIBaseScript.DisplayMessage("Something is blocked", 3000);
+                        }
+                    }
+                    if (UnityEngine.Input.GetMouseButtonDown(1))
+                    {
+                        buildedObjectBuildingBehavior.StopAction();
+                        buildedObject = null;
+                        selectedObject = null;
+                        return true;
+                    }
+
+                    projector.active = true;
+                    projector.GetComponent<Projector>().material.color = newColor;
+                    var allNewRenders = selectedObject.GetComponents<Renderer>().Concat(selectedObject.GetComponentsInChildren<Renderer>()).ToArray();
+                    foreach (var render in allNewRenders)
+                        foreach (var material in render.materials)
+                        {
+                            material.SetFloat("_Mode", 2);
+                            material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                            material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                            material.SetInt("_ZWrite", 0);
+                            material.DisableKeyword("_ALPHATEST_ON");
+                            material.EnableKeyword("_ALPHABLEND_ON");
+                            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                            material.renderQueue = 3000;
+                            material.SetColor("_Color", newColor);
+                        }
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void SelectBinds()
+    {
+        if (keyTimer > 0)
+            keyTimer -= Time.fixedDeltaTime;
+        for (int number = 1; number <= 9; number++)
+        {
+            var key = KeyCode.Alpha0 + number;
+            if (UnityEngine.Input.GetKeyDown(key))
+            {
+                bool recreate = UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl);
+                bool addNew = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
+                bool remove = UnityEngine.Input.GetKey(KeyCode.LeftAlt) || UnityEngine.Input.GetKey(KeyCode.RightAlt);
+
+                var selectedUnits = GetSelectedObjects();
+                if (recreate || addNew || remove)
+                {
+                    if (recreate)
+                        unitsBinds[key].Clear();
+
+                    foreach (GameObject selectedUnit in selectedUnits)
+                    {
+                        if ((addNew || recreate) && !unitsBinds[key].Contains(selectedUnit))
+                            unitsBinds[key].Add(selectedUnit);
+                        else if (remove)
+                            unitsBinds[key].Remove(selectedUnit);
+
+                        unitsBinds[key] = GetFilteredObjects(unitsBinds[key]);
+                    }
+                }
+                else
+                {
+                    var units = unitsBinds[key];
+                    if (units.Count > 0)
+                    {
+                        DeselectAllUnits();
+                        foreach (GameObject unit in units)
+                        {
+                            UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
+                            selection.isSelected = true;
+                        }
+                        if (keyTimer > 0)
+                            MoveCameraToPoint(GetCenterOfObjects(units));
+                        tempKey = key;
+                        keyTimer = 0.25f;
+                    }
+                }
+            }
+        }
+    }
 
     public void MoveCaeraToUnit(GameObject unit)
     {
@@ -533,9 +557,12 @@ public class CameraController : MonoBehaviourPunCallbacks
             // Draw map
             mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
             var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
-            mapImage.image = mapTexture;
-            mapImage.style.height = "100%";
-            mapImage.style.width = "100%";
+            if (mapTexture.height > 0)
+            {
+                mapImage.image = mapTexture;
+                mapImage.style.height = "100%";
+                mapImage.style.width = "100%";
+            }
 
             var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
             unitsBlock.innerHTML = "";
@@ -580,7 +607,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
         // Display free workers
         if (freeWorkers.Count > 0)
-            UI.document.Run("CreateInfoButton", "workers", freeWorkers.Count, "F1");
+            UI.document.Run("CreateInfoButton", "workers", freeWorkers.Count, "F1", "");
 
         // Display binds
         for (int number = 1; number <= 9; number++)
@@ -598,10 +625,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             }
             if (units.Count > 0)
             {
-                if (units[0].GetComponent<UnitBehavior>() != null)
-                    UI.document.Run("CreateInfoButton", "solders", units.Count, number);
-                else
-                    UI.document.Run("CreateInfoButton", "bilding", units.Count, number);
+                UI.document.Run("CreateInfoButton", "solders", units.Count, number, units[0].GetComponent<BaseBehavior>().imagePath);
             }
         }
     }

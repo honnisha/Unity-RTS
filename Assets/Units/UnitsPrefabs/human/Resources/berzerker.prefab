@@ -1035,7 +1035,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1528613431990062}
-  m_LocalRotation: {x: -0, y: 0.9961947, z: -0, w: -0.08715578}
+  m_LocalRotation: {x: 0, y: 0.9961947, z: -0, w: -0.08715578}
   m_LocalPosition: {x: 1.27, y: -0.0018310547, z: 70.65}
   m_LocalScale: {x: 0.10000005, y: 0.099999994, z: 0.10000005}
   m_Children:
@@ -1131,6 +1131,9 @@ MonoBehaviour:
   health: 0
   live: 1
   pointToInteract: {fileID: 0}
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 15
   uniqueName: Berserker
   readableName: Berserker
@@ -1141,10 +1144,11 @@ MonoBehaviour:
   costGold: 25
   costWood: 0
   productionHotkey: 100
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 20
   rangeAttack: 1.5
   interactType: 0
-  attackTime: 2
+  attackTime: 2.5
   attackDelay: 1.2
   damageAfterTimer: 1
   attackTimer: 0
@@ -1203,8 +1207,12 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
+  attackedTeam: 0
   resourceCapacityType: 0
   resourceCapacity: 0
+  resourceEndless: 0
+  sourceType: 0
   storedResources: 
   buildHpPerSecond: 2.5
   buildingTool:
@@ -1243,8 +1251,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 5791970414735973560}
-  viewIdField: 0
-  InstantiationId: 4
+  viewIdField: 15
+  InstantiationId: 15
   isRuntimeInstantiated: 0
 --- !u!114 &5791970414735973560
 MonoBehaviour:

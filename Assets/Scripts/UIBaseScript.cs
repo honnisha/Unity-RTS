@@ -50,67 +50,42 @@ public class UIBaseScript : MonoBehaviour
 
     private List<UIImage> commands = new List<UIImage>();
 
+    CameraController cameraController;
     // Use this for initialization
     void Start()
     {
+        cameraController = Camera.main.GetComponent<CameraController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
         List<GameObject> selectegObjects = cameraController.GetSelectedObjects();
 
+        UnityEngine.Profiling.Profiler.BeginSample("Draw blocks"); // Profiler
         List<UIImage> selectedUnitUIImage = GetSelectedObjectsToUIImage(selectegObjects);
         DisplayUIImageObjects("center", selectedUnitUIImage, ref storageUIImages);
 
         if (selectegObjects.Count == 1)
-        {
-            //Display query to build
-            BaseBehavior unitBaseBehaviorComponent = selectegObjects[0].GetComponent<BaseBehavior>();
-            BuildingBehavior buildingBehaviorComponent = selectegObjects[0].GetComponent<BuildingBehavior>();
-            if (buildingBehaviorComponent != null && buildingBehaviorComponent.team == cameraController.team)
-                updateQueue(buildingBehaviorComponent.unitsQuery, buildingBehaviorComponent.uqeryLimit, buildingBehaviorComponent.buildTimer);
-
-            // Set health
-            foreach (var element in UI.document.getElementsByClassName("unitHealth"))
-                element.style.width = String.Format("{0:F0}%", unitBaseBehaviorComponent.health / unitBaseBehaviorComponent.maxHealth * 100);
-
-            UnitBehavior unitBehaviorComponent = selectegObjects[0].GetComponent<UnitBehavior>();
-            foreach (var element in UI.document.getElementsByClassName("dinamicInfo"))
-            {
-                element.innerHTML = "";
-
-                if (unitBehaviorComponent != null && unitBehaviorComponent.resourceHold > 0)
-                {
-                    Dom.Element statusticDiv = UI.document.createElement("p");
-                    if (unitBehaviorComponent.resourceType == BaseBehavior.ResourceType.Food)
-                        statusticDiv.innerHTML = String.Format("Food: {0:F0}", unitBehaviorComponent.resourceHold);
-                    if (unitBehaviorComponent.resourceType == BaseBehavior.ResourceType.Gold)
-                        statusticDiv.innerHTML = String.Format("Gold: {0:F0}", unitBehaviorComponent.resourceHold);
-                    if (unitBehaviorComponent.resourceType == BaseBehavior.ResourceType.Wood)
-                        statusticDiv.innerHTML = String.Format("Wood: {0:F0}", unitBehaviorComponent.resourceHold);
-                    element.appendChild(statusticDiv);
-                }
-                if (unitBaseBehaviorComponent.resourceCapacity > 0)
-                {
-                    Dom.Element statusticDiv = UI.document.createElement("p");
-                    if (unitBaseBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Food)
-                        statusticDiv.innerHTML = String.Format("Food: {0:F0}", unitBaseBehaviorComponent.resourceCapacity);
-                    if (unitBaseBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Gold)
-                        statusticDiv.innerHTML = String.Format("Gold: {0:F0}", unitBaseBehaviorComponent.resourceCapacity);
-                    if (unitBaseBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Wood)
-                        statusticDiv.innerHTML = String.Format("Wood: {0:F0}", unitBaseBehaviorComponent.resourceCapacity);
-                    element.appendChild(statusticDiv);
-                }
-            }
-        }
+            DisplayDetailInfo(selectegObjects[0]);
 
         List<UIImage> skillUIImages = GetSelectedSkillsOfObjectsToUIImage(selectegObjects);
         DisplayUIImageObjects("right", skillUIImages, ref storageSkillUIImages);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
+        UnityEngine.Profiling.Profiler.BeginSample("DisplayCommands"); // Profiler
         DisplayCommands(selectegObjects);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
+        UnityEngine.Profiling.Profiler.BeginSample("HandleUIEvents"); // Profiler
+        bool description = HandleUIEvents(selectegObjects, skillUIImages);
+        if (!description)
+            DestroyDescription();
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
+
+    public bool HandleUIEvents(List<GameObject> selectegObjects, List<UIImage> skillUIImages)
+    {
         bool description = false;
         Dom.Element activeElement = PowerUI.CameraPointer.All[0].ActiveOver;
         if (activeElement != null)
@@ -158,8 +133,49 @@ public class UIBaseScript : MonoBehaviour
                 cameraController.MoveCameraToPoint(unit.transform.position);
             }
         }
-        if (!description)
-            DestroyDescription();
+        return description;
+    }
+
+    public void DisplayDetailInfo(GameObject unit)
+    {
+        //Display query to build
+        BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+        BuildingBehavior buildingBehaviorComponent = unit.GetComponent<BuildingBehavior>();
+        if (buildingBehaviorComponent != null && buildingBehaviorComponent.team == cameraController.team)
+            updateQueue(buildingBehaviorComponent.unitsQuery, buildingBehaviorComponent.uqeryLimit, buildingBehaviorComponent.buildTimer);
+
+        // Set health
+        foreach (var element in UI.document.getElementsByClassName("unitHealth"))
+            element.style.width = String.Format("{0:F0}%", unitBaseBehaviorComponent.health / unitBaseBehaviorComponent.maxHealth * 100);
+
+        UnitBehavior unitBehaviorComponent = unit.GetComponent<UnitBehavior>();
+        foreach (var element in UI.document.getElementsByClassName("dinamicInfo"))
+        {
+            element.innerHTML = "";
+
+            if (unitBehaviorComponent != null && unitBehaviorComponent.resourceHold > 0)
+            {
+                Dom.Element statusticDiv = UI.document.createElement("p");
+                if (unitBehaviorComponent.resourceType == BaseBehavior.ResourceType.Food)
+                    statusticDiv.innerHTML = String.Format("Food: {0:F0}", unitBehaviorComponent.resourceHold);
+                if (unitBehaviorComponent.resourceType == BaseBehavior.ResourceType.Gold)
+                    statusticDiv.innerHTML = String.Format("Gold: {0:F0}", unitBehaviorComponent.resourceHold);
+                if (unitBehaviorComponent.resourceType == BaseBehavior.ResourceType.Wood)
+                    statusticDiv.innerHTML = String.Format("Wood: {0:F0}", unitBehaviorComponent.resourceHold);
+                element.appendChild(statusticDiv);
+            }
+            if (unitBaseBehaviorComponent.resourceCapacity > 0)
+            {
+                Dom.Element statusticDiv = UI.document.createElement("p");
+                if (unitBaseBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Food)
+                    statusticDiv.innerHTML = String.Format("Food: {0:F0}", unitBaseBehaviorComponent.resourceCapacity);
+                if (unitBaseBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Gold)
+                    statusticDiv.innerHTML = String.Format("Gold: {0:F0}", unitBaseBehaviorComponent.resourceCapacity);
+                if (unitBaseBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Wood)
+                    statusticDiv.innerHTML = String.Format("Wood: {0:F0}", unitBaseBehaviorComponent.resourceCapacity);
+                element.appendChild(statusticDiv);
+            }
+        }
     }
 
     public void DisplayMessage(string message, int timer)
@@ -174,8 +190,7 @@ public class UIBaseScript : MonoBehaviour
         foreach (GameObject unit in selectegObjects)
         {
             BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-            CameraController cameraController = Camera.main.GetComponent<CameraController>();
-            if (unitBaseBehaviorComponent.team != cameraController.team)
+            if (unitBaseBehaviorComponent.team != cameraController.team || unitBaseBehaviorComponent.ownerId != cameraController.userId)
                 continue;
 
             BuildingBehavior buildingBehaviorComponent = selectegObjects[0].GetComponent<BuildingBehavior>();
@@ -185,16 +200,16 @@ public class UIBaseScript : MonoBehaviour
             //Skills
             UnitBehavior unitBehaviorComponent = unit.GetComponent<UnitBehavior>();
             if (unitBehaviorComponent != null && unitBehaviorComponent.live)
-                foreach (BaseSkillScript skill in unitBehaviorComponent.skillList)
+            {
+                foreach (GameObject skillObject in unitBehaviorComponent.skillList)
                 {
-                    string name = skill.uniqueName;
-                    if(skill.skillObject != null)
+                    if(skillObject != null)
                     {
-                        BuildingBehavior skillBuildingBehaviorComponent = skill.skillObject.GetComponent<BuildingBehavior>();
+                        BuildingBehavior skillBuildingBehaviorComponent = skillObject.GetComponent<BuildingBehavior>();
                         if (skillBuildingBehaviorComponent != null)
                         {
                             GetOrCreateUIImageToList(
-                                ref newUIImages, name, skillBuildingBehaviorComponent.imagePath,
+                                ref newUIImages, skillBuildingBehaviorComponent.uniqueName, skillBuildingBehaviorComponent.imagePath,
                                 skillBuildingBehaviorComponent.readableName, skillBuildingBehaviorComponent.readableDescription,
                                 skillBuildingBehaviorComponent.GetStatistics(), skillBuildingBehaviorComponent.GetCostInformation(),
                                 skillBuildingBehaviorComponent.productionHotkey
@@ -202,24 +217,17 @@ public class UIBaseScript : MonoBehaviour
                             continue;
                         }
                     }
-                    else
-                    {
-                        GetOrCreateUIImageToList(
-                            ref newUIImages, name, skill.imagePath,
-                            skill.readableName, skill.readableDescription,
-                            skill.GetStatistics(), skill.GetCostInformation(),
-                            skill.hotkey
-                            );
-                    }
                 }
+            }
+
             //Created objects
             if (buildingBehaviorComponent != null && buildingBehaviorComponent.live)
                 foreach (GameObject buildUnit in buildingBehaviorComponent.producedUnits)
                 {
+                    Debug.Log(buildUnit + " " + buildingBehaviorComponent.producedUnits[0]);
                     BaseBehavior buildUnitBaseBehaviorComponent = buildUnit.GetComponent<BaseBehavior>();
-                    string name = buildUnitBaseBehaviorComponent.uniqueName;
                     GetOrCreateUIImageToList(
-                        ref newUIImages, name, buildUnitBaseBehaviorComponent.imagePath,
+                        ref newUIImages, buildUnitBaseBehaviorComponent.uniqueName, buildUnitBaseBehaviorComponent.imagePath,
                         buildUnitBaseBehaviorComponent.readableName, buildUnitBaseBehaviorComponent.readableDescription,
                         buildUnitBaseBehaviorComponent.GetStatistics(), buildUnitBaseBehaviorComponent.GetCostInformation(),
                         buildUnitBaseBehaviorComponent.productionHotkey
@@ -270,8 +278,7 @@ public class UIBaseScript : MonoBehaviour
                     recreate = true;
                 index++;
             }
-
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        
         if (selectegObjects.Count > 0)
         {
             BaseBehavior baseBehavior = selectegObjects[0].GetComponent<BaseBehavior>();
@@ -425,8 +432,7 @@ public class UIBaseScript : MonoBehaviour
                 }
                 else
                     elementsBlock = allElementsBlock[0];
-
-                CameraController cameraController = Camera.main.GetComponent<CameraController>();
+                
                 Dom.Element createdImage = DrawInfo(elementsBlock, unitImageInfo, detailInfo, discriptable, true, detailInfo);
                 storageImages.Add(unitImageInfo);
                 if (tableName == "center" && !detailInfo)
@@ -557,8 +563,7 @@ public class UIBaseScript : MonoBehaviour
                 elementDiv.setAttribute("src", unitBaseBehaviorComponent.imagePath);
                 elementDiv.className = String.Format("clckable {0}", index);
                 progressBaseDiv.appendChild(elementDiv);
-
-                CameraController cameraController = Camera.main.GetComponent<CameraController>();
+                
                 if (index == 0)
                 {
                     float time = unitBaseBehaviorComponent.timeToBuild;

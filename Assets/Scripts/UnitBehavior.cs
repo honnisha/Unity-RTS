@@ -46,6 +46,8 @@ public class UnitBehavior : BaseBehavior
 
     private float workingTimer = 0.0f;
     private bool blockedBuilding = false;
+    private float toolInHandTimer = 0.0f;
+    private float timetToStuck = 0.0f;
     
     public override void Awake()
     {
@@ -60,6 +62,7 @@ public class UnitBehavior : BaseBehavior
     
     override public void Update()
     {
+        UnityEngine.Profiling.Profiler.BeginSample("UserUpdate"); // Profiler
         base.Update();
         if (!live)
             return;
@@ -73,81 +76,255 @@ public class UnitBehavior : BaseBehavior
         #endregion
 
         UnitSelectionComponent unitSelectionComponent = GetComponent<UnitSelectionComponent>();
-
+        
         // Find target
         if (IsIdle())
         {
-            if (blockedBuilding && interactObject != null)
-                StartInteract(interactObject);
-
             if (behaviorType == BehaviorType.Aggressive)
-                AttackNearEnemies(gameObject.transform.position, agrRange);
+                AttackNearEnemies(gameObject.transform.position, agrRange, randomRange: 7.0f);
             SendOrderFromQueue();
         }
 
-        #region Tools in hand
-        // Logic for tools in hand
-        ToolInfo toolInfo = GetToolInfo();
-        // Create tool in hand
-        if (toolInfo != null && holderObject == null && toolInfo.prefab != null)
+        // Wait for building if something blocked
+        if (target == null && !base.agent.pathPending && !base.agent.hasPath)
+            if (blockedBuilding && interactObject != null)
+                StartInteract(interactObject);
+
+        toolInHandTimer += Time.fixedDeltaTime;
+        timerToCreateHolder += Time.fixedDeltaTime;
+        if (toolInHandTimer > 0.25f)
         {
-            timerToCreateHolder += Time.deltaTime;
-            if(timerToCreateHolder >= 0.5f)
-            {
-                holderToolInfo = toolInfo;
-                holderObject = (GameObject)Instantiate(toolInfo.prefab, toolInfo.holder.transform.position, toolInfo.holder.transform.rotation);
-                holderObject.transform.SetParent(toolInfo.holder.transform);
-            }
-        }
-        // Destroy
-        if ((toolInfo == null || holderToolInfo != toolInfo) && holderObject != null)
-        {
-            timerToCreateHolder = 0.0f;
-            holderToolInfo = null;
-            Destroy(holderObject);
+            // TODO: change to events instead check in update
+            UpdateToolInHand();
+            toolInHandTimer = 0.0f;
         }
 
-        if (interactType == InteractigType.None && resourceGatherInfo.Count > 0)
-            if (resourceHold <= 0)
-            {
-                anim.SetBool("Carry", false);
-            }
-            else
-                anim.SetBool("Carry", true);
-
-        if(target != null)
+        // Stuck
+        if(!IsIdle() && interactType == InteractigType.None)
         {
-            BuildingBehavior targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
-            if (targetBuildingBehavior != null && targetBuildingBehavior.sourceType == SourceType.Farm)
+            timetToStuck += Time.fixedDeltaTime;
+            if (base.curSpeed > 0.05)
+                timetToStuck = 0.0f;
+
+            if (timetToStuck > 4.0f)
             {
-                foreach(GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
+                StopAction(false);
+                interactObject = null;
+                timetToStuck = 0.0f;
+            }
+        }
+
+        // Counterattack
+        if (IsIdle() && attackedTeam != 0)
+        {
+            if(behaviorType == BehaviorType.Aggressive || behaviorType == BehaviorType.Counterattack)
+            {
+                bool targetFinded = AttackNearEnemies(transform.position, agrRange, attackedTeam, randomRange: 8.0f);
+                if (!targetFinded)
                 {
-                    UnitBehavior workerUnitBehavior = unit.GetComponent<UnitBehavior>();
-                    if (workerUnitBehavior.interactObject == target && unit != gameObject)
+                    attackedTeam = 0;
+                    return;
+                }
+            }
+        }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
+        UnityEngine.Profiling.Profiler.BeginSample("DoInteract"); // Profiler
+        // Interact with something
+        bool interrupt = DoInteract();
+        if (interrupt)
+            return;
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
+        UnityEngine.Profiling.Profiler.BeginSample("End Update"); // Profiler
+        // To avoid recalculate path
+        if (target == null && targetOldPosition != null)
+            targetOldPosition = new Vector3();
+
+        MoveToTarget();
+
+        DoAttack();
+
+        if (isWalkAround && IsMasterClient() && target == null)
+            WalkAround();
+
+        if (pointMarkerPrefab != null)
+            if (!unitSelectionComponent.isSelected || !live)
+                DestroyPointMarker();
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
+
+    public void WalkAround()
+    {
+        if (timeToWalk <= 0.0f)
+            timeToWalk = UnityEngine.Random.Range(5.0f, 20.0f);
+
+        timerToWalk += Time.deltaTime;
+        if (timerToWalk >= timeToWalk)
+        {
+            PhotonView unitPhotonView = GetComponent<PhotonView>();
+            if (PhotonNetwork.InRoom)
+                unitPhotonView.RPC("GiveOrderWithSpeed", PhotonTargets.All, GetRandomPoint(unitPosition, 10.0f), false, false, UnityEngine.Random.Range(0.9f, 1.3f));
+            else
+                GiveOrderWithSpeed(GetRandomPoint(unitPosition, 10.0f), false, false, UnityEngine.Random.Range(0.9f, 1.3f));
+            timerToWalk = 0.0f;
+            timeToWalk = 0.0f;
+        }
+    }
+
+    public void DoAttack()
+    {
+        if (interactType == InteractigType.Attacking && target != null)
+        {
+            BaseBehavior targetBaseBehavior = null;
+            if (target != null)
+                targetBaseBehavior = target.GetComponent<BaseBehavior>();
+
+            if (IsTeamEnemy(targetBaseBehavior.team))
+            {
+                base.attackDelayTimer = base.attackDelayTimer - Time.deltaTime;
+                if (!base.attacked && base.attackDelayTimer <= 0.0f && target != null)
+                {
+                    // Damage deal
+                    base.attacked = true;
+                    if (damageAfterTimer)
+                        targetBaseBehavior.TakeDamage(damage, gameObject);
+                    if (actionEffect != null)
                     {
-                        UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-                        cameraUIBaseScript.DisplayMessage("Only one worker can work in farm", 1000);
-                        StopAction(true);
-                        break;
+                        ActionEffect unitActionEffect = actionEffect.transform.gameObject.GetComponent<ActionEffect>();
+                        unitActionEffect.activate(gameObject, target, damage);
                     }
                 }
-                if (target != null)
+                base.attackTimer = base.attackTimer - Time.deltaTime;
+                if (base.attackTimer <= 0.0f)
                 {
-                    interactObject = target;
-                    base.agent.destination = GetRandomPoint(target.transform.position, 2.0f);
-                    target = null;
+                    interactType = InteractigType.None;
+                    base.agent.isStopped = false;
+
+                    if (!targetBaseBehavior.live || tempDestinationPoint != Vector3.zero)
+                    {
+                        base.agent.ResetPath();
+                        ActionIsDone();
+
+                        if (PhotonNetwork.InRoom)
+                            GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
+                        else
+                            StartInteract(target);
+                    }
                 }
             }
-            if (targetBuildingBehavior != null && targetBuildingBehavior.pointToInteract != null)
+        }
+    }
+
+    public void MoveToTarget()
+    {
+        if (interactType == InteractigType.None && target != null)
+        {
+            BaseBehavior targetBaseBehavior = null;
+            if (target != null)
+                targetBaseBehavior = target.GetComponent<BaseBehavior>();
+
+            if (Vector3.Distance(targetOldPosition, target.transform.position) > 0.4f)
             {
-                interactObject = target;
-                base.agent.destination = targetBuildingBehavior.pointToInteract.transform.position;
-                target = null;
+                var targetPoint = target.transform.position;
+                if (targetBaseBehavior.pointToInteract != null)
+                    targetPoint = targetBaseBehavior.pointToInteract.transform.position;
+
+                BuildingBehavior targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
+                if (targetBuildingBehavior != null)
+                {
+
+                    NavMeshHit hitPosition;
+                    // Finds the closest point on NavMesh within specified range.
+                    if (NavMesh.SamplePosition(targetPoint, out hitPosition, 6.0f, NavMesh.AllAreas))
+                        base.agent.destination = hitPosition.position;
+                }
+                else
+                    base.agent.destination = targetPoint;
+
+                targetOldPosition = targetPoint;
+            }
+
+            float minDistance = 0.4f;
+            bool targetDest = false;
+            bool isTargetEnemy = false;
+            if (targetBaseBehavior != null)
+                if (IsTeamEnemy(targetBaseBehavior.team) && attackType != AttackType.None)
+                    isTargetEnemy = true;
+
+            if (isTargetEnemy && targetBaseBehavior.live)
+                minDistance = rangeAttack;
+
+            float dist = Vector3.Distance(gameObject.transform.position, target.transform.position);
+            RaycastHit hit;
+            // If unit and target close enough
+            if (dist <= minDistance && Physics.Linecast(transform.position, target.transform.position))
+                targetDest = true;
+            // Or collisions touch each other
+            else if (GetComponent<Collider>().bounds.Intersects(target.GetComponent<Collider>().bounds))
+                targetDest = true;
+
+            float magnitDistance = 2.0f;
+            if (target.GetComponent<BuildingBehavior>() != null)
+                magnitDistance = target.GetComponent<BuildingBehavior>().magnitDistance;
+
+            if (dist <= magnitDistance && Physics.Linecast(transform.position, target.transform.position + new Vector3(0, 1, 0)))
+            {
+                base.agent.isStopped = true;
+                Vector3 targetPosition = new Vector3(target.transform.position.x, transform.position.y, target.transform.position.z);
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, agent.speed * 0.9f * Time.deltaTime);
+                transform.LookAt(targetPosition);
+            }
+            else
+                base.agent.isStopped = false;
+
+            if (targetDest)
+            {
+                // Attack it target if target is enemy or stop
+                if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live)
+                {
+                    //agent.ResetPath();
+                    base.agent.isStopped = true;
+                    if (attackType != AttackType.None)
+                        Attack(target);
+                }
+                else
+                {
+                    base.agent.isStopped = true;
+
+                    if (PhotonNetwork.InRoom)
+                        GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
+                    else
+                        StartInteract(target);
+                }
             }
         }
-        #endregion
+        else if (target == null && !base.agent.isStopped && Vector3.Distance(gameObject.transform.position, base.agent.destination) <= 0.5f)
+        {
+            base.agent.isStopped = true;
+            if (interactObject != null)
+            {
+                if (PhotonNetwork.InRoom)
+                    GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID);
+                else
+                    StartInteract(interactObject);
+            }
+            else
+            {
+                target = null;
+                ActionIsDone();
+            }
+        }
+        if (tempDestinationPoint != Vector3.zero && target == null)
+        {
+            base.agent.isStopped = false;
+            base.agent.destination = tempDestinationPoint;
+            tempDestinationPoint = Vector3.zero;
+        }
+    }
 
-        #region Interact with something
+    public bool DoInteract()
+    {
         if (workingTimer >= 5.0f)
         {
             if (interactObject != null)
@@ -161,13 +338,13 @@ public class UnitBehavior : BaseBehavior
                     else
                         GiveOrder(interactObject, false, false);
                     workingTimer = 0.0f;
-                    return;
+                    return true;
                 }
             }
         }
         // Interact with something
         if (
-            interactType == InteractigType.Bulding || interactType == InteractigType.Gathering || 
+            interactType == InteractigType.Bulding || interactType == InteractigType.Gathering ||
             interactType == InteractigType.CuttingTree || interactType == InteractigType.Farming)
         {
             if (interactObject != null)
@@ -208,7 +385,7 @@ public class UnitBehavior : BaseBehavior
 
                                 resourceHold += resourceInfo.gatherPerSecond;
 
-                                if(!baseObjectBehaviorComponent.resourceEndless)
+                                if (!baseObjectBehaviorComponent.resourceEndless)
                                     if (baseObjectBehaviorComponent.resourceCapacity > resourceInfo.gatherPerSecond)
                                     {
                                         if (resourceHold < resourceInfo.maximumCapacity)
@@ -292,187 +469,82 @@ public class UnitBehavior : BaseBehavior
             {
                 StopAction(true);
                 ActionIsDone();
-                if (PhotonNetwork.InRoom)
-                    GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
-                else
-                    StartInteract(target);
-            }
-        }
-        #endregion
-
-        // To avoid recalculate path
-        if (target == null && targetOldPosition != null)
-            targetOldPosition = new Vector3();
-
-        BaseBehavior targetBaseBehavior = null;
-        if (target != null)
-            targetBaseBehavior = target.GetComponent<BaseBehavior>();
-        
-        #region Move to target
-        if (interactType == InteractigType.None && target != null)
-        {
-            if (Vector3.Distance(targetOldPosition, target.transform.position) > 0.4f)
-            {
-                var targetPoint = target.transform.position;
-                if (targetBaseBehavior.pointToInteract != null)
-                    targetPoint = targetBaseBehavior.pointToInteract.transform.position;
-
-                BuildingBehavior targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
-                if (targetBuildingBehavior != null)
+                if (target != null)
                 {
-
-                    NavMeshHit hitPosition;
-                    // Finds the closest point on NavMesh within specified range.
-                    if (NavMesh.SamplePosition(targetPoint, out hitPosition, 6.0f, NavMesh.AllAreas))
-                        base.agent.destination = hitPosition.position;
-                }
-                else
-                    base.agent.destination = targetPoint;
-
-                targetOldPosition = targetPoint;
-            }
-
-            float minDistance = 0.4f;
-            bool targetDest = false;
-            bool isTargetEnemy = false;
-            if (targetBaseBehavior != null)
-                if (IsTeamEnemy(targetBaseBehavior.team))
-                    isTargetEnemy = true;
-
-            if (isTargetEnemy && targetBaseBehavior.live)
-                minDistance = rangeAttack;
-
-            float dist = Vector3.Distance(gameObject.transform.position, target.transform.position);
-            RaycastHit hit;
-            // If unit and target close enough
-            if (dist <= minDistance && Physics.Linecast(transform.position, target.transform.position))
-                targetDest = true;  
-            // Or collisions touch each other
-            else if (GetComponent<Collider>().bounds.Intersects(target.GetComponent<Collider>().bounds))
-                targetDest = true;
-
-            float magnitDistance = 2.0f;
-            if (target.GetComponent<BuildingBehavior>() != null)
-                magnitDistance = target.GetComponent<BuildingBehavior>().magnitDistance;
-
-            if (dist <= magnitDistance && Physics.Linecast(transform.position, target.transform.position + new Vector3(0, 1, 0)))
-            {
-                base.agent.isStopped = true;
-                Vector3 targetPosition = new Vector3(target.transform.position.x, transform.position.y, target.transform.position.z);
-                transform.position = Vector3.MoveTowards(transform.position, targetPosition, agent.speed * 0.9f * Time.deltaTime);
-                transform.LookAt(targetPosition);
-            }
-            else
-                base.agent.isStopped = false;
-
-            if (targetDest)
-            {
-                // Attack it target if target is enemy or stop
-                if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live)
-                {
-                    //agent.ResetPath();
-                    base.agent.isStopped = true;
-                    if (attackType != AttackType.None)
-                        Attack(target);
-                }
-                else
-                {
-                    base.agent.isStopped = true;
-
                     if (PhotonNetwork.InRoom)
                         GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
                     else
                         StartInteract(target);
                 }
+                else
+                {
+                    Debug.Log(gameObject.name + ": " + interactType + "no target");
+                }
             }
         }
-        else if (target == null && !base.agent.isStopped && Vector3.Distance(gameObject.transform.position, base.agent.destination) <= 0.5f)
+        return false;
+    }
+
+    public void UpdateToolInHand()
+    {
+        toolInHandTimer = 0.0f;
+        ToolInfo toolInfo = GetToolInfo();
+        // Create tool in hand
+        if (toolInfo != null && holderObject == null && toolInfo.prefab != null)
         {
-            base.agent.isStopped = true;
-            if (interactObject != null)
+            if (timerToCreateHolder >= 0.5f)
             {
-                if (PhotonNetwork.InRoom)
-                    GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID);
-                else
-                    StartInteract(interactObject);
+                holderToolInfo = toolInfo;
+                holderObject = (GameObject)Instantiate(toolInfo.prefab, toolInfo.holder.transform.position, toolInfo.holder.transform.rotation);
+                holderObject.transform.SetParent(toolInfo.holder.transform);
+            }
+        }
+        // Destroy
+        if ((toolInfo == null || holderToolInfo != toolInfo) && holderObject != null)
+        {
+            timerToCreateHolder = 0.0f;
+            holderToolInfo = null;
+            Destroy(holderObject);
+        }
+
+        if (interactType == InteractigType.None && resourceGatherInfo.Count > 0)
+            if (resourceHold <= 0)
+            {
+                anim.SetBool("Carry", false);
             }
             else
+                anim.SetBool("Carry", true);
+
+        if (target != null)
+        {
+            BuildingBehavior targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
+            if (targetBuildingBehavior != null && targetBuildingBehavior.sourceType == SourceType.Farm)
             {
+                foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
+                {
+                    UnitBehavior workerUnitBehavior = unit.GetComponent<UnitBehavior>();
+                    if (workerUnitBehavior.interactObject == target && unit != gameObject)
+                    {
+                        UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+                        cameraUIBaseScript.DisplayMessage("Only one worker can work in farm", 1000);
+                        StopAction(true);
+                        break;
+                    }
+                }
+                if (target != null)
+                {
+                    interactObject = target;
+                    base.agent.destination = GetRandomPoint(target.transform.position, 2.0f);
+                    target = null;
+                }
+            }
+            if (targetBuildingBehavior != null && targetBuildingBehavior.pointToInteract != null)
+            {
+                interactObject = target;
+                base.agent.destination = targetBuildingBehavior.pointToInteract.transform.position;
                 target = null;
-                ActionIsDone();
             }
         }
-        if (tempDestinationPoint != Vector3.zero && target == null)
-        {
-            base.agent.isStopped = false;
-            base.agent.destination = tempDestinationPoint;
-            tempDestinationPoint = Vector3.zero;
-        }
-        #endregion
-        
-        #region Attack
-        if (interactType == InteractigType.Attacking && target != null)
-        {
-            if (IsTeamEnemy(targetBaseBehavior.team))
-            {
-                base.attackDelayTimer = base.attackDelayTimer - Time.deltaTime;
-                if (!base.attacked && base.attackDelayTimer <= 0.0f && target != null)
-                {
-                    // Damage deal
-                    base.attacked = true;
-                    if (damageAfterTimer)
-                        targetBaseBehavior.TakeDamage(damage, gameObject);
-                    if (actionEffect != null)
-                    {
-                        ActionEffect unitActionEffect = actionEffect.transform.gameObject.GetComponent<ActionEffect>();
-                        unitActionEffect.activate(gameObject, target, damage);
-                    }
-                }
-                base.attackTimer = base.attackTimer - Time.deltaTime;
-                if (base.attackTimer <= 0.0f)
-                {
-                    interactType = InteractigType.None;
-                    base.agent.isStopped = false;
-
-                    if (!targetBaseBehavior.live || tempDestinationPoint != Vector3.zero)
-                    {
-                        base.agent.ResetPath();
-                        ActionIsDone();
-
-                        if (PhotonNetwork.InRoom)
-                            GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
-                        else
-                            StartInteract(target);
-                    }
-                }
-            }
-        }
-        #endregion
-        
-        if (isWalkAround && IsMasterClient())
-        {
-            if (target == null)
-            {
-                if (timeToWalk <= 0.0f)
-                    timeToWalk = UnityEngine.Random.Range(5.0f, 20.0f);
-
-                timerToWalk += Time.deltaTime;
-                if (timerToWalk >= timeToWalk)
-                {
-                    PhotonView unitPhotonView = GetComponent<PhotonView>();
-                    if (PhotonNetwork.InRoom)
-                        unitPhotonView.RPC("GiveOrderWithSpeed", PhotonTargets.All, GetRandomPoint(unitPosition, 10.0f), false, false, UnityEngine.Random.Range(0.9f, 1.3f));
-                    else
-                        GiveOrderWithSpeed(GetRandomPoint(unitPosition, 10.0f), false, false, UnityEngine.Random.Range(0.9f, 1.3f));
-                    timerToWalk = 0.0f;
-                    timeToWalk = 0.0f;
-                }
-            }
-        }
-
-        if (pointMarkerPrefab != null)
-            if (!unitSelectionComponent.isSelected || !live)
-                DestroyPointMarker();
     }
 
     public override bool IsIdle()
@@ -527,7 +599,7 @@ public class UnitBehavior : BaseBehavior
             foreach (GameObject building in allUnits)
             {
                 float distance = Vector3.Distance(gameObject.transform.position, building.transform.position);
-                if (distance > 10.0f)
+                if (distance > 15.0f)
                     continue;
 
                 BuildingBehavior buildingBuildingBehavior = building.GetComponent<BuildingBehavior>();
@@ -771,9 +843,12 @@ public class UnitBehavior : BaseBehavior
 
     public override void AlertAttacking(GameObject attacker)
     {
+        BaseBehavior attackerBaseBehavior = attacker.GetComponent<BaseBehavior>();
+        attackedTeam = attackerBaseBehavior.team;
+
         if (behaviorType == BehaviorType.Run)
         {
-            if (IsIdle() || interactObject != null)
+            if (target != null)
             {
                 Vector3 dirToTarget = (transform.position - attacker.transform.position).normalized;
 
@@ -951,33 +1026,41 @@ public class UnitBehavior : BaseBehavior
         if (team != cameraController.team || cameraController.chatInput)
             return result;
    
-        foreach (BaseSkillScript skill in skillList)
+        foreach (GameObject skillObject in skillList)
         {
-            KeyCode hotkey = skill.hotkey;
-            if (skill.skillObject != null && skill.skillObject.GetComponent<BuildingBehavior>() != null)
-                hotkey = skill.skillObject.GetComponent<BuildingBehavior>().productionHotkey;
-
-            if (skill.uniqueName == commandName || Input.GetKeyDown(hotkey))
+            if (skillObject != null)
             {
-                if(skill.skillObject != null)
+                KeyCode hotkey = KeyCode.None;
+                string uniqueName = "";
+                if (skillObject.GetComponent<BuildingBehavior>() != null)
                 {
-                    BuildingBehavior buildingBehavior = skill.skillObject.GetComponent<BuildingBehavior>();
-                    if (buildingBehavior != null)
-                    {
-                        if (cameraController.buildedObject == null)
-                        {
-                            // if not enough resources -> return second element true
-                            result[1] = !SpendResources(buildingBehavior.costFood, buildingBehavior.costGold, buildingBehavior.costWood);
-                            if (result[1])
-                                return result;
-
-                            cameraUIBaseScript.DisplayMessage("Select place to build", 3000);
-                            cameraController.buildedObject = skill.skillObject;
-                        }
-                    }
-                    result[0] = true;
+                    BuildingBehavior buildingBehavior = skillObject.GetComponent<BuildingBehavior>();
+                    hotkey = buildingBehavior.productionHotkey;
+                    uniqueName = buildingBehavior.uniqueName;
                 }
-                return result;
+
+                if (uniqueName == commandName || Input.GetKeyDown(hotkey))
+                {
+                    if (skillObject != null)
+                    {
+                        BuildingBehavior buildingBehavior = skillObject.GetComponent<BuildingBehavior>();
+                        if (buildingBehavior != null)
+                        {
+                            if (cameraController.buildedObject == null)
+                            {
+                                // if not enough resources -> return second element true
+                                result[1] = !SpendResources(buildingBehavior.costFood, buildingBehavior.costGold, buildingBehavior.costWood);
+                                if (result[1])
+                                    return result;
+
+                                cameraUIBaseScript.DisplayMessage("Select place to build", 3000);
+                                cameraController.buildedObject = skillObject;
+                            }
+                        }
+                        result[0] = true;
+                    }
+                    return result;
+                }
             }
         }
         if (commandName == "stop" || Input.GetKeyDown(KeyCode.H))

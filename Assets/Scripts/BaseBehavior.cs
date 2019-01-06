@@ -132,27 +132,19 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     #region Skills info
 
     [Header("Skills")]
-    public List<BaseSkillScript> skillList = new List<BaseSkillScript>();
+    public List<GameObject> skillList = new List<GameObject>();
 
     #endregion
 
     #region Stuff
 
     [Header("Stuff")]
-    [HideInInspector]
-    public WorldUI objectUIInfo;
     public TextAsset HTMLHealthFile;
     public Vector3 InfoHTMLOffset = new Vector3();
     public GameObject pointMarkerPrefab;
-    [HideInInspector]
-    public GameObject pointMarker;
     public Vector2Int HTMLHealthSize = new Vector2Int(100, 100);
     private float tempHealth;
     public GameObject visionToolPrefab;
-    [HideInInspector]
-    public GameObject visionTool;
-    [HideInInspector]
-    public bool canBeSelected = true;
     public int visionCount = 0;
     [HideInInspector]
     public bool beenSeen = false;
@@ -164,6 +156,16 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public ToolInfo holderToolInfo;
     [HideInInspector]
     public float tempSpeed;
+    [HideInInspector]
+    public int attackedTeam = 0;
+    [HideInInspector]
+    public WorldUI objectUIInfo;
+    [HideInInspector]
+    public GameObject pointMarker;
+    [HideInInspector]
+    public bool canBeSelected = true;
+    [HideInInspector]
+    public GameObject visionTool;
 
     [HideInInspector]
     public List<object> queueCommands = new List<object>();
@@ -479,29 +481,59 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         pointMarker = null;
     }
 
-    public bool AttackNearEnemies(Vector3 centerOfSearch, float range, int attackTeam = 999)
+    public List<GameObject> GetObjectsInRange(Vector3 position, float radius, bool live = true, int team = -1, bool units = true, bool buildings = true)
+    {
+        List<GameObject> objects = new List<GameObject>();
+        int unitsMask = 1 << LayerMask.NameToLayer("Unit");
+        int buildingMask = 1 << LayerMask.NameToLayer("Building");
+        int mask = 1;
+        if (units && !buildings)
+            mask = unitsMask;
+        else if (!units && buildings)
+            mask = buildingMask;
+        else
+            mask = unitsMask | buildingMask;
+
+        foreach (Collider collider in Physics.OverlapSphere(position, radius, mask))
+        {
+            GameObject unit = collider.gameObject;
+            BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
+            if (unitBaseBehavior.team != team && team != -1)
+                continue;
+            if (unitBaseBehavior.live != live)
+                continue;
+            objects.Add(unit);
+        }
+        return objects;
+    }
+
+    public bool AttackNearEnemies(Vector3 centerOfSearch, float range, int attackTeam = -1, float randomRange = 0.0f)
     {
         if (attackType == AttackType.None && interactType != InteractigType.Attacking)
             return false;
 
-        var allUnits = GameObject.FindGameObjectsWithTag("Unit");
-        GameObject targetUnit = null;
-        float minDistance = range;
-        foreach (GameObject unit in allUnits)
-        {
-            UnitBehavior unitBehaviorComponent = unit.GetComponent<UnitBehavior>();
-            if (unitBehaviorComponent.team != team && unitBehaviorComponent.live && unitBehaviorComponent.team > 0)
-            {
-                if (attackTeam != 999 && attackTeam != unitBehaviorComponent.team)
-                    continue;
+        var allObjects = GetObjectsInRange(transform.position, range, team: attackTeam);
+        if (allObjects.Count <= 0)
+            return false;
 
-                float dist = Vector3.Distance(centerOfSearch, unit.transform.position);
-                if (dist <= minDistance && Physics.Linecast(transform.position, unit.transform.position))
-                {
-                    minDistance = dist;
-                    targetUnit = unit;
-                }
+        GameObject targetUnit = null;
+        // Find colsest target
+        float distance = range;
+        foreach (GameObject unit in allObjects)
+        {
+            float distanceToUnit = Vector3.Distance(centerOfSearch, unit.transform.position);
+            if (distanceToUnit < distance)
+            {
+                targetUnit = unit;
+                distance = distanceToUnit;
             }
+        }
+        if (randomRange != 0.0f)
+        {
+            // Get random target
+            var targetObjects = GetObjectsInRange(targetUnit.transform.position, randomRange, team: attackTeam);
+            if (targetObjects.Count > 0)
+                targetUnit = targetObjects[UnityEngine.Random.Range(0, targetObjects.Count - 1)];
         }
         if (targetUnit != null)
         {
