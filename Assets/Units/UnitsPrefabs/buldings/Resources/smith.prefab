@@ -249,6 +249,7 @@ MonoBehaviour:
   health: 500
   live: 1
   pointToInteract: {fileID: 0}
+  debug: 0
   isWalkAround: 0
   timeToWalk: 0
   timerToWalk: 0
@@ -294,6 +295,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   agent: {fileID: 0}
+  obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
   tempDestinationPoint: {x: 0, y: 0, z: 0}
@@ -319,6 +321,7 @@ MonoBehaviour:
   pointMarker: {fileID: 0}
   canBeSelected: 1
   visionTool: {fileID: 0}
+  unitSelectionComponent: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -384,8 +387,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3516}
-  viewIdField: 33
-  InstantiationId: 33
+  viewIdField: 7
+  InstantiationId: 7
   isRuntimeInstantiated: 0
 --- !u!114 &3516
 MonoBehaviour:

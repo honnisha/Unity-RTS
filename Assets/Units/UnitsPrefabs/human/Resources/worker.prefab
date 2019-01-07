@@ -91,8 +91,9 @@ GameObject:
   - component: {fileID: 1811}
   - component: {fileID: 3211}
   - component: {fileID: 3393}
-  - component: {fileID: 3392}
   - component: {fileID: 3320}
+  - component: {fileID: 5037147353714793835}
+  - component: {fileID: 3392}
   - component: {fileID: 3291}
   - component: {fileID: 3395}
   - component: {fileID: 3394}
@@ -153,6 +154,44 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isSelected: 0
   projector: {fileID: 843}
+--- !u!195 &3320
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845}
+  m_Enabled: 0
+  m_AgentTypeID: 0
+  m_Radius: 0.31
+  m_Speed: 2.5
+  m_Acceleration: 50
+  avoidancePriority: 50
+  m_AngularSpeed: 660
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 1.99
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 3
+--- !u!208 &5037147353714793835
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 0.35, y: 1, z: 0.35}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0.7, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!114 &3392
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,6 +210,7 @@ MonoBehaviour:
   health: 60
   live: 1
   pointToInteract: {fileID: 0}
+  debug: 1
   isWalkAround: 0
   timeToWalk: 0
   timerToWalk: 0
@@ -224,6 +264,7 @@ MonoBehaviour:
     prefab: {fileID: 1014602966566676, guid: de9c6dc2c03b1cd42873ff0de9975eec, type: 3}
     holder: {fileID: 849}
   agent: {fileID: 3320}
+  obstacle: {fileID: 0}
   anim: {fileID: 3211}
   target: {fileID: 0}
   tempDestinationPoint: {x: 0, y: 0, z: 0}
@@ -255,6 +296,7 @@ MonoBehaviour:
   pointMarker: {fileID: 0}
   canBeSelected: 1
   visionTool: {fileID: 0}
+  unitSelectionComponent: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -287,11 +329,11 @@ MonoBehaviour:
     gatherPerSecond: 0.5
     maximumCapacity: 15
     carryObject:
-      prefab: {fileID: 0}
-      holder: {fileID: 0}
+      prefab: {fileID: 100000, guid: c18b48f6c33f79349b2b77a9a207d91c, type: 3}
+      holder: {fileID: 553429081656739584}
     toolObject:
-      prefab: {fileID: 0}
-      holder: {fileID: 0}
+      prefab: {fileID: 1149314094770296, guid: 7655a33462091a245bdfb3084dcf4e99, type: 3}
+      holder: {fileID: 1974170570646115540}
   resourceHold: 0
   resourceType: 3
   farmInfo:
@@ -306,28 +348,6 @@ MonoBehaviour:
         type: 3}
       holder: {fileID: 878}
   interactObject: {fileID: 0}
---- !u!195 &3320
-NavMeshAgent:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 845}
-  m_Enabled: 1
-  m_AgentTypeID: 0
-  m_Radius: 0.33
-  m_Speed: 2.5
-  m_Acceleration: 50
-  avoidancePriority: 50
-  m_AngularSpeed: 660
-  m_StoppingDistance: 0.3
-  m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
-  m_AutoRepath: 1
-  m_Height: 1.99
-  m_BaseOffset: 0
-  m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 3
 --- !u!136 &3291
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -361,8 +381,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3394}
-  viewIdField: 56
-  InstantiationId: 56
+  viewIdField: 42
+  InstantiationId: 42
   isRuntimeInstantiated: 0
 --- !u!114 &3394
 MonoBehaviour:
@@ -424,6 +444,9 @@ MonoBehaviour:
   - Type: 4
     SynchronizeType: 0
     Name: Farming
+  - Type: 4
+    SynchronizeType: 0
+    Name: Mining
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
@@ -1219,6 +1242,8 @@ Transform:
   - {fileID: 1817}
   - {fileID: 1815}
   - {fileID: 1850}
+  - {fileID: 2439085011810134499}
+  - {fileID: 3166353677375511636}
   m_Father: {fileID: 1836}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1566,3 +1591,63 @@ Transform:
   m_Father: {fileID: 1835}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 23.876, y: -107.343, z: 6.663}
+--- !u!1 &553429081656739584
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3166353677375511636}
+  m_Layer: 0
+  m_Name: GoldHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3166353677375511636
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 553429081656739584}
+  m_LocalRotation: {x: -0.7581077, y: -0.27975157, z: -0.29501882, w: 0.5098781}
+  m_LocalPosition: {x: -0.185, y: -0.024, z: -0.11}
+  m_LocalScale: {x: 0.002528364, y: 0.002528364, z: 0.002528364}
+  m_Children: []
+  m_Father: {fileID: 1835}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: -69.743, y: 152.096, z: -200.865}
+--- !u!1 &1974170570646115540
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2439085011810134499}
+  m_Layer: 0
+  m_Name: PickHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2439085011810134499
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1974170570646115540}
+  m_LocalRotation: {x: -0.01424634, y: 0.07932201, z: -0.021120926, w: 0.99652344}
+  m_LocalPosition: {x: -0.3082356, y: 0.04272697, z: -0.01672802}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1835}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: -1.435, y: 9.134001, z: -2.543}

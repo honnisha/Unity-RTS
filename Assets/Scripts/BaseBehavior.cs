@@ -21,6 +21,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public float health;
     public bool live = true;
     public GameObject pointToInteract;
+    public bool debug = false;
 
     public bool isWalkAround = false;
     [HideInInspector]
@@ -115,7 +116,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public ToolInfo weapon;
 
     [HideInInspector]
-    public UnityEngine.AI.NavMeshAgent agent;
+    public NavMeshAgent agent;
+    public NavMeshObstacle obstacle;
     [HideInInspector]
     public Animator anim;
     //[HideInInspector]
@@ -166,6 +168,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public bool canBeSelected = true;
     [HideInInspector]
     public GameObject visionTool;
+    public UnitSelectionComponent unitSelectionComponent;
 
     [HideInInspector]
     public List<object> queueCommands = new List<object>();
@@ -210,9 +213,13 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     virtual public void Awake()
     {
+        unitSelectionComponent = GetComponent<UnitSelectionComponent>();
         photonView = GetComponent<PhotonView>();
         anim = GetComponent<Animator>();
-        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        agent = GetComponent<NavMeshAgent>();
+        obstacle = GetComponent<NavMeshObstacle>();
+        if (agent != null && obstacle != null)
+            obstacle.enabled = false;
 
         unitPosition = transform.position;
     }
@@ -247,7 +254,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         }
 
         var tagsToSelect = cameraController.tagsToSelect.Find(x => (x.name == gameObject.tag));
-        UnitSelectionComponent unitSelectionComponent = GetComponent<UnitSelectionComponent>();
 
         bool healthVisible = true;
         if (!live)
