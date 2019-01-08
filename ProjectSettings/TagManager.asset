@@ -10,6 +10,7 @@ TagManager:
   - UnitsParent
   - BuildingsParent
   - Ambient
+  - Spawn
   layers:
   - Default
   - TransparentFX
@@ -26,7 +27,7 @@ TagManager:
   - Unit
   - Building
   - Ambient
-  - 
+  - HP
   - 
   - 
   - 

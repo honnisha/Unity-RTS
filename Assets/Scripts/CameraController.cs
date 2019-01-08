@@ -557,12 +557,20 @@ public class CameraController : MonoBehaviourPunCallbacks
             // Draw map
             mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
             var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
-            if (mapTexture.height > 0)
+
+            Texture newTexture;
+
+            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
+            if (terrainGenerator != null && terrainGenerator.mapTexture != null)
+            {
+                mapImage.image = terrainGenerator.mapTexture;
+            }
+            else if (mapTexture.height > 0)
             {
                 mapImage.image = mapTexture;
-                mapImage.style.height = "100%";
-                mapImage.style.width = "100%";
             }
+            mapImage.style.height = "100%";
+            mapImage.style.width = "100%";
 
             var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
             unitsBlock.innerHTML = "";
