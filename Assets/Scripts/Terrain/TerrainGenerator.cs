@@ -44,7 +44,8 @@ public class TerrainGenerator : MonoBehaviour
         return ground_shape_fractal as ModuleBase;
     }
 
-    private float KeepPositive(float value) {
+    private float KeepPositive(float value)
+    {
         if (value < 0) return 0.0f;
         if (value > 1) return 1.0f;
         return value;
@@ -59,7 +60,7 @@ public class TerrainGenerator : MonoBehaviour
         ModuleBase moduleBase = GetFractal();
         mapTexture = new Texture2D(sizeX, sizeY);
         SMappingRanges ranges = new SMappingRanges();
-        
+
         float[,,] map = new float[sizeX, sizeY, 8];
         int[][,] grassLayers = new int[][,] { new int[sizeX, sizeY], new int[sizeX, sizeY], new int[sizeX, sizeY], new int[sizeX, sizeY] };
         for (int y = 0; y < t.terrainData.detailHeight; y++)
@@ -98,7 +99,7 @@ public class TerrainGenerator : MonoBehaviour
             t.terrainData.SetDetailLayer(0, 0, i, grassLayers[i]);
     }
     public double scale = 1.0;
-    
+
     public static double DoubleLerp(double start, double end, double amount)
     {
         double difference = end - start;

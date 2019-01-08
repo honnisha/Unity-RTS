@@ -95,7 +95,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     #endregion
 
     #region Destroy Info
-    
+
     [Header("Destroy Info")]
     public float timeToDestroy = 30.0f;
     public float destroyAfter = 7.0f;
@@ -168,6 +168,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public bool canBeSelected = true;
     [HideInInspector]
     public GameObject visionTool;
+    [HideInInspector]
     public UnitSelectionComponent unitSelectionComponent;
 
     [HideInInspector]
@@ -339,7 +340,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 Destroy(gameObject, destroyAfter);
             }
         }
-        if (sendToUnderground){
+        if (sendToUnderground)
+        {
             delayToMoveUnderground -= Time.deltaTime;
             if (delayToMoveUnderground <= 0)
             {
@@ -391,7 +393,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         }
         else
             return true;
-        
+
     }
 
     public void TextBubble(string message, int timer)
@@ -455,7 +457,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         if ((pointMarker == null || !saveMarker) && pointMarkerPrefab != null)
         {
             var createdMarker = (GameObject)Instantiate(pointMarkerPrefab, target, pointMarkerPrefab.transform.rotation);
-            Projector projectorComponent = createdMarker.GetComponentInChildren<Projector>();
+            PointMarker pointMarkerScript = createdMarker.GetComponent<PointMarker>();
+            Projector projectorComponent = pointMarkerScript.projector.GetComponent<Projector>();
             projectorComponent.material.color = color;
             if (timer > 0)
                 Destroy(createdMarker, timer);
@@ -481,7 +484,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     public void DestroyPointMarker()
     {
-        if(pointMarker != null)
+        if (pointMarker != null)
             Destroy(pointMarker);
         pointMarker = null;
     }
@@ -606,7 +609,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public virtual void TakeDamage(float damage, GameObject attacker) { }
     public virtual void BecomeDead() { }
     public virtual void StartInteract(GameObject targetObject) { }
-    public virtual bool[] UICommand(string commandName) { return new bool[2] { false, false}; }
+    public virtual bool[] UICommand(string commandName) { return new bool[2] { false, false }; }
     public virtual bool IsHealthVisible() { return false; }
     public virtual List<string> GetCostInformation() { return new List<string>(); }
     public virtual bool IsVisible() { return false; }

@@ -224,6 +224,7 @@ public class UIBaseScript : MonoBehaviour
             if (buildingBehaviorComponent != null && buildingBehaviorComponent.live)
                 foreach (GameObject buildUnit in buildingBehaviorComponent.producedUnits)
                 {
+                    Debug.Log(buildUnit + " " + buildingBehaviorComponent.producedUnits[0]);
                     BaseBehavior buildUnitBaseBehaviorComponent = buildUnit.GetComponent<BaseBehavior>();
                     GetOrCreateUIImageToList(
                         ref newUIImages, buildUnitBaseBehaviorComponent.uniqueName, buildUnitBaseBehaviorComponent.imagePath,

@@ -10,9 +10,6 @@ TagManager:
   - UnitsParent
   - BuildingsParent
   - Ambient
-  - Spawn
-  - Bullet
-  - FogProjector
   layers:
   - Default
   - TransparentFX
@@ -29,8 +26,8 @@ TagManager:
   - Unit
   - Building
   - Ambient
-  - HP
-  - Marker
+  - 
+  - 
   - 
   - 
   - 

@@ -35,15 +35,12 @@ MonoBehaviour:
   - CreateMessage
   - AddMessasgeToChat
   - Update
-  - SpawnPlayer
   - ChangeOwner
   - GiveOrder
   - GiveOrderViewID
-  - SetAsProject
-  - UnitStartBuildUserId
+  - GiveOrderWithSpeed
+  - SendChatMessage
   - SetAsBuilding
   - SetAsSelected
   - StartInteractViewID
-  - GiveOrderWithSpeed
-  - SendChatMessage
   DisableAutoOpenWizard: 1

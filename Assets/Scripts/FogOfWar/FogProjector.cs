@@ -15,7 +15,7 @@ public class FogProjector : MonoBehaviour
     [Range(1, 4)]
     public int upsample = 2;
 
-    // Material blurMaterial;
+    Material blurMaterial;
     public float blur=1;
 
     Projector projector;
@@ -28,8 +28,8 @@ public class FogProjector : MonoBehaviour
     {
         projector = GetComponent<Projector>();
 
-        // blurMaterial = new Material(blurShader);
-        // blurMaterial.SetVector("_Parameter", new Vector4(blur, -blur, 0, 0));
+        blurMaterial = new Material(blurShader);
+        blurMaterial.SetVector("_Parameter", new Vector4(blur, -blur, 0, 0));
 
         projecTexture = new RenderTexture(
                             fogTexture.width * upsample,
