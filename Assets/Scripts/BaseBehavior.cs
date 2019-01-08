@@ -455,8 +455,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         if ((pointMarker == null || !saveMarker) && pointMarkerPrefab != null)
         {
             var createdMarker = (GameObject)Instantiate(pointMarkerPrefab, target, pointMarkerPrefab.transform.rotation);
-            PointMarker pointMarkerScript = createdMarker.GetComponent<PointMarker>();
-            Projector projectorComponent = pointMarkerScript.projector.GetComponent<Projector>();
+            Projector projectorComponent = createdMarker.GetComponentInChildren<Projector>();
             projectorComponent.material.color = color;
             if (timer > 0)
                 Destroy(createdMarker, timer);

@@ -11,6 +11,8 @@ TagManager:
   - BuildingsParent
   - Ambient
   - Spawn
+  - Bullet
+  - FogProjector
   layers:
   - Default
   - TransparentFX

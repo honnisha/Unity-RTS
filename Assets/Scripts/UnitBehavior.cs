@@ -173,9 +173,6 @@ public class UnitBehavior : BaseBehavior
             if (newAgentDestination != new Vector3())
             {
                 NavMeshPath path = new NavMeshPath();
-                bool canFind = agent.CalculatePath(newAgentDestination, path);
-                if(!canFind)
-                Debug.Log(canFind);
                 agent.destination = newAgentDestination;
                 newAgentDestination = new Vector3();
             }

@@ -59,8 +59,7 @@ public class TerrainGenerator : MonoBehaviour
         ModuleBase moduleBase = GetFractal();
         mapTexture = new Texture2D(sizeX, sizeY);
         SMappingRanges ranges = new SMappingRanges();
-
-        Debug.Log(moduleBase.Get(2.0, 2.0));
+        
         float[,,] map = new float[sizeX, sizeY, 8];
         int[][,] grassLayers = new int[][,] { new int[sizeX, sizeY], new int[sizeX, sizeY], new int[sizeX, sizeY], new int[sizeX, sizeY] };
         for (int y = 0; y < t.terrainData.detailHeight; y++)
@@ -95,7 +94,7 @@ public class TerrainGenerator : MonoBehaviour
             }
         }
         t.terrainData.SetAlphamaps(0, 0, map);
-        for (int i = 0; i <= grassLayers.Length; i++)
+        for (int i = 0; i < grassLayers.Length; i++)
             t.terrainData.SetDetailLayer(0, 0, i, grassLayers[i]);
     }
     public double scale = 1.0;
