@@ -1,0 +1,11 @@
+Unity/Temp
+Unity/Library
+.DS_Store
+
+
+*.meta
+*.sln
+*.csproj
+*.unityproj
+*.pidb
+*.userprefs
