@@ -229,11 +229,13 @@ padding-bottom: 5px;
 
 .mapBlock {
 	background-size: 100%;
+	background: green;
+}
+.minimap {
 	margin-left: 50%;
 	margin-top: 5%;
 	height: 100%;
 	width: 45%;
-	background: green;
 }
 .map {
 	position: relative;
@@ -379,10 +381,41 @@ padding-bottom: 5px;
 	height: 11px;
 	width: 13px;
 }
+.window {
+	top: 6%;
+	left: 25%;
+	width: 50%;
+	height: 70%;
+	position: absolute;
+	text-align: center;
+    background: url("paper dark") no-repeat;
+	background-size: 100%;
+}
+.window > .bigMap {
+	padding: 5%;
+	position: absolute;
+	width: 90%;
+	height: 90%;
+}
+.closeWindow {
+	color: gray;
+    font-size: 110%;
+	font-weight: bold;
+	text-align: center;
+	height: 4%;
+	width: 5%;
+	right: 0px;
+	position: absolute;
+    background: url("button gray.png") no-repeat;
+	background-size: 100%;
+}
+.closeWindow:hover {
+	color: red;
+}
 </style>
 <script>
 	function CreateMessage(message, timeout) {
-        var parentElement = document.getElementsByClassName("messages")[0];
+        var parentElement = document.getElementsByTagName("messages")[0];
         var msgboxDiv = document.createElement("div");
         msgboxDiv.className = "msgbox";
         parentElement.appendChild(msgboxDiv);
@@ -455,6 +488,34 @@ padding-bottom: 5px;
         menuElement.innerText = hotkey;
         elementHolder.appendChild(menuElement);
 	}
+	function DisplayBigMapWindow() {
+        var htmlBlock = document.getElementsByTagName("html")[0];
+
+        var windowBlock = document.createElement("div");
+        windowBlock.className = "window";
+        htmlBlock.appendChild(windowBlock);
+
+        var bapBlock = document.createElement("div");
+        bapBlock.className = "bigMap";
+        windowBlock.appendChild(bapBlock);
+
+        var mapBlock = document.createElement("div");
+        mapBlock.className = "mapBlock";
+        bapBlock.appendChild(mapBlock);
+		
+        var element = document.createElement("img");
+        element.className = "map clckable";
+        mapBlock.appendChild(element);
+		
+        var element = document.createElement("div");
+        element.className = "units clckable";
+        mapBlock.appendChild(element);
+		
+        var element = document.createElement("div");
+        element.className = "closeWindow buttonBigMap";
+        element.innerText = "X";
+        windowBlock.appendChild(element);
+	}
 </script>
 
 <div class="messages">
@@ -468,10 +529,12 @@ padding-bottom: 5px;
 			Wood: &wood;
 			</div>
 		</div>
-		<div class="mapBlock">
-			<img class="map clckable">
-			</img>
-			<div class="units clckable">
+		<div class="minimap">
+			<div class="mapBlock">
+				<img class="map clckable">
+				</img>
+				<div class="units clckable">
+				</div>
 			</div>
 		</div>
 	</div>
@@ -492,7 +555,8 @@ padding-bottom: 5px;
 </div>
 
 <div class="buttons">
-	<div class="buttonMenu">Menu (f10)</div>
+	<div class="buttonMenu buttonMainMenu">Menu (f10)</div>
+	<div class="buttonMenu buttonBigMap">Map (M)</div>
 </div>
 
 <div class="menu">

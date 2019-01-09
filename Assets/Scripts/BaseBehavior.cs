@@ -370,7 +370,12 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         else
         {
             if (cameraController.userId == ownerId)
-                return "#0F0";
+            {
+                if (unitSelectionComponent.isSelected)
+                    return "#A7FFA9";
+                else
+                    return "#00A500";
+            }
             else
                 return "#FFF";
         }

@@ -30,7 +30,6 @@ public class CameraController : MonoBehaviourPunCallbacks
     [HideInInspector]
     public bool chatInput = false;
     [HideInInspector]
-    public bool menuOpen = false;
     private int workersIterate = 0;
 
     [System.Serializable]
@@ -78,10 +77,22 @@ public class CameraController : MonoBehaviourPunCallbacks
     private Dictionary<KeyCode, List<GameObject>> unitsBinds = new Dictionary<KeyCode, List<GameObject>>();
     private KeyCode tempKey;
     private float keyTimer = 0.0f;
+    
+    public enum WindowType { None, MainMenu, BigMap };
+    public WindowType selectedWindowType = WindowType.None;
+    public Dictionary<WindowType, List<object>> menuInfo = new Dictionary<WindowType, List<object>>();
 
     // Use this for initialization
     void Start()
     {
+        menuInfo.Add(WindowType.MainMenu, new List<object>());
+        menuInfo[WindowType.MainMenu].Add(KeyCode.F10);
+        menuInfo[WindowType.MainMenu].Add("buttonMainMenu");
+
+        menuInfo.Add(WindowType.BigMap, new List<object>());
+        menuInfo[WindowType.BigMap].Add(KeyCode.M);
+        menuInfo[WindowType.BigMap].Add("buttonBigMap");
+
         for (int number = 1; number <= 9; number++)
             unitsBinds.Add(KeyCode.Alpha0 + number, new List<GameObject>());
 
@@ -154,7 +165,6 @@ public class CameraController : MonoBehaviourPunCallbacks
         if (countWorkersTimer <= 0)
         {
             UpdateMapsAndStatistic();
-            countWorkersTimer = 1.0f;
 
             UI.Variables["food"] = String.Format("{0:F0}", food);
             if (workedOnFood > 0) UI.Variables["food"] += String.Format(" ({0})", workedOnFood);
@@ -226,26 +236,37 @@ public class CameraController : MonoBehaviourPunCallbacks
 
         if (!isClickGUI)
             SelectBinds();
-
-        // Menu
-        if (activeOver != null && activeOver.className.Contains("buttonMenu") && UnityEngine.Input.GetMouseButtonDown(0) ||
-            UnityEngine.Input.GetKeyDown(KeyCode.F10) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
+        
+        WindowType newWindowType = GetNewWindow(activeOver);
+        if ((newWindowType != WindowType.None && selectedWindowType != WindowType.None) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
         {
-            if (!menuOpen && !UnityEngine.Input.GetKeyDown(KeyCode.Escape))
-            {
-                UI.document.Run("CreateMenu");
-                menuOpen = true;
-            }
-            else
-            {
+            if (selectedWindowType == WindowType.MainMenu)
                 UI.document.getElementsByClassName("menu")[0].innerHTML = "";
-                menuOpen = false;
-            }
+            else if (selectedWindowType == WindowType.BigMap)
+                UI.document.getElementsByClassName("window")[0].remove();
+
+            if (newWindowType == selectedWindowType || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
+                newWindowType = WindowType.None;
+            selectedWindowType = WindowType.None;
         }
+
+        if (newWindowType != WindowType.None)
+        {
+            if (newWindowType == WindowType.MainMenu)
+                UI.document.Run("CreateMenu");
+            else if (newWindowType == WindowType.BigMap)
+            {
+                UI.document.Run("DisplayBigMapWindow");
+                UpdateMapsAndStatistic();
+            }
+
+            selectedWindowType = newWindowType;
+        }
+
         if (activeOver != null && activeOver.className.Contains("CloseMenu") && UnityEngine.Input.GetMouseButtonDown(0))
         {
             UI.document.getElementsByClassName("menu")[0].innerHTML = "";
-            menuOpen = false;
+            selectedWindowType = WindowType.None;
         }
         else if (activeOver != null && activeOver.className.Contains("GoToMainMenu") && UnityEngine.Input.GetMouseButtonDown(0))
         {
@@ -262,6 +283,28 @@ public class CameraController : MonoBehaviourPunCallbacks
         
         if (!objectPlaced && buildedObject == null)
             SelectUnitsUpdate(isClickGUI);
+    }
+
+    public WindowType GetNewWindow(Dom.Element activeOver)
+    {
+        if (activeOver != null || UnityEngine.Input.anyKeyDown)
+        {
+            foreach (WindowType menuType in menuInfo.Keys)
+            {
+                foreach (object eventType in menuInfo[menuType])
+                {
+                    if (eventType is string)
+                    {
+                        if (activeOver != null && UnityEngine.Input.GetMouseButtonUp(0) && activeOver.className.Contains((string)eventType))
+                            return menuType;
+                    }
+                    else
+                        if (UnityEngine.Input.GetKeyDown((KeyCode)eventType))
+                        return menuType;
+                }
+            }
+        }
+        return WindowType.None;
     }
 
     public void SelectUnitsUpdate(bool isClickGUI)
@@ -555,22 +598,27 @@ public class CameraController : MonoBehaviourPunCallbacks
         foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
         {
             // Draw map
-            mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
+            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
+            if (terrainGenerator != null && terrainGenerator.mapTexture != null)
+            {
+                ((HtmlElement)mapBlock).image = terrainGenerator.mapTexture;
+                mapBlock.style.height = "100%";
+                mapBlock.style.width = "100%";
+            }
+            else
+            {
+                mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
+            }
             var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
 
             Texture newTexture;
 
-            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
-            if (terrainGenerator != null && terrainGenerator.mapTexture != null)
-            {
-                mapImage.image = terrainGenerator.mapTexture;
-            }
-            else if (mapTexture.height > 0)
+            if (mapTexture.height > 0)
             {
                 mapImage.image = mapTexture;
+                mapImage.style.height = "100%";
+                mapImage.style.width = "100%";
             }
-            mapImage.style.height = "100%";
-            mapImage.style.width = "100%";
 
             var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
             unitsBlock.innerHTML = "";
@@ -636,6 +684,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                 UI.document.Run("CreateInfoButton", "solders", units.Count, number, units[0].GetComponent<BaseBehavior>().imagePath);
             }
         }
+        countWorkersTimer = 1.0f;
     }
 
     public override void OnDisconnected(DisconnectCause cause)

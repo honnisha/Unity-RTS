@@ -52,6 +52,13 @@ public class TerrainGenerator : MonoBehaviour
         return value;
     }
 
+    public Color ParseHEX(string hexString)
+    {
+        Color newColor = new Color();
+        ColorUtility.TryParseHtmlString(hexString, out newColor);
+        return newColor;
+    }
+
     public void Generate()
     {
         Terrain t = Terrain.activeTerrain;
@@ -66,9 +73,9 @@ public class TerrainGenerator : MonoBehaviour
 
         float[,,] map = new float[sizeX, sizeY, 7];
         int[][,] grassLayers = new int[][,] { new int[sizeX, sizeY], new int[sizeX, sizeY], new int[sizeX, sizeY], new int[sizeX, sizeY] };
-        for (int y = 0; y < t.terrainData.detailHeight; y++)
+        for (int y = 0; y < sizeX; y++)
         {
-            for (int x = 0; x < t.terrainData.detailWidth; x++)
+            for (int x = 0; x < sizeY; x++)
             {
                 double p = (double)x / (double)sizeX;
                 double q = (double)y / (double)sizeY;
@@ -79,10 +86,17 @@ public class TerrainGenerator : MonoBehaviour
                 float val = (float)moduleBase.Get(nx * scale, ny * scale);
 
                 float textureScale = (val + 1.0f);
-                if (textureScale > 0.9f)
-                    mapTexture.SetPixel(x, y, new Color(0, 1, 0, 1));
+                if (textureScale > 0.89f)
+                     mapTexture.SetPixel(y, x, ParseHEX("#005C01"));
+                else if (textureScale > 0.7f)
+                    mapTexture.SetPixel(y, x, ParseHEX("#007501"));
+                else if (textureScale < 0.2f)
+                    mapTexture.SetPixel(y, x, ParseHEX("#3F8541"));
+                else if (textureScale < 0.1f)
+                    mapTexture.SetPixel(y, x, ParseHEX("#5F8560"));
                 else
-                    mapTexture.SetPixel(x, y, new Color(0, 0.4f, 0, 1));
+                    mapTexture.SetPixel(y, x, ParseHEX("#008501"));
+                // mapTexture.SetPixel(x, y, new Color(val, val, val));
 
                 float grassValue = 0.0f;
                 if(textureScale > 0.75)
@@ -90,30 +104,31 @@ public class TerrainGenerator : MonoBehaviour
                 map[x, y, 1] = grassValue;
 
                 float stoneValue = 0.0f;
-                if (textureScale < 0.2)
+                if (textureScale < 0.25)
                 {
-                    stoneValue = 1.0f - KeepPositive(textureScale * 5.0f);
+                    stoneValue = 1.0f - KeepPositive(textureScale * 4.0f);
                 }
                 map[x, y, 3] = stoneValue;
 
                 map[x, y, 0] = KeepPositive(textureScale + 0.2f) - grassValue - stoneValue / 2.0f;
                 map[x, y, 2] = KeepPositive(1.0f - textureScale - 0.2f) - grassValue - stoneValue / 2.0f;
 
-                if (textureScale > 0.75f)
+                if (textureScale > 0.9f)
                 {
                     grassLayers[3][x, y] = 1;
                 }
-                if (textureScale > 0.6f)
+                if (textureScale > 0.7f)
                 {
                     grassLayers[2][x, y] = 2;
                 }
-                else if (textureScale > 0.3f)
+                else if (textureScale > 0.5f)
                 {
-                    grassLayers[2][x, y] = 1;
+                    grassLayers[1][x, y] = 2;
+                }   
+                else if (textureScale > 0.15f)
+                {
                     grassLayers[1][x, y] = 1;
                 }
-                else if (textureScale > 0.1f)
-                    grassLayers[1][x, y] = 1;
             }
         }
         mapTexture.Apply();
