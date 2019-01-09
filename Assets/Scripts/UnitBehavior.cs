@@ -149,7 +149,15 @@ public class UnitBehavior : BaseBehavior
             if (!unitSelectionComponent.isSelected || !live)
                 DestroyPointMarker();
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
-        
+
+        if ((obstacle == null || !obstacle.enabled) && newAgentDestination != new Vector3())
+        {
+            if(!agent.enabled)
+                agent.enabled = true;
+            base.agent.isStopped = false;
+            agent.destination = newAgentDestination;
+            newAgentDestination = new Vector3();
+        }
         if (isAgentStopped)
         {
             if (agent.enabled)
@@ -161,23 +169,12 @@ public class UnitBehavior : BaseBehavior
                     obstacle.enabled = true;
             }
         }
-        if (!isAgentStopped || newAgentDestination != new Vector3())
+        if (!isAgentStopped)
         {
             if (!agent.enabled)
             {
                 if (obstacle != null)
                     obstacle.enabled = false;
-                agent.enabled = true;
-                base.agent.isStopped = false;
-            }
-            if (newAgentDestination != new Vector3())
-            {
-                NavMeshPath path = new NavMeshPath();
-                bool canFind = agent.CalculatePath(newAgentDestination, path);
-                if(!canFind)
-                Debug.Log(canFind);
-                agent.destination = newAgentDestination;
-                newAgentDestination = new Vector3();
             }
         }
     }
@@ -302,7 +299,7 @@ public class UnitBehavior : BaseBehavior
             SetAgentDestination(GetClosestPositionToTarget(targetPoint));
 
             float minDistance = minDistanceToInteract;
-            bool targetDest = false;
+            bool reachDest = false;
             bool isTargetEnemy = false;
             if (targetBaseBehavior != null)
                 if (IsTeamEnemy(targetBaseBehavior.team) && attackType != AttackType.None)
@@ -311,18 +308,33 @@ public class UnitBehavior : BaseBehavior
             if (isTargetEnemy && targetBaseBehavior.live)
                 minDistance = rangeAttack;
 
+            bool targetIsPoint = false;
+            bool colliderCheck = true;
+            bool isBuilding = target.GetComponent<BuildingBehavior>() != null;
+            BuildingBehavior targetBuildingBehavior = null;
+            if (isBuilding)
+            {
+                targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
+                if (targetBuildingBehavior.sourceType == SourceType.Farm)
+                {
+                    targetIsPoint = true;
+                    colliderCheck = false;
+                }
+            }
+
             float dist = Vector3.Distance(gameObject.transform.position, target.transform.position);
             RaycastHit hit;
             // If unit and target close enough
+            if(targetIsPoint && Vector3.Distance(gameObject.transform.position, agent.destination) <= minDistance && Vector3.Distance(gameObject.transform.position, target.transform.position) < 4.0f)
             if (dist <= minDistance && Physics.Linecast(transform.position, target.transform.position))
-                targetDest = true;
+                reachDest = true;
             // Or collisions touch each other
-            else if (GetComponent<Collider>().bounds.Intersects(target.GetComponent<Collider>().bounds))
-                targetDest = true;
+            if (colliderCheck && GetComponent<Collider>().bounds.Intersects(target.GetComponent<Collider>().bounds))
+                reachDest = true;
 
             float magnitDistance = 2.0f;
-            if (target.GetComponent<BuildingBehavior>() != null)
-                magnitDistance = target.GetComponent<BuildingBehavior>().magnitDistance;
+            if (targetBuildingBehavior != null)
+                magnitDistance = targetBuildingBehavior.magnitDistance;
 
             if (false)
             {
@@ -337,7 +349,7 @@ public class UnitBehavior : BaseBehavior
                     SetAgentStopped(false);
             }
 
-            if (targetDest)
+            if (reachDest)
             {
                 // Attack it target if target is enemy or stop
                 if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live)
@@ -586,7 +598,7 @@ public class UnitBehavior : BaseBehavior
                 if (target != null)
                 {
                     interactObject = target;
-                    SetAgentDestination(GetRandomPoint(target.transform.position, 2.0f));
+                    SetAgentDestination(GetRandomPoint(target.transform.position, 3.0f));
                     target = null;
                 }
             }
@@ -630,7 +642,7 @@ public class UnitBehavior : BaseBehavior
     public ToolInfo GetToolInfo()
     {
         ToolInfo toolInfo = null;
-        if(resourceType != ResourceType.None)
+        if(resourceType != ResourceType.None || interactType == InteractigType.Bulding)
         {
             ResourceGatherInfo resourceInfo = resourceGatherInfo.Find(x => x.type == resourceType);
             if (resourceInfo != null)

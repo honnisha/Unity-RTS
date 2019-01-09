@@ -255,6 +255,13 @@ MonoBehaviour:
   uqeryLimit: 10
   buildTimer: 0
   tempMaterialsMode: 
+  terrainChangeInfo:
+    offset: {x: -2.6, y: -2.6}
+    size: {x: 10, y: 10}
+    layer: 5
+    value: 1
+    changeTexture: 1
+    removeGrass: 1
 --- !u!114 &3380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,8 +295,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3389}
-  viewIdField: 55
-  InstantiationId: 55
+  viewIdField: 11
+  InstantiationId: 11
   isRuntimeInstantiated: 0
 --- !u!114 &3389
 MonoBehaviour:

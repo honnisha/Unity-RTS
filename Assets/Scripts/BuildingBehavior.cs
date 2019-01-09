@@ -29,6 +29,20 @@ public class BuildingBehavior : BaseBehavior
 
     #endregion
 
+    [System.Serializable]
+    public class TerrainChangeInfo
+    {
+        public Vector2 offset;
+        public Vector2 size;
+        public int layer;
+        public int value;
+        public bool changeTexture = false;
+        public bool removeGrass = false;
+    }
+    [Header("Terrain modifications")]
+    public TerrainChangeInfo terrainChangeInfo;
+    private bool terrainHasChanged = false;
+
     public override void Awake()
     {
         if (gameObject.layer == LayerMask.NameToLayer("Ambient"))
@@ -43,6 +57,17 @@ public class BuildingBehavior : BaseBehavior
     override public void Update()
     {
         base.Update();
+
+        if(!terrainHasChanged && state == BuildingState.Builded && IsVisible())
+        {
+            terrainHasChanged = true;
+            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
+            Vector2 newPosition = new Vector2(transform.transform.position.x + terrainChangeInfo.offset.y, transform.transform.position.z + terrainChangeInfo.offset.x);
+            if (terrainChangeInfo.changeTexture)
+                terrainGenerator.SetTextureOnTerrain(newPosition, terrainChangeInfo.size, terrainChangeInfo.layer, terrainChangeInfo.value);
+            if(terrainChangeInfo.removeGrass)
+                terrainGenerator.RemoveGrassOnTerrain(newPosition, terrainChangeInfo.size);
+        }
 
         if (unitsQuery.Count > 0)
         {

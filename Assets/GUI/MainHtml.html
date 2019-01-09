@@ -415,7 +415,7 @@ padding-bottom: 5px;
 </style>
 <script>
 	function CreateMessage(message, timeout) {
-        var parentElement = document.getElementsByTagName("messages")[0];
+        var parentElement = document.getElementsByClassName("messages")[0];
         var msgboxDiv = document.createElement("div");
         msgboxDiv.className = "msgbox";
         parentElement.appendChild(msgboxDiv);

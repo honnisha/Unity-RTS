@@ -341,7 +341,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                                 }
                                 else
                                 {
-                                    clickTimer = 0.25f;
+                                    clickTimer = 0.4f;
                                     UnitSelectionComponent selectionComponent = hit.transform.gameObject.GetComponent<UnitSelectionComponent>();
                                     selectionComponent.isSelected = true;
                                 }
@@ -560,7 +560,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                         if (keyTimer > 0)
                             MoveCameraToPoint(GetCenterOfObjects(units));
                         tempKey = key;
-                        keyTimer = 0.25f;
+                        keyTimer = 0.4f;
                     }
                 }
             }

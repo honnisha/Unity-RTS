@@ -166,6 +166,7 @@ MonoBehaviour:
   health: 600
   live: 1
   pointToInteract: {fileID: 0}
+  debug: 0
   isWalkAround: 0
   timeToWalk: 0
   timerToWalk: 0
@@ -211,6 +212,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   agent: {fileID: 0}
+  obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
   tempDestinationPoint: {x: 0, y: 0, z: 0}
@@ -236,6 +238,7 @@ MonoBehaviour:
   pointMarker: {fileID: 0}
   canBeSelected: 1
   visionTool: {fileID: 0}
+  unitSelectionComponent: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -249,6 +252,13 @@ MonoBehaviour:
   uqeryLimit: 10
   buildTimer: 0
   tempMaterialsMode: 
+  terrainChangeInfo:
+    offset: {x: -2.5, y: -4}
+    size: {x: 10, y: 14}
+    layer: 5
+    value: 1
+    changeTexture: 1
+    removeGrass: 1
 --- !u!114 &2752
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -283,7 +293,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 2839}
   viewIdField: 0
-  InstantiationId: 7
+  InstantiationId: 3
   isRuntimeInstantiated: 0
 --- !u!114 &2839
 MonoBehaviour:

@@ -446,6 +446,10 @@ MonoBehaviour:
   health: 100
   live: 1
   pointToInteract: {fileID: 1234786408475336}
+  debug: 0
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 10
   uniqueName: Gold mining
   readableName: Gold mining
@@ -456,6 +460,7 @@ MonoBehaviour:
   costGold: 50
   costWood: 50
   productionHotkey: 102
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
   interactType: 0
@@ -487,6 +492,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   agent: {fileID: 0}
+  obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
   tempDestinationPoint: {x: 0, y: 0, z: 0}
@@ -496,11 +502,8 @@ MonoBehaviour:
   HTMLHealthFile: {fileID: 0}
   InfoHTMLOffset: {x: 0, y: 3, z: 0}
   pointMarkerPrefab: {fileID: 0}
-  pointMarker: {fileID: 0}
   HTMLHealthSize: {x: 100, y: 100}
   visionToolPrefab: {fileID: 0}
-  visionTool: {fileID: 0}
-  canBeSelected: 1
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
@@ -508,10 +511,16 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
+  attackedTeam: 0
+  pointMarker: {fileID: 0}
+  canBeSelected: 1
+  visionTool: {fileID: 0}
+  unitSelectionComponent: {fileID: 0}
   resourceCapacityType: 2
   resourceCapacity: 1000
   resourceEndless: 0
-  IsAFarm: 0
+  sourceType: 0
   storedResources: 
   state: 3
   magnitDistance: 2
@@ -521,6 +530,13 @@ MonoBehaviour:
   uqeryLimit: 5
   buildTimer: 0
   tempMaterialsMode: 
+  terrainChangeInfo:
+    offset: {x: 0, y: 0}
+    size: {x: 0, y: 0}
+    layer: 0
+    value: 0
+    changeTexture: 0
+    removeGrass: 0
 --- !u!114 &114574785616756634
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -5,6 +5,7 @@ using AccidentalNoise;
 
 public class TerrainGenerator : MonoBehaviour
 {
+    public int layersCount = 1;
     public FractalType fractalType = FractalType.MULTI;
     public BasisTypes basisType = BasisTypes.SIMPLEX;
     public InterpTypes interpType = InterpTypes.QUINTIC;
@@ -59,6 +60,45 @@ public class TerrainGenerator : MonoBehaviour
         return newColor;
     }
 
+    private Vector2 CalculatePosition(Vector2 position)
+    {
+        Terrain t = Terrain.activeTerrain;
+        float scaleX = t.terrainData.alphamapHeight / t.terrainData.size.x;
+        float scaleY = t.terrainData.alphamapWidth / t.terrainData.size.z;
+        return new Vector2(position.x * scaleX, position.y * scaleY);
+    }
+
+    public void SetTextureOnTerrain(Vector2 position, Vector2 size, int layer, int value)
+    {
+        Terrain t = Terrain.activeTerrain;
+        float[,,] map = new float[(int)size.x, (int)size.y, layersCount];
+        for (int y = 0; y < (int)size.x; y++)
+        {
+            for (int x = 0; x < (int)size.y; x++)
+            {
+                map[y, x, layer] = value;
+            }
+        }
+        Vector2 terrainPosition = CalculatePosition(position);
+        t.terrainData.SetAlphamaps((int)terrainPosition.x, (int)terrainPosition.y, map);
+    }
+
+    public void RemoveGrassOnTerrain(Vector2 position, Vector2 size)
+    {
+        Terrain t = Terrain.activeTerrain;
+        int[,] grassLayers = new int[(int)size.x, (int)size.y];
+        for (int y = 0; y < (int)size.x; y++)
+        {
+            for (int x = 0; x < (int)size.y; x++)
+            {
+                grassLayers[y, x] = 0;
+            }
+        }
+        Vector2 terrainPosition = CalculatePosition(position);
+        for(int i = 0; i <= 3; i++)
+            t.terrainData.SetDetailLayer((int)terrainPosition.x, (int)terrainPosition.y, i, grassLayers);
+    }
+
     public void Generate()
     {
         Terrain t = Terrain.activeTerrain;
@@ -71,7 +111,7 @@ public class TerrainGenerator : MonoBehaviour
         mapTexture = new Texture2D(sizeX, sizeY);
         SMappingRanges ranges = new SMappingRanges();
 
-        float[,,] map = new float[sizeX, sizeY, 7];
+        float[,,] map = new float[sizeX, sizeY, layersCount];
         int[][,] grassLayers = new int[][,] { new int[sizeX, sizeY], new int[sizeX, sizeY], new int[sizeX, sizeY], new int[sizeX, sizeY] };
         for (int y = 0; y < sizeX; y++)
         {

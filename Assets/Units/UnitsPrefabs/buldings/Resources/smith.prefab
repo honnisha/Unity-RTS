@@ -330,7 +330,7 @@ MonoBehaviour:
   state: 3
   magnitDistance: 4
   producedUnits:
-  - {fileID: 1731176499304606, guid: 95eb1e8559a643a489385f9c45b9163b, type: 3}
+  - {fileID: 1294, guid: 95eb1e8559a643a489385f9c45b9163b, type: 3}
   - {fileID: 1528613431990062, guid: 2c7addb4de208dd47b215e38fc2e92db, type: 3}
   - {fileID: 1323032547063684, guid: 8ebcd63d2818748488da2bba309fb6e4, type: 3}
   spawnPoint: {fileID: 1048}
@@ -338,6 +338,13 @@ MonoBehaviour:
   uqeryLimit: 10
   buildTimer: 0
   tempMaterialsMode: 
+  terrainChangeInfo:
+    offset: {x: -3.1, y: -2.2}
+    size: {x: 10, y: 11}
+    layer: 5
+    value: 1
+    changeTexture: 1
+    removeGrass: 1
 --- !u!114 &3462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,8 +394,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3516}
-  viewIdField: 7
-  InstantiationId: 7
+  viewIdField: 5
+  InstantiationId: 5
   isRuntimeInstantiated: 0
 --- !u!114 &3516
 MonoBehaviour:
