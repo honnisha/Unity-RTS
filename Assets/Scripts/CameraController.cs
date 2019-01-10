@@ -82,9 +82,13 @@ public class CameraController : MonoBehaviourPunCallbacks
     public WindowType selectedWindowType = WindowType.None;
     public Dictionary<WindowType, List<object>> menuInfo = new Dictionary<WindowType, List<object>>();
 
+    Dictionary<string, List<Vector3>> spawnData;
+
     // Use this for initialization
     void Start()
     {
+        UI.document.Run("CreateLoadingScreen", "Retrieving data");
+
         menuInfo.Add(WindowType.MainMenu, new List<object>());
         menuInfo[WindowType.MainMenu].Add(KeyCode.F10);
         menuInfo[WindowType.MainMenu].Add("buttonMainMenu");
@@ -96,8 +100,8 @@ public class CameraController : MonoBehaviourPunCallbacks
         for (int number = 1; number <= 9; number++)
             unitsBinds.Add(KeyCode.Alpha0 + number, new List<GameObject>());
 
-        GameObject createdUnit = null;
-
+        int mapSeed = UnityEngine.Random.Range(0, 1000);
+        int playerCount = 1;
         // Multiplayer
         if (PhotonNetwork.InRoom)
         {
@@ -112,28 +116,72 @@ public class CameraController : MonoBehaviourPunCallbacks
 
             object playerTeamObd;
             if (PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue(GameInfo.PLAYER_TEAM, out playerTeamObd))
-            {
                 team = (int)playerTeamObd;
-            }
+
+            object mapSeedObd;
+            if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(GameInfo.MAP_SEED, out mapSeedObd))
+                mapSeed = (int)mapSeedObd;
+
             userId = PhotonNetwork.LocalPlayer.UserId;
-            Debug.Log("userNumber: " + userNumber + " team: " + team + " userId: " + userId);
+            playerCount = PhotonNetwork.PlayerList.Length;
+            Debug.Log("userNumber: " + userNumber + " team: " + team + " userId: " + userId + " mapSeed: " + mapSeed);
         }
         // Singleplayer
         else
         {
             PhotonNetwork.OfflineMode = true;
         }
-
-        foreach (GameObject spawnPoint in GameObject.FindGameObjectsWithTag("Spawn"))
+        
+        UI.document.Run("UpdateLoadingDescription", "Create terrain");
+        TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
+        terrainGenerator.Generate(mapSeed);
+        if (GameInfo.IsMasterClient())
         {
-            SpawnBehavior spawnBehavior = spawnPoint.GetComponent<SpawnBehavior>();
-            PhotonView spawnPhotonView = spawnPoint.GetComponent<PhotonView>();
-            if (spawnBehavior.number == userNumber)
-            {
-                createdUnit = PhotonNetwork.Instantiate(createSpawnBuildingName, spawnPoint.transform.position, spawnPoint.transform.rotation, 0);
-                break;
-            }
+            spawnData = terrainGenerator.GetSpawnData(spawnCount: playerCount);
+            if (PhotonNetwork.InRoom)
+                GetComponent<PhotonView>().RPC("InstantiateObjects", PhotonTargets.All, spawnData);
+            else
+                InstantiateObjects(spawnData);
         }
+        else
+        {
+            UI.document.Run("UpdateLoadingDescription", "Retrieving spawn data");
+        }
+    }
+
+    void OnDrawGizmos()
+    {
+        if (spawnData != null)
+        {
+            Gizmos.color = Color.yellow;
+            foreach(Vector3 spawnPoint in spawnData["spawn"])
+                Gizmos.DrawSphere(spawnPoint, 0.4f);
+        }
+    }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+    {
+        int countLoadedPlayers = 0;
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            object playerLoadedObd;
+            bool playerLoaded = false;
+            if (player.CustomProperties.TryGetValue(GameInfo.PLAYER_LOADED_LEVEL, out playerLoadedObd))
+                playerLoaded = (bool)playerLoadedObd;
+            if (playerLoaded)
+                countLoadedPlayers++;
+        }
+        if (countLoadedPlayers >= PhotonNetwork.PlayerList.Length)
+            StartGame();
+    }
+
+    [PunRPC]
+    public void InstantiateObjects(Dictionary<string, List<Vector3>> newSpawnData)
+    {
+        GameObject createdUnit = null;
+        spawnData = newSpawnData;
+
+        createdUnit = PhotonNetwork.Instantiate(createSpawnBuildingName, spawnData["spawn"][userNumber], new Quaternion(), 0);
         if (createdUnit == null)
         {
             UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
@@ -154,6 +202,24 @@ public class CameraController : MonoBehaviourPunCallbacks
             BuildingBehavior createdUnitBuildingBehavior = createdUnit.GetComponent<BuildingBehavior>();
             createdUnitBuildingBehavior.ProduceUnit(startUnitInfo.prefabName, startUnitInfo.number, startUnitInfo.distance);
         }
+
+        if (PhotonNetwork.InRoom)
+        {
+            ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() {
+                { GameInfo.PLAYER_LOADED_LEVEL, true}
+            };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            UI.document.Run("UpdateLoadingDescription", "Waiting for other players");
+        }
+        else
+        {
+            StartGame();
+        }
+    }
+
+    public void StartGame()
+    {
+        UI.document.Run("DeleteLoadingScreen");
     }
 
     private int workedOnFood, workedOnGold, workedOnWood = 0;
@@ -270,6 +336,7 @@ public class CameraController : MonoBehaviourPunCallbacks
         }
         else if (activeOver != null && activeOver.className.Contains("GoToMainMenu") && UnityEngine.Input.GetMouseButtonDown(0))
         {
+            UI.document.Run("CreateLoadingScreen", "Leave");
             PhotonNetwork.Disconnect();
             PhotonNetwork.LoadLevel("Levels/menu");
         }

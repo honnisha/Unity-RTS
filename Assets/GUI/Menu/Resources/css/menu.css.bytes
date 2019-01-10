@@ -146,19 +146,9 @@ input {
 	background: #000;
 	text-align: left;
 }
-.players {
-	margin: 5px 0px 0px 0px;
-	width: 97%;
-
-	height: 60%;
-    border: 1px solid white;
-	display: inline-block;
-	background: #292929;
-}
 .chat {
 	margin: 5px 0px 0px 0px;
 	width: 97%;
-
 	height: 20.5%;
     border: 1px solid white;
 	display: inline-block;
@@ -195,18 +185,27 @@ input {
 .infoBlock > .button {
 	width: 40%;
 }
+.players {
+	overflow-y: scroll;
+	margin: 5px 0px 0px 0px;
+	height: 60%;
+	width: 97%;
+    border: 1px solid white;
+	display: inline-block;
+	background: #292929;
+}
 .players > div {
 	text-align: left;
 	font-weight: bold;
 	margin: 5px;
 	padding: 5px;
-	height: 35px;
-	width: 96%;
+	height: 25px;
+	width: 93%;
     border: 1px solid white;
 	background: #424242;
 }
 .players > div > p{
-	margin: 7px;
+	margin: 4px;
 	display: inline-block;
 }
 .chat > div {

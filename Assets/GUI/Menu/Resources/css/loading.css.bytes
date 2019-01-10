@@ -1,0 +1,27 @@
+.loading {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	text-align: center;
+	background: black;
+}
+.loading > .loadingBlock {
+	display: inline-block;
+	position: relative;
+	top: 40%;
+	height: 10%;
+	width: 20%;
+	padding: 20px;
+	background-size: 100%;
+}
+.loadingBlock > .titleLoading {
+	font-weight: bold;
+	text-align: center;
+    font-size: 14pt;
+	width: 100%;
+}
+.loadingBlock > .descriptionLoading {
+	padding-top: 10px;
+    font-size: 10pt;
+	width: 100%;
+}

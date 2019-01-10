@@ -388,19 +388,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         DestroyPointMarker();
     }
 
-    public bool IsMasterClient()
-    {
-        if (PhotonNetwork.InRoom)
-        {
-            if (PhotonNetwork.LocalPlayer.IsMasterClient)
-                return true;
-            return false;
-        }
-        else
-            return true;
-
-    }
-
     public void TextBubble(string message, int timer)
     {
         if (objectUIInfo != null)

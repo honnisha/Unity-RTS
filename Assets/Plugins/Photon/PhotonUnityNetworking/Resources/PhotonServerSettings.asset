@@ -43,4 +43,5 @@ MonoBehaviour:
   - SetAsBuilding
   - SetAsSelected
   - StartInteractViewID
+  - InstantiateObjects
   DisableAutoOpenWizard: 1

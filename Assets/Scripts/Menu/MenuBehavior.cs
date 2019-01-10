@@ -10,11 +10,118 @@ using UnityEngine.SceneManagement;
 
 namespace GangaGame
 {
-    public class GameInfo
+    public static class GameInfo
     {
         public const string PLAYER_READY = "IsPlayerReady";
         public const string PLAYER_TEAM = "PlayerTeam";
-        public const bool PLAYER_LOADED_LEVEL = false;
+        public const string PLAYER_LOADED_LEVEL = "LoadedLevel";
+        public const string MAP_SEED = "MapSeed";
+        public const string NPC_INFO = "NPCInfo";
+
+        public static bool isPlayerReady = false;
+        public static int playerTeam = 1;
+        public static List<int> NPCList = new List<int>();
+
+        public static bool IsMasterClient()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                if (PhotonNetwork.LocalPlayer.IsMasterClient)
+                    return true;
+                return false;
+            }
+            else
+                return true;
+        }
+        
+        public static void SetReady(bool newState)
+        {
+            isPlayerReady = newState;
+            if (PhotonNetwork.InRoom)
+            {
+                ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_READY, isPlayerReady } };
+                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            }
+        }
+        public static void SetTeam(int newTeam)
+        {
+            playerTeam = newTeam;
+            if (PhotonNetwork.InRoom)
+            {
+                ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_TEAM, playerTeam} };
+                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            }
+        }
+        public static List<int> GetNPCInfo()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                List<int> roomNPCInfo = new List<int>();
+                object oldNPCListObj;
+                if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(GameInfo.NPC_INFO, out oldNPCListObj))
+                {
+                    foreach (Match match in new Regex(@"\((\d+)\)").Matches((string)oldNPCListObj))
+                    {
+                        var regex = new Regex(@"(\d+)").Match(match.Value);
+                        int NPCTeam = int.Parse(regex.Groups[1].Value);
+                        roomNPCInfo.Add(NPCTeam);
+                    }
+                }
+                return roomNPCInfo;
+            }
+            else
+                return NPCList;
+        }
+        public static void UpdateNPCInfo(List<int> newNPCList)
+        {
+            string newNPCListAsString = "";
+            foreach(int NPCTeam in newNPCList)
+                newNPCListAsString += String.Format("({0})", NPCTeam);
+
+            ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() { { GameInfo.NPC_INFO, newNPCListAsString } };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+        }
+
+        public static void ChangeNPCTeam(int index, int newTeam)
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                List<int> oldNPCList = GetNPCInfo();
+                oldNPCList[index] = newTeam;
+                UpdateNPCInfo(oldNPCList);
+            }
+            NPCList[index] = newTeam;
+        }
+        public static void CreateNPC(int team)
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                List<int> oldNPCList = GetNPCInfo();
+                oldNPCList.Add(team);
+                UpdateNPCInfo(oldNPCList);
+            }
+            NPCList.Add(team);
+        }
+        public static void DeleteNPC(int index)
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                List<int> oldNPCList = GetNPCInfo();
+                oldNPCList.RemoveAt(index);
+                UpdateNPCInfo(oldNPCList);
+            }
+            NPCList.RemoveAt(index);
+        }
+        public static string GetNickName()
+        {
+            if (PhotonNetwork.IsConnected)
+                return PhotonNetwork.LocalPlayer.NickName;
+
+            string username = PlayerPrefs.GetString("username");
+            if (username == "")
+                username = "Player";
+            return username;
+        }
     }
 
     public class MenuBehavior : MonoBehaviourPunCallbacks
@@ -34,9 +141,7 @@ namespace GangaGame
         private float sendMessageTimer = 0.0f;
         private bool timerActive = false;
 
-        private bool isPlayerReady = false;
         private bool gameStarted = false;
-        private int playerTeam = 1;
 
         AudioSource audioSource;
         private void Start()
@@ -44,8 +149,24 @@ namespace GangaGame
             audioSource = GetComponent<AudioSource>();
         }
 
+        private string loadedLevel = "";
+        private bool singleplayer = true;
+        private float timerToLoad = 0.2f;
         private void Update()
         {
+            if(loadedLevel != "")
+            {
+                timerToLoad -= Time.fixedDeltaTime;
+                if(timerToLoad <= 0)
+                {
+                    if (singleplayer)
+                        SceneManager.LoadScene(loadedLevel);
+                    else
+                        PhotonNetwork.LoadLevel(loadedLevel);
+                }
+                return;
+            }
+
             if (timerActive && !gameStarted)
             {
                 timerToStart -= Time.deltaTime;
@@ -60,10 +181,15 @@ namespace GangaGame
                     AddMessasgeToChat(String.Format("Game started..."));
                     gameStarted = true;
 
-                    PhotonNetwork.CurrentRoom.IsOpen = false;
-                    PhotonNetwork.CurrentRoom.IsVisible = false;
+                    if (PhotonNetwork.InRoom)
+                    {
+                        PhotonNetwork.CurrentRoom.IsOpen = false;
+                        PhotonNetwork.CurrentRoom.IsVisible = false;
+                    }
 
-                   // PhotonNetwork.LoadLevel("Levels/Map1/Map1");
+                    UI.document.Run("CreateLoadingScreen", "Level initialization");
+                    loadedLevel = "Levels/Map1/Map1";
+                    return;
                 }
             }
             string className = "";
@@ -75,11 +201,17 @@ namespace GangaGame
             {
                 if (className.Contains("singleplayer"))
                 {
+                    singleplayer = true;
                     audioSource.Play(0);
-                    SceneManager.LoadScene("Levels/Map1/Map1");
+                    GameInfo.NPCList.Clear();
+                    UI.document.innerHTML = RoomHTMLFile.text;
+                    GameInfo.SetReady(false);
+                    UpdateRoomView();
+                    return;
                 }
                 if (className.Contains("multiplayer"))
                 {
+                    singleplayer = false;
                     audioSource.Play(0);
                     if (PlayerPrefs.GetString("username") == "")
                         CreateConnectDialog();
@@ -125,6 +257,19 @@ namespace GangaGame
                         UI.document.getElementsByClassName("messageSettings")[0].innerHTML = "Settings saved!";
                     return;
                 }
+
+                // Singleplayer
+                else if (singleplayer && className.Contains("backToMenu"))
+                {
+                    gameStarted = false;
+                    UI.document.innerHTML = MenuHTMLFile.text;
+                }
+                else if (singleplayer && className.Contains("setReady"))
+                {
+                    GameInfo.SetReady(!GameInfo.isPlayerReady);
+                    UpdateRoomView();
+                }
+
                 else if (className.Contains("backToMenu") && !PhotonNetwork.InRoom)
                 {
                     PhotonNetwork.Disconnect();
@@ -159,12 +304,13 @@ namespace GangaGame
                     }
                     else
                     {
-                        PhotonNetwork.JoinOrCreateRoom(roomName, new RoomOptions { MaxPlayers = (byte)int.Parse(maxplayers) }, TypedLobby.Default);
                         DeleteDialog();
                         CreateMessage("Creating...");
+                        PhotonNetwork.JoinOrCreateRoom(roomName, new RoomOptions { MaxPlayers = (byte)int.Parse(maxplayers) }, TypedLobby.Default);
                     }
                 }
-                else if (PhotonNetwork.InRoom && className.Contains("backToMenu"))
+
+                else if ((PhotonNetwork.InRoom || singleplayer) && className.Contains("backToMenu"))
                 {
                     PhotonNetwork.LeaveRoom();
                     CreateMessage("Leaving...");
@@ -182,15 +328,65 @@ namespace GangaGame
                 }
                 else if (PhotonNetwork.InRoom && className.Contains("setReady"))
                 {
-                    SetReady(!isPlayerReady);
+                    GameInfo.SetReady(!GameInfo.isPlayerReady);
                 }
-                else if (PhotonNetwork.InRoom && UI.document.getElementsByAttribute("name", "teamSelect").length > 0)
+                
+                // Create NPC
+                else if (GameInfo.IsMasterClient() && className.Contains("CreateNPC"))
                 {
-                    var select = UI.document.getElementsByAttribute("name", "teamSelect")[0];
-                    int teamSelect = int.Parse(select.id);
-                    if (playerTeam != teamSelect)
+                    if(GameInfo.NPCList.Count >= 9)
                     {
-                        SetTeam(teamSelect);
+                        UI.document.Run("CreateChatMessage", "You can not create more bots than 9");
+                        return;
+                    }
+                    else
+                    {
+                        GameInfo.CreateNPC(GameInfo.NPCList.Count + 1);
+                        if (singleplayer)
+                            UpdateRoomView();
+                        return;
+                    }
+                }
+                // Kick
+                else if (GameInfo.IsMasterClient() && className.Contains("kick"))
+                {
+                    if (element.parentElement.className.Contains("NPC"))
+                    {
+                        int index = int.Parse(new Regex(@"NPCINDEX(\d+)").Match(element.className).Groups[1].Value);
+                        GameInfo.DeleteNPC(index);
+                        if (singleplayer)
+                            UpdateRoomView();
+                        return;
+                    }
+                    else
+                    {
+                        string kickUsername = element.parentElement.textContent;
+                        AddMessasgeToChat(String.Format("{0} kicked user {1}", PhotonNetwork.LocalPlayer.NickName, kickUsername));
+                        GetComponent<PhotonView>().RPC("KickPlayer", PhotonTargets.All, kickUsername);
+                        return;
+                    }
+                }
+
+                // Change team
+                else if (UI.document.getElementsByAttribute("name", "teamSelect").length > 0)
+                {
+                    foreach (Dom.Element selectElement in UI.document.getElementsByAttribute("name", "teamSelect"))
+                    {
+                        int teamSelect = int.Parse(selectElement.id);
+                        if (selectElement.className.Contains(GameInfo.GetNickName()))
+                        {
+                            if (GameInfo.playerTeam != teamSelect)
+                            {
+                                GameInfo.SetTeam(teamSelect);
+                            }
+                        }
+                        else if (GameInfo.IsMasterClient() && selectElement.parentElement.className.Contains("NPC"))
+                        {
+                            // Debug.Log("NPC (" + selectElement.parentElement.className + "): " + teamSelect);
+                            int index = int.Parse(new Regex(@"NPCINDEX(\d+)").Match(selectElement.parentElement.className).Groups[1].Value);
+                            if (GameInfo.NPCList[index] != teamSelect)
+                                GameInfo.ChangeNPCTeam(index, teamSelect);
+                        }
                     }
                 }
             }
@@ -243,12 +439,12 @@ namespace GangaGame
         {
             UI.document.Run("AddInfo", new string[1] { info });
         }
-        void CreateUser(string username, int playerTeam, bool playerReady, bool canEdit)
+        void CreateUser(string username, int playerTeam, bool playerReady, bool canEdit, bool canKick = false, int value = 0, string className = "")
         {
             if (UI.document.getElementsByClassName("players").length <= 0)
                 return;
             
-            UI.document.Run("CreateUser", username, playerTeam, playerReady, canEdit);
+            UI.document.Run("CreateUser", username, playerTeam, playerReady, canEdit, canKick, value, className);
             //var select = UI.document.getElementsByAttribute("name", "teamSelect")[0];
             // select.childNodes[playerTeam - 1].setAttribute("selected", "selected");
         }
@@ -260,7 +456,16 @@ namespace GangaGame
 
             UI.document.Run("CreateChatMessage", new string[1] { message });
         }
-        
+        [PunRPC]
+        public void KickPlayer(string kickUsername)
+        {
+            if (PhotonNetwork.LocalPlayer.NickName == kickUsername)
+            {
+                PhotonNetwork.LeaveRoom();
+                CreateMessage("Leaving...");
+            }
+        }
+
         private void UpdateLobbyListView()
         {
             var menuBlock = UI.document.getElementsByClassName("menu")[0];
@@ -310,14 +515,22 @@ namespace GangaGame
 
         public override void OnJoinedRoom()
         {
-            isPlayerReady = false;
+            GameInfo.isPlayerReady = false;
             foreach (Player p in PhotonNetwork.PlayerList)
             {
                 playerListEntries.Add(p);
             }
             UI.document.innerHTML = RoomHTMLFile.text;
-            SetReady(false);
+            GameInfo.SetReady(false);
             UpdateRoomView();
+
+            if (GameInfo.IsMasterClient())
+            {
+                ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() {
+                    { GameInfo.MAP_SEED, UnityEngine.Random.Range(0, 1000) }
+                };
+                PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+            }
 
             //Hashtable props = new Hashtable
             //{
@@ -379,7 +592,6 @@ namespace GangaGame
 
         private void UpdateCachedRoomList(List<RoomInfo> roomList)
         {
-            Debug.Log("UpdateCachedRoomList: " + roomList.Count);
             foreach (RoomInfo roomInfo in roomList)
             {
                 // Remove room from cached room list if it got closed, became invisible or was marked as removed
@@ -412,31 +624,60 @@ namespace GangaGame
             else
                 UI.document.getElementsByClassName("players")[0].innerHTML = "";
 
+            List<int> roomNPCList = GameInfo.GetNPCInfo();
             bool allPlayersIsReady = true;
-            foreach (Player player in playerListEntries)
+            string masterClientNickname = "";
+            if (PhotonNetwork.InRoom)
             {
-                object playerReadyObd;
-                bool playerReady = false;
-                if (player.CustomProperties.TryGetValue(GameInfo.PLAYER_READY, out playerReadyObd))
-                    playerReady = (bool)playerReadyObd;
+                foreach (Player user in playerListEntries)
+                {
+                    object userReadyObd;
+                    bool userReady = false;
+                    if (user.CustomProperties.TryGetValue(GameInfo.PLAYER_READY, out userReadyObd))
+                        userReady = (bool)userReadyObd;
 
-                object playerTeamObd;
-                int playerTeam = 1;
-                if (player.CustomProperties.TryGetValue(GameInfo.PLAYER_TEAM, out playerTeamObd))
-                    playerTeam = (int)playerTeamObd;
+                    object userTeamObd;
+                    int userTeam = 1;
+                    if (user.CustomProperties.TryGetValue(GameInfo.PLAYER_TEAM, out userTeamObd))
+                        userTeam = (int)userTeamObd;
 
-                bool canEdit = false;
-                if (player == PhotonNetwork.LocalPlayer)
-                    canEdit = true;
+                    bool canEdit = false;
+                    if (user == PhotonNetwork.LocalPlayer)
+                        canEdit = true;
 
-                CreateUser(player.NickName, playerTeam, playerReady, canEdit);
+                    CreateUser(user.NickName, userTeam, userReady, canEdit, canKick: GameInfo.IsMasterClient() && !canEdit);
 
-                if (!playerReady)
-                    allPlayersIsReady = false;
+                    if (!userReady)
+                        allPlayersIsReady = false;
+
+                    if (user.IsMasterClient)
+                        masterClientNickname = user.NickName;
+                }
+            }
+            else
+            {
+                masterClientNickname = GameInfo.GetNickName();
+                allPlayersIsReady = GameInfo.isPlayerReady;
+                CreateUser(GameInfo.GetNickName(), GameInfo.playerTeam, GameInfo.isPlayerReady, canEdit: true);
+            }
+            int index = 0;
+            foreach (int NPCTeam in roomNPCList)
+            {
+                index++;
+                CreateUser(String.Format("NPC: {0}", index), NPCTeam, true, canEdit: GameInfo.IsMasterClient(), canKick: GameInfo.IsMasterClient(), value: index - 1, className: "NPC");
+            }
+
+            if (GameInfo.IsMasterClient())
+            {
+                UI.document.Run("CreateAddButton");
             }
             if (allPlayersIsReady)
             {
-                timerToStart = timeToStart;
+                if (PhotonNetwork.InRoom)
+                    timerToStart = timeToStart;
+                else
+                    timerToStart = 3.0f;
+
                 AddMessasgeToChat(String.Format("All players is ready, game will start in {0:F0} seconds", timerToStart));
                 sendMessageTimer = 0.0f;
                 timerActive = true;
@@ -452,26 +693,13 @@ namespace GangaGame
             else
                 UI.document.getElementsByClassName("roomInfo")[0].innerHTML = "";
 
-            AddInfo(String.Format("Room name: {0}", PhotonNetwork.CurrentRoom.Name));
-            AddInfo(String.Format("Max players: {0}", PhotonNetwork.CurrentRoom.MaxPlayers));
-        }
-
-        void SetReady(bool newState)
-        {
-            isPlayerReady = newState;
-            ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() {
-                { GameInfo.PLAYER_READY, isPlayerReady }//,  { GameInfo.PLAYER_LOADED_LEVEL, false}
-            };
-            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-        }
-
-        void SetTeam(int newTeam)
-        {
-            playerTeam = newTeam;
-            ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() {
-                { GameInfo.PLAYER_TEAM, playerTeam}
-            };
-            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            if (PhotonNetwork.InRoom)
+            {
+                AddInfo(String.Format("Room name: {0}", PhotonNetwork.CurrentRoom.Name));
+                AddInfo(String.Format("Room owner: {0}", masterClientNickname));
+                AddInfo(String.Format("Max players: {0}", PhotonNetwork.CurrentRoom.MaxPlayers));
+            }
+            AddInfo(String.Format("NPC count: {0}", roomNPCList.Count));
         }
 
         void Awake()

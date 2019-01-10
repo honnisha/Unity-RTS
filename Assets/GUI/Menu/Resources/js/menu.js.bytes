@@ -6,19 +6,36 @@ function CreateChatMessage(message) {
 	chat.appendChild(div);
 }
 
-function selectFunction() {
-    var selectBox = document.getElementsByClassName("teamSelect")[0];
-    selectBox.id = selectBox.options[selectBox.selectedIndex].value;
+function selectFunction(element) {
+    element.id = element.options[element.selectedIndex].value;
 }
-function CreateUser(username, playerTeam, playerReady, canEdit) {
+function CreateAddButton() {
+	var playerDiv = document.createElement("div");
+	playerDiv.className = "add CreateNPC";
+	playerDiv.textContent = "Create NPC";
+	document.getElementsByClassName("players")[0].appendChild(playerDiv);
+}
+function CreateUser(username, playerTeam, playerReady, canEdit, canKick, value, className) {
 	var playerDiv = document.createElement("div");
 	if(playerReady)
 		playerDiv.className = "green";
+	if(className != "")
+		playerDiv.className += " " + className;
 	document.getElementsByClassName("players")[0].appendChild(playerDiv);
 	
 	var pdiv = document.createElement("p");
 	pdiv.textContent = username;
 	playerDiv.appendChild(pdiv);
+
+	if(canKick)
+	{
+		var pdiv = document.createElement("p");
+		pdiv.textContent = "kick";
+		pdiv.className = "kick NPCINDEX" + value;
+		playerDiv.appendChild(pdiv);
+		
+		playerDiv.className += " NPCINDEX" + value;
+	}
 
 	var teamDiv;
 	if(canEdit)
@@ -27,9 +44,10 @@ function CreateUser(username, playerTeam, playerReady, canEdit) {
 		for (var i = 1; i <= 9; i++) {
 			teamDiv.innerHTML += "<option value=" + i + ">" + i + "</option>";
 		}
-		playerDiv.setAttribute("onchange", "selectFunction(this)");
+		teamDiv.setAttribute("onchange", "selectFunction(this)");
 		teamDiv.name = "teamSelect";
 		teamDiv.className = "teamSelect";
+		teamDiv.className += " " + username;
 		teamDiv.id = playerTeam;
 		teamDiv.childNodes[playerTeam - 1].setAttribute("selected", "selected");
 	}

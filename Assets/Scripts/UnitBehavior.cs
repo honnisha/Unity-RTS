@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Linq;
 using Photon.Pun;
+using GangaGame;
 
 public class UnitBehavior : BaseBehavior
 {
@@ -142,7 +143,7 @@ public class UnitBehavior : BaseBehavior
 
         DoAttack();
 
-        if (isWalkAround && IsMasterClient() && target == null)
+        if (isWalkAround && GameInfo.IsMasterClient() && target == null)
             WalkAround();
 
         if (pointMarkerPrefab != null)
@@ -325,7 +326,7 @@ public class UnitBehavior : BaseBehavior
             float dist = Vector3.Distance(gameObject.transform.position, target.transform.position);
             RaycastHit hit;
             // If unit and target close enough
-            if(targetIsPoint && Vector3.Distance(gameObject.transform.position, agent.destination) <= minDistance && Vector3.Distance(gameObject.transform.position, target.transform.position) < 4.0f)
+            if(targetIsPoint && Vector3.Distance(gameObject.transform.position, agent.destination) <= minDistance && Vector3.Distance(gameObject.transform.position, target.transform.position) < 5.0f)
             if (dist <= minDistance && Physics.Linecast(transform.position, target.transform.position))
                 reachDest = true;
             // Or collisions touch each other

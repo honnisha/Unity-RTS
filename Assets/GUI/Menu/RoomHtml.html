@@ -1,9 +1,11 @@
 <link rel="stylesheet" type="text/css" href="css/menu.css">
 <script type='text/javascript' src="js/menu.js"></script>
+<link rel="stylesheet" type="text/css" href="css/loading.css">
+<script type='text/javascript' src="js/loading.js"></script>
 <style>
 .ready {
-	height: 30px;
-	width: 30px;
+	height: 20px;
+	width: 20px;
 	background: black;
 	float: right;
     background: url("menu/hand-ok.png") no-repeat;
@@ -12,8 +14,8 @@
 	display: inline-block;
 }
 .notReady {
-	height: 30px;
-	width: 30px;
+	height: 20px;
+	width: 20px;
 	background: black;
 	float: right;
     background: url("menu/cross-mark.png") no-repeat;
@@ -22,9 +24,27 @@
 	display: inline-block;
 }
 .players > div > select {
-	left: 40%;
+	left: 38%;
 	position: absolute;
 	width: 40px;
+}
+.kick {
+	padding-left: 10px;
+	font-weight: normal;
+}
+.kick:hover {
+	color: red;
+}
+.players > .add {
+	margin-left: 37%;
+	width: 20%;
+	font-weight: normal;
+	height: 20px;
+	text-align: center;
+	background: #242424;
+}
+.players > .add:hover {
+	background: #333333;
 }
 .team {
 	padding-top: 15px;
@@ -59,6 +79,9 @@
 .roomInfo {
     background-image: url("paper noborder.png");
     border: 1px solid #4e4c49;
+}
+.loading > .loadingBlock {
+    background-image: url("paper dark.png") no-repeat;
 }
 </style>
 

@@ -18,10 +18,10 @@ public class TerrainGenerator : MonoBehaviour
     public Texture2D mapTexture;
 
     public bool generate = false;
+    float[,] mapData;
 
     void Start()
     {
-        Generate();
     }
 
     // Update is called once per frame
@@ -30,7 +30,7 @@ public class TerrainGenerator : MonoBehaviour
         if (generate)
         {
             generate = false;
-            Generate();
+            Generate((int)seed);
         }
     }
 
@@ -99,13 +99,30 @@ public class TerrainGenerator : MonoBehaviour
             t.terrainData.SetDetailLayer((int)terrainPosition.x, (int)terrainPosition.y, i, grassLayers);
     }
 
-    public void Generate()
+    public Dictionary<string, List<Vector3>> GetSpawnData(int spawnCount)
     {
+        Dictionary<string, List<Vector3>> newData = new Dictionary<string, List<Vector3>>();
+        int sizeX = Terrain.activeTerrain.terrainData.alphamapWidth;
+        int sizeY = Terrain.activeTerrain.terrainData.alphamapHeight;
+
+        newData["spawn"] = new List<Vector3>();
+        for (int i = 0; i <= spawnCount; i++)
+        {
+            newData["spawn"].Add(new Vector3(100, 0, 100));
+        }
+
+        return newData;
+    }
+
+    public void Generate(int mapSeed)
+    {
+        seed = (uint)mapSeed;
         Terrain t = Terrain.activeTerrain;
         int sizeX = t.terrainData.alphamapWidth;
         int sizeY = t.terrainData.alphamapHeight;
         if (t.terrainData.detailHeight != t.terrainData.alphamapWidth)
             Debug.Log("detailHeight and alphamapWidth must be equal");
+        mapData = new float[sizeX, sizeY];
 
         ModuleBase moduleBase = GetFractal();
         mapTexture = new Texture2D(sizeX, sizeY);
@@ -124,6 +141,7 @@ public class TerrainGenerator : MonoBehaviour
                 ny = ranges.mapy0 + q * (ranges.mapy1 - ranges.mapy0);
 
                 float val = (float)moduleBase.Get(nx * scale, ny * scale);
+                mapData[x, y] = val;
 
                 float textureScale = (val + 1.0f);
                 if (textureScale > 0.89f)

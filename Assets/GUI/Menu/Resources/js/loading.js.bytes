@@ -1,0 +1,31 @@
+function CreateLoadingScreen(message) {
+	var html = document.getElementsByTagName("html")[0];
+	html.style.background = "black";
+
+    var loadingMain = document.createElement("div");
+    loadingMain.className = "loading";
+	html.appendChild(loadingMain);
+
+    var loadingContent = document.createElement("div");
+    loadingContent.className = "loadingBlock";
+    loadingMain.appendChild(loadingContent);
+
+    var innerDiv = document.createElement("div");
+    innerDiv.className = "titleLoading";
+    innerDiv.textContent = "Loading ...";
+    loadingContent.appendChild(innerDiv);
+
+    var innerDiv = document.createElement("div");
+    innerDiv.className = "descriptionLoading";
+    innerDiv.textContent = message;
+    loadingContent.appendChild(innerDiv);
+}
+function UpdateLoadingDescription(message) {
+	var innerDiv = document.getElementsByClassName("descriptionLoading")[0];
+    innerDiv.textContent = message;
+}
+function DeleteLoadingScreen() {
+	var html = document.getElementsByTagName("html")[0];
+	html.style.background = "";
+	document.getElementsByClassName("loading")[0].remove();
+}
