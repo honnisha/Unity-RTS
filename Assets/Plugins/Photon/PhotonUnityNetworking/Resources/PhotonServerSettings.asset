@@ -44,4 +44,5 @@ MonoBehaviour:
   - SetAsSelected
   - StartInteractViewID
   - InstantiateObjects
+  - KickPlayer
   DisableAutoOpenWizard: 1

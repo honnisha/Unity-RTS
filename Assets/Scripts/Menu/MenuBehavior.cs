@@ -7,6 +7,7 @@ using System.Collections;
 using System;
 using System.Text.RegularExpressions;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 namespace GangaGame
 {
@@ -17,10 +18,14 @@ namespace GangaGame
         public const string PLAYER_LOADED_LEVEL = "LoadedLevel";
         public const string MAP_SEED = "MapSeed";
         public const string NPC_INFO = "NPCInfo";
+        public const string PLAYER_SPECTATOR = "PlayerSpectator";
+        public const string MAP_SIZE = "MapSize";
 
         public static bool isPlayerReady = false;
         public static int playerTeam = 1;
+        public static bool playerSpectate = false;
         public static List<int> NPCList = new List<int>();
+        public static int mapSize = 3;
 
         public static bool IsMasterClient()
         {
@@ -38,19 +43,25 @@ namespace GangaGame
         {
             isPlayerReady = newState;
             if (PhotonNetwork.InRoom)
-            {
-                ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_READY, isPlayerReady } };
-                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-            }
+                PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_READY, isPlayerReady } });
         }
         public static void SetTeam(int newTeam)
         {
             playerTeam = newTeam;
             if (PhotonNetwork.InRoom)
-            {
-                ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_TEAM, playerTeam} };
-                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-            }
+                PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_TEAM, playerTeam } });
+        }
+        public static void SetSpectator(bool newState)
+        {
+            playerSpectate = newState;
+            if (PhotonNetwork.InRoom)
+                PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_SPECTATOR, playerSpectate } });
+        }
+        public static void SetMapSize(int newMapSize)
+        {
+            mapSize = newMapSize;
+            if (PhotonNetwork.InRoom)
+                PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { GameInfo.MAP_SIZE, mapSize } });
         }
         public static List<int> GetNPCInfo()
         {
@@ -163,6 +174,7 @@ namespace GangaGame
                         SceneManager.LoadScene(loadedLevel);
                     else
                         PhotonNetwork.LoadLevel(loadedLevel);
+                    loadedLevel = "";
                 }
                 return;
             }
@@ -203,9 +215,11 @@ namespace GangaGame
                 {
                     singleplayer = true;
                     audioSource.Play(0);
+                    GameInfo.playerSpectate = false;
                     GameInfo.NPCList.Clear();
                     UI.document.innerHTML = RoomHTMLFile.text;
                     GameInfo.SetReady(false);
+                    GameInfo.mapSize = 3;
                     UpdateRoomView();
                     return;
                 }
@@ -330,11 +344,11 @@ namespace GangaGame
                 {
                     GameInfo.SetReady(!GameInfo.isPlayerReady);
                 }
-                
+
                 // Create NPC
                 else if (GameInfo.IsMasterClient() && className.Contains("CreateNPC"))
                 {
-                    if(GameInfo.NPCList.Count >= 9)
+                    if (GameInfo.NPCList.Count >= 9)
                     {
                         UI.document.Run("CreateChatMessage", "You can not create more bots than 9");
                         return;
@@ -366,9 +380,30 @@ namespace GangaGame
                         return;
                     }
                 }
+                if (className.Contains("spectator") && element.parentElement.innerText.Contains(GameInfo.GetNickName()))
+                {
+                    GameInfo.SetSpectator(!GameInfo.playerSpectate);
+                    if (singleplayer)
+                        UpdateRoomView();
+                    return;
+                }
+
+                // Change map size
+                var mapElements = UI.document.getElementsByClassName("MapSize");
+                if (mapElements.length > 0)
+                {
+                    int newSize = int.Parse(mapElements[0].id);
+                    if (newSize != GameInfo.mapSize)
+                    {
+                        GameInfo.SetMapSize(newSize);
+                        if (singleplayer)
+                            UpdateRoomView();
+                        return;
+                    }
+                }
 
                 // Change team
-                else if (UI.document.getElementsByAttribute("name", "teamSelect").length > 0)
+                if (UI.document.getElementsByAttribute("name", "teamSelect").length > 0)
                 {
                     foreach (Dom.Element selectElement in UI.document.getElementsByAttribute("name", "teamSelect"))
                     {
@@ -439,12 +474,12 @@ namespace GangaGame
         {
             UI.document.Run("AddInfo", new string[1] { info });
         }
-        void CreateUser(string username, int playerTeam, bool playerReady, bool canEdit, bool canKick = false, int value = 0, string className = "")
+        void CreateUser(string username, int playerTeam, bool playerReady, bool canEdit, bool canKick = false, int value = 0, string className = "", bool canChangeSpectate = false, bool spectateActive = false)
         {
             if (UI.document.getElementsByClassName("players").length <= 0)
                 return;
             
-            UI.document.Run("CreateUser", username, playerTeam, playerReady, canEdit, canKick, value, className);
+            UI.document.Run("CreateUser", username, playerTeam, playerReady, canEdit, canKick, value, className, canChangeSpectate, spectateActive);
             //var select = UI.document.getElementsByAttribute("name", "teamSelect")[0];
             // select.childNodes[playerTeam - 1].setAttribute("selected", "selected");
         }
@@ -516,6 +551,7 @@ namespace GangaGame
         public override void OnJoinedRoom()
         {
             GameInfo.isPlayerReady = false;
+            GameInfo.playerSpectate = false;
             foreach (Player p in PhotonNetwork.PlayerList)
             {
                 playerListEntries.Add(p);
@@ -526,8 +562,9 @@ namespace GangaGame
 
             if (GameInfo.IsMasterClient())
             {
+                GameInfo.mapSize = 3;
                 ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() {
-                    { GameInfo.MAP_SEED, UnityEngine.Random.Range(0, 1000) }
+                    { GameInfo.MAP_SEED, UnityEngine.Random.Range(0, 1000) }, { GameInfo.MAP_SIZE, GameInfo.mapSize }
                 };
                 PhotonNetwork.CurrentRoom.SetCustomProperties(props);
             }
@@ -641,11 +678,16 @@ namespace GangaGame
                     if (user.CustomProperties.TryGetValue(GameInfo.PLAYER_TEAM, out userTeamObd))
                         userTeam = (int)userTeamObd;
 
+                    object userSpectateObd;
+                    bool userSpectate = false;
+                    if (user.CustomProperties.TryGetValue(GameInfo.PLAYER_SPECTATOR, out userSpectateObd))
+                        userSpectate = (bool)userSpectateObd;
+
                     bool canEdit = false;
                     if (user == PhotonNetwork.LocalPlayer)
                         canEdit = true;
 
-                    CreateUser(user.NickName, userTeam, userReady, canEdit, canKick: GameInfo.IsMasterClient() && !canEdit);
+                    CreateUser(user.NickName, userTeam, userReady, canEdit, canKick: GameInfo.IsMasterClient() && !canEdit, canChangeSpectate: canEdit, spectateActive: userSpectate);
 
                     if (!userReady)
                         allPlayersIsReady = false;
@@ -658,13 +700,17 @@ namespace GangaGame
             {
                 masterClientNickname = GameInfo.GetNickName();
                 allPlayersIsReady = GameInfo.isPlayerReady;
-                CreateUser(GameInfo.GetNickName(), GameInfo.playerTeam, GameInfo.isPlayerReady, canEdit: true);
+                CreateUser(GameInfo.GetNickName(), GameInfo.playerTeam, GameInfo.isPlayerReady, canEdit: true, canChangeSpectate: true, spectateActive: GameInfo.playerSpectate);
             }
             int index = 0;
             foreach (int NPCTeam in roomNPCList)
             {
                 index++;
-                CreateUser(String.Format("NPC: {0}", index), NPCTeam, true, canEdit: GameInfo.IsMasterClient(), canKick: GameInfo.IsMasterClient(), value: index - 1, className: "NPC");
+                CreateUser(
+                    String.Format("NPC: {0}", index), NPCTeam, true, canEdit: GameInfo.IsMasterClient(), 
+                    canKick: GameInfo.IsMasterClient(), value: index - 1, className: "NPC",
+                    canChangeSpectate: false, spectateActive: false
+                    );
             }
 
             if (GameInfo.IsMasterClient())
@@ -700,6 +746,17 @@ namespace GangaGame
                 AddInfo(String.Format("Max players: {0}", PhotonNetwork.CurrentRoom.MaxPlayers));
             }
             AddInfo(String.Format("NPC count: {0}", roomNPCList.Count));
+            
+            List<string> mapNames = new List<string>(new string[] { "Very small", "Small", "Medium", "Big", "Very big", "Very much big", "Ultra-super big!" });
+            if (GameInfo.IsMasterClient())
+            {
+                List<string> optionsArgs = new List<string>(new string[] { "Map size:", "MapSize", GameInfo.mapSize.ToString() });
+                UI.document.Run("AddSelectOption", optionsArgs.Concat(mapNames).ToArray());
+            }
+            else
+            {
+                AddInfo(String.Format("Map size: {0}", mapNames[GameInfo.mapSize]));
+            }
         }
 
         void Awake()

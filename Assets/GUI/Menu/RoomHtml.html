@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="css/menu.css">
-<script type='text/javascript' src="js/menu.js"></script>
 <link rel="stylesheet" type="text/css" href="css/loading.css">
+<script type='text/javascript' src="js/menu.js"></script>
 <script type='text/javascript' src="js/loading.js"></script>
 <style>
 .ready {
@@ -27,6 +27,24 @@
 	left: 38%;
 	position: absolute;
 	width: 40px;
+}
+.players > div > .spectator {
+	padding-top: 7px;
+	left: 27%;
+	position: absolute;
+}
+.active {
+	color: white;
+}
+.active:hover {
+	color: #575757;
+}
+.notActive {
+	color: #575757;
+}
+.notActive:hover {
+	color: white;
+
 }
 .kick {
 	padding-left: 10px;
@@ -82,6 +100,25 @@
 }
 .loading > .loadingBlock {
     background-image: url("paper dark.png") no-repeat;
+}
+.roomInfo > .option {
+	margin: 4px 0px 0px 0px;
+	padding: 0px;
+	height: 30px;
+	width: 100%;
+}
+.roomInfo > .option > p{
+    font-size: 11pt;
+	margin: 5px 10px;
+	width: 49%;
+	display: inline-block;
+}
+.roomInfo > .option > select{
+	left: 49%;
+	margin: 0px;
+	position: absolute; 
+	width: 49%;
+	display: inline-block;
 }
 </style>
 

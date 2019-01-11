@@ -215,6 +215,6 @@ input {
 	width: 96.3%;
 }
 .roomInfo > div {
-	margin: 10px;
+	margin: 10px 0px 0px 10px;
 	text-align: left;
 }

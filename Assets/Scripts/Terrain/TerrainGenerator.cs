@@ -14,6 +14,7 @@ public class TerrainGenerator : MonoBehaviour
     public double frequency = 2.0;
     public double lacunarity = 2.0;
     public uint seed = 1;
+    public double scale = 1.0;
 
     public Texture2D mapTexture;
 
@@ -60,12 +61,20 @@ public class TerrainGenerator : MonoBehaviour
         return newColor;
     }
 
-    private Vector2 CalculatePosition(Vector2 position)
+    private Vector2 CalculatePositionToTerrain(Vector2 position)
     {
         Terrain t = Terrain.activeTerrain;
         float scaleX = t.terrainData.alphamapHeight / t.terrainData.size.x;
         float scaleY = t.terrainData.alphamapWidth / t.terrainData.size.z;
         return new Vector2(position.x * scaleX, position.y * scaleY);
+    }
+
+    private Vector3 CalculateTerrainToPosition(int x, int y)
+    {
+        Terrain t = Terrain.activeTerrain;
+        float scaleX = t.terrainData.size.x / t.terrainData.alphamapHeight;
+        float scaleY = t.terrainData.size.z / t.terrainData.alphamapWidth;
+        return new Vector3(y * scaleY, 0.0f, x * scaleX);
     }
 
     public void SetTextureOnTerrain(Vector2 position, Vector2 size, int layer, int value)
@@ -79,7 +88,7 @@ public class TerrainGenerator : MonoBehaviour
                 map[y, x, layer] = value;
             }
         }
-        Vector2 terrainPosition = CalculatePosition(position);
+        Vector2 terrainPosition = CalculatePositionToTerrain(position);
         t.terrainData.SetAlphamaps((int)terrainPosition.x, (int)terrainPosition.y, map);
     }
 
@@ -94,7 +103,7 @@ public class TerrainGenerator : MonoBehaviour
                 grassLayers[y, x] = 0;
             }
         }
-        Vector2 terrainPosition = CalculatePosition(position);
+        Vector2 terrainPosition = CalculatePositionToTerrain(position);
         for(int i = 0; i <= 3; i++)
             t.terrainData.SetDetailLayer((int)terrainPosition.x, (int)terrainPosition.y, i, grassLayers);
     }
@@ -105,23 +114,58 @@ public class TerrainGenerator : MonoBehaviour
         int sizeX = Terrain.activeTerrain.terrainData.alphamapWidth;
         int sizeY = Terrain.activeTerrain.terrainData.alphamapHeight;
 
+        float spawnOffset = 0.15f;
+        float minValue = 0.5f;
+
+        // Spawn coordinates
+        List<Vector3> avalibleSpawnPositions = new List<Vector3>();
+        int offset = (int)(sizeX * spawnOffset);
+
+        for (int y = offset; y < sizeY - offset; y++)
+            if (mapData[offset, y] < minValue)
+                avalibleSpawnPositions.Add(CalculateTerrainToPosition(offset, y));
+
+        for (int x = offset; x < sizeX - offset; x++)
+            if (mapData[x, sizeY - offset] < minValue)
+                avalibleSpawnPositions.Add(CalculateTerrainToPosition(x, sizeY - offset));
+
+        for (int y = sizeY - offset; y > offset; y--)
+            if (mapData[sizeX - offset, y] < minValue)
+                avalibleSpawnPositions.Add(CalculateTerrainToPosition(sizeX - offset, y));
+
+        for (int x = sizeX - offset; x > offset; x--)
+            if (mapData[x, offset] < minValue)
+                avalibleSpawnPositions.Add(CalculateTerrainToPosition(x, offset));
+        
         newData["spawn"] = new List<Vector3>();
-        for (int i = 0; i <= spawnCount; i++)
+        for (int i = 1; i <= spawnCount; i++)
         {
-            newData["spawn"].Add(new Vector3(100, 0, 100));
+            int positionIndex = (int)((avalibleSpawnPositions.Count - 1) / spawnCount * i);
+            newData["spawn"].Add(avalibleSpawnPositions[positionIndex]);
+            // Debug.Log(positionIndex + " (" + avalibleSpawnPositions.Count + "): " + avalibleSpawnPositions[positionIndex]);
         }
 
         return newData;
     }
 
-    public void Generate(int mapSeed)
+    public void Generate(int mapSeed, int newSize = 3)
     {
         seed = (uint)mapSeed;
         Terrain t = Terrain.activeTerrain;
+
+        int newTerrainSize = (int)(newSize * 128 * 1.5f);
+        t.terrainData.SetDetailResolution(newTerrainSize, 32);
+        t.terrainData.alphamapResolution = newTerrainSize;
+        t.terrainData.heightmapResolution = newTerrainSize;
+        t.terrainData.size = new Vector3(100 * newSize, 100, 100 * newSize);
+        scale = newSize / 1.5f;
+
+        Debug.Log("Terrain Generate: size:" + newSize + " " + t.terrainData.size);
+
         int sizeX = t.terrainData.alphamapWidth;
         int sizeY = t.terrainData.alphamapHeight;
         if (t.terrainData.detailHeight != t.terrainData.alphamapWidth)
-            Debug.Log("detailHeight and alphamapWidth must be equal");
+            Debug.Log("detailHeight and alphamapWidth must be equal :" + t.terrainData.alphamapWidth + " " + t.terrainData.alphamapHeight);
         mapData = new float[sizeX, sizeY];
 
         ModuleBase moduleBase = GetFractal();
@@ -141,9 +185,10 @@ public class TerrainGenerator : MonoBehaviour
                 ny = ranges.mapy0 + q * (ranges.mapy1 - ranges.mapy0);
 
                 float val = (float)moduleBase.Get(nx * scale, ny * scale);
-                mapData[x, y] = val;
 
                 float textureScale = (val + 1.0f);
+                mapData[x, y] = textureScale;
+
                 if (textureScale > 0.89f)
                      mapTexture.SetPixel(y, x, ParseHEX("#005C01"));
                 else if (textureScale > 0.7f)
@@ -194,7 +239,6 @@ public class TerrainGenerator : MonoBehaviour
         for (int i = 0; i < grassLayers.Length; i++)
             t.terrainData.SetDetailLayer(0, 0, i, grassLayers[i]);
     }
-    public double scale = 1.0;
 
     public static double DoubleLerp(double start, double end, double amount)
     {

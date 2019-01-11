@@ -15,7 +15,29 @@ function CreateAddButton() {
 	playerDiv.textContent = "Create NPC";
 	document.getElementsByClassName("players")[0].appendChild(playerDiv);
 }
-function CreateUser(username, playerTeam, playerReady, canEdit, canKick, value, className) {
+function AddSelectOption()
+{
+	var optionDiv = document.createElement("div");
+	optionDiv.className = "option";
+	document.getElementsByClassName("roomInfo")[0].appendChild(optionDiv);
+	
+	var pDiv = document.createElement("p");
+	pDiv.textContent = arguments[0];
+	optionDiv.appendChild(pDiv);
+	
+	var selectDiv = document.createElement("select");
+
+	var idIndex = 1;
+	for(var i = 3; i < arguments.length; i++) {
+		selectDiv.innerHTML += "<option value=" + idIndex + ">" + arguments[i] + "</option>";
+		idIndex++;
+	}
+	selectDiv.setAttribute("onchange", "selectFunction(this)");
+	selectDiv.className = arguments[1];
+	selectDiv.childNodes[arguments[2] - 1].setAttribute("selected", "selected");
+	optionDiv.appendChild(selectDiv);
+}
+function CreateUser(username, playerTeam, playerReady, canEdit, canKick, value, className, canChangeSpectate, spectateActive) {
 	var playerDiv = document.createElement("div");
 	if(playerReady)
 		playerDiv.className = "green";
@@ -26,6 +48,30 @@ function CreateUser(username, playerTeam, playerReady, canEdit, canKick, value, 
 	var pdiv = document.createElement("p");
 	pdiv.textContent = username;
 	playerDiv.appendChild(pdiv);
+
+	if(spectateActive || canChangeSpectate)
+	{
+		if(spectateActive)
+		{
+			var pdiv = document.createElement("p");
+			pdiv.className = "spectator";
+			if(canChangeSpectate)
+				pdiv.className += " active";
+
+			pdiv.textContent = "spectator";
+			playerDiv.appendChild(pdiv);
+		}
+		else if(canChangeSpectate)
+		{
+			var pdiv = document.createElement("p");
+			pdiv.className = "spectator";
+			if(canChangeSpectate)
+				pdiv.className += " notActive";
+
+			pdiv.textContent = "spectator";
+			playerDiv.appendChild(pdiv);
+		}
+	}
 
 	if(canKick)
 	{

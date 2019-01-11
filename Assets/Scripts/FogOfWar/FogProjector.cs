@@ -18,16 +18,12 @@ public class FogProjector : MonoBehaviour
     // Material blurMaterial;
     public float blur=1;
 
-    Projector projector;
-
     public float blendSpeed = 1;
     float blend;
     int blendNameId;
 
     void OnEnable()
     {
-        projector = GetComponent<Projector>();
-
         // blurMaterial = new Material(blurShader);
         // blurMaterial.SetVector("_Parameter", new Vector4(blur, -blur, 0, 0));
 
@@ -43,17 +39,36 @@ public class FogProjector : MonoBehaviour
                          0,
                          fogTexture.format) {filterMode = FilterMode.Bilinear};
 
-        projector.material.SetTexture("_FogTex", projecTexture);
-        projector.material.SetTexture("_OldFogTex", oldTexture);
+        // projector.material.SetTexture("_FogTex", projecTexture);
+        // projector.material.SetTexture("_OldFogTex", oldTexture);
         blendNameId = Shader.PropertyToID("_Blend");
         blend = 1;
-        projector.material.SetFloat(blendNameId, blend);
+        // projector.material.SetFloat(blendNameId, blend);
         Graphics.Blit(fogTexture, projecTexture);
         UpdateFog();
     }
 
     public void UpdateFog()
     {
+        Terrain t = Terrain.activeTerrain;
+        Vector3 newPosition = t.terrainData.size / 2;
+        transform.position = new Vector3(newPosition.x, 50.0f, newPosition.z);
+
+        float newSize = t.terrainData.size.x / 2;
+        // projector.orthographicSize = newSize;
+        Light fogLight = GetComponentInChildren<Light>();
+        fogLight.cookieSize = t.terrainData.size.x;
+
+        Camera fogCamera = GetComponentInChildren<Camera>();
+        fogCamera.orthographicSize = newSize;
+    }
+
+    public void Update()
+    {
+        Terrain t = Terrain.activeTerrain;
+        if (transform.position.x != (t.terrainData.size / 2).x)
+            UpdateFog();
+
         Graphics.Blit(projecTexture, oldTexture);
         Graphics.Blit(fogTexture, projecTexture);
 
@@ -76,11 +91,11 @@ public class FogProjector : MonoBehaviour
     IEnumerator Blend()
     {
         blend = 0;
-        projector.material.SetFloat(blendNameId, blend);
+        // projector.material.SetFloat(blendNameId, blend);
         while (blend < 1)
         {
             blend = Mathf.MoveTowards(blend, 1, blendSpeed * Time.deltaTime);
-            projector.material.SetFloat(blendNameId, blend);
+            // projector.material.SetFloat(blendNameId, blend);
             yield return null;
         }
     }

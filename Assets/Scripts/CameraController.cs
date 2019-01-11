@@ -101,6 +101,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             unitsBinds.Add(KeyCode.Alpha0 + number, new List<GameObject>());
 
         int mapSeed = UnityEngine.Random.Range(0, 1000);
+        int mapSize = GameInfo.mapSize;
         int playerCount = 1;
         // Multiplayer
         if (PhotonNetwork.InRoom)
@@ -122,6 +123,10 @@ public class CameraController : MonoBehaviourPunCallbacks
             if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(GameInfo.MAP_SEED, out mapSeedObd))
                 mapSeed = (int)mapSeedObd;
 
+            object mapSizeObd;
+            if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(GameInfo.MAP_SIZE, out mapSizeObd))
+                mapSize = (int)mapSizeObd;
+
             userId = PhotonNetwork.LocalPlayer.UserId;
             playerCount = PhotonNetwork.PlayerList.Length;
             Debug.Log("userNumber: " + userNumber + " team: " + team + " userId: " + userId + " mapSeed: " + mapSeed);
@@ -134,10 +139,10 @@ public class CameraController : MonoBehaviourPunCallbacks
         
         UI.document.Run("UpdateLoadingDescription", "Create terrain");
         TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
-        terrainGenerator.Generate(mapSeed);
+        terrainGenerator.Generate(mapSeed, mapSize);
         if (GameInfo.IsMasterClient())
         {
-            spawnData = terrainGenerator.GetSpawnData(spawnCount: playerCount);
+            spawnData = terrainGenerator.GetSpawnData(spawnCount: playerCount + GameInfo.GetNPCInfo().Count);
             if (PhotonNetwork.InRoom)
                 GetComponent<PhotonView>().RPC("InstantiateObjects", PhotonTargets.All, spawnData);
             else
