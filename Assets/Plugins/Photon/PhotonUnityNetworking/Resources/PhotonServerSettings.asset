@@ -45,4 +45,6 @@ MonoBehaviour:
   - StartInteractViewID
   - InstantiateObjects
   - KickPlayer
+  - InstantiateAllSpawns
+  - InstantiateAllTrees
   DisableAutoOpenWizard: 1

@@ -128,6 +128,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public Vector3 previousPosition;
     [HideInInspector]
     public float curSpeed;
+    [HideInInspector]
+    public CameraController cameraController;
 
     #endregion
 
@@ -212,8 +214,10 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         team = newTeam;
     }
 
+    Renderer[] renders;
     virtual public void Awake()
     {
+        cameraController = Camera.main.GetComponent<CameraController>();
         unitSelectionComponent = GetComponent<UnitSelectionComponent>();
         photonView = GetComponent<PhotonView>();
         anim = GetComponent<Animator>();
@@ -223,17 +227,34 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
             obstacle.enabled = false;
 
         unitPosition = transform.position;
+        renders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
     }
 
+    private bool isInCameraView = false;
+    public bool IsInCameraView()
+    {
+        return isInCameraView;
+    }
+
+    private bool isRender = true;
     virtual public void Update()
     {
-        foreach (Renderer render in gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray())
-            render.enabled = IsVisible() || beenSeen;
+        isInCameraView = cameraController.IsInCameraView(transform.position);
 
-        // foreach (Collider collider in gameObject.GetComponents<Collider>().Concat(gameObject.GetComponentsInChildren<Collider>()).ToArray())
-        //     collider.enabled = IsVisible() || beenSeen;
+        UnityEngine.Profiling.Profiler.BeginSample("p Update Render"); // Profiler
+        bool newIsRender = IsInCameraView() && (IsVisible() || beenSeen);
+        if (newIsRender != isRender)
+        {
+            isRender = newIsRender;
+            foreach (Renderer render in renders)
+                render.enabled = isRender;
 
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+            // foreach (Collider collider in gameObject.GetComponents<Collider>().Concat(gameObject.GetComponentsInChildren<Collider>()).ToArray())
+            //     collider.enabled = IsVisible() || beenSeen;
+        }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+        
+        UnityEngine.Profiling.Profiler.BeginSample("p Update vision tool"); // Profiler
         if (team == cameraController.team && ownerId == cameraController.userId && live)
         {
             if (visionTool == null && visionToolPrefab != null)
@@ -253,67 +274,70 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 Destroy(visionTool);
             }
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
-        var tagsToSelect = cameraController.tagsToSelect.Find(x => (x.name == gameObject.tag));
-
-        bool healthVisible = true;
-        if (!live)
-            healthVisible = false;
-        if (tagsToSelect.healthVisibleOnlyWhenSelect && !unitSelectionComponent.isSelected)
-            healthVisible = false;
-
-        if (IsHealthVisible())
-            healthVisible = true;
-
-        if (healthVisible && live && IsVisible())
+        UnityEngine.Profiling.Profiler.BeginSample("p Update health"); // Profiler
+        if (IsInCameraView() && HTMLHealthFile != null)
         {
-            if (objectUIInfo == null && HTMLHealthFile != null)
+            bool healthVisible = true;
+            if (IsHealthVisible())
+                healthVisible = true;
+
+            if (healthVisible && live && IsVisible() && IsInCameraView())
             {
-                objectUIInfo = new WorldUI(HTMLHealthSize.x, HTMLHealthSize.y);
-                objectUIInfo.FaceCamera(Camera.main);
-                // objectUIInfo.ParentToOrigin(gameObject);
-                objectUIInfo.PixelPerfect = true;
-                objectUIInfo.transform.position = gameObject.transform.position;
-                objectUIInfo.transform.position += InfoHTMLOffset;
-                objectUIInfo.document.innerHTML = HTMLHealthFile.text;
-                objectUIInfo.Layer = LayerMask.NameToLayer("HP");
-
-                if (team <= 0)
-                    objectUIInfo.document.getElementById("health").style.background = "white";
-                else if (cameraController.team != team)
-                    objectUIInfo.document.getElementById("health").style.background = "red";
-                else
+                if (objectUIInfo == null && HTMLHealthFile != null)
                 {
-                    if (cameraController.userId == ownerId)
-                        objectUIInfo.document.getElementById("health").style.background = "green";
-                    else
+                    objectUIInfo = new WorldUI(HTMLHealthSize.x, HTMLHealthSize.y);
+                    objectUIInfo.FaceCamera(Camera.main);
+                    // objectUIInfo.ParentToOrigin(gameObject);
+                    objectUIInfo.PixelPerfect = true;
+                    objectUIInfo.transform.position = gameObject.transform.position;
+                    objectUIInfo.transform.position += InfoHTMLOffset;
+                    objectUIInfo.document.innerHTML = HTMLHealthFile.text;
+                    objectUIInfo.Layer = LayerMask.NameToLayer("HP");
+
+                    if (team <= 0)
                         objectUIInfo.document.getElementById("health").style.background = "white";
+                    else if (cameraController.team != team)
+                        objectUIInfo.document.getElementById("health").style.background = "red";
+                    else
+                    {
+                        if (cameraController.userId == ownerId)
+                            objectUIInfo.document.getElementById("health").style.background = "green";
+                        else
+                            objectUIInfo.document.getElementById("health").style.background = "white";
+                    }
+                    tempHealth = 0.0f;
                 }
-                tempHealth = 0.0f;
             }
-        }
-        else
-        {
+            else
+            {
+                if (objectUIInfo != null)
+                {
+                    objectUIInfo.Destroy();
+                    objectUIInfo = null;
+                }
+            }
             if (objectUIInfo != null)
             {
-                objectUIInfo.Destroy();
-                objectUIInfo = null;
+                objectUIInfo.transform.position = gameObject.transform.position;
+                objectUIInfo.transform.position += InfoHTMLOffset;
+                if (tempHealth != health)
+                {
+                    Dom.Element healthElement = objectUIInfo.document.getElementById("health");
+                    healthElement.style.width = String.Format("{0:F0}%", health / maxHealth * 100);
+                    tempHealth = health;
+                }
             }
         }
-        if (objectUIInfo != null)
-        {
-            objectUIInfo.transform.position = gameObject.transform.position;
-            objectUIInfo.transform.position += InfoHTMLOffset;
-            if (tempHealth != health)
-            {
-                Dom.Element healthElement = objectUIInfo.document.getElementById("health");
-                healthElement.style.width = String.Format("{0:F0}%", health / maxHealth * 100);
-                tempHealth = health;
-            }
-        }
-        if (UnityEngine.Input.anyKeyDown)
-            UICommand(null);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
+        UnityEngine.Profiling.Profiler.BeginSample("p Update UICommand"); // Profiler
+        if (cameraController.isSelecting && UnityEngine.Input.anyKeyDown)
+            UICommand(null);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
+        UnityEngine.Profiling.Profiler.BeginSample("p Update Destroy beh."); // Profiler
         if (sendToDestroy == true && !sendToUnderground)
         {
             timeToDestroy -= Time.deltaTime;
@@ -353,6 +377,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 }
             }
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public bool IsDisplayOnMap()

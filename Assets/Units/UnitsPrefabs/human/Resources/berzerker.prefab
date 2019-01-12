@@ -1016,6 +1016,7 @@ GameObject:
   - component: {fileID: 95060617490342706}
   - component: {fileID: 136467182371030076}
   - component: {fileID: 195455039355670668}
+  - component: {fileID: 883006957870340268}
   - component: {fileID: 114277323155242132}
   - component: {fileID: 114634354996762512}
   - component: {fileID: 7661890078232436951}
@@ -1037,7 +1038,7 @@ Transform:
   m_GameObject: {fileID: 1528613431990062}
   m_LocalRotation: {x: 0, y: 0.9961947, z: -0, w: -0.08715578}
   m_LocalPosition: {x: 1.27, y: -0.0018310547, z: 70.65}
-  m_LocalScale: {x: 0.10000005, y: 0.099999994, z: 0.10000005}
+  m_LocalScale: {x: 0.085, y: 0.085, z: 0.085}
   m_Children:
   - {fileID: 4268947542905476}
   - {fileID: 4101575436364130}
@@ -1099,6 +1100,22 @@ NavMeshAgent:
   m_BaseOffset: -2.32
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
+--- !u!208 &883006957870340268
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1528613431990062}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 2.76, y: 9.24, z: 2.76}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 10.33, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!114 &114277323155242132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1131,6 +1148,7 @@ MonoBehaviour:
   health: 0
   live: 1
   pointToInteract: {fileID: 0}
+  debug: 0
   isWalkAround: 0
   timeToWalk: 0
   timerToWalk: 0
@@ -1184,6 +1202,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   agent: {fileID: 0}
+  obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
   tempDestinationPoint: {x: 0, y: 0, z: 0}
@@ -1194,12 +1213,9 @@ MonoBehaviour:
   InfoHTMLOffset: {x: 0, y: 2.2, z: 0}
   pointMarkerPrefab: {fileID: 1174494487606054, guid: 7723961c7b4a2cf4cbfa8e9a6c45ba62,
     type: 3}
-  pointMarker: {fileID: 0}
   HTMLHealthSize: {x: 40, y: 40}
   visionToolPrefab: {fileID: 1311408724359970, guid: fc937d29efbc7d146a830e8e4d19ea62,
     type: 3}
-  visionTool: {fileID: 0}
-  canBeSelected: 1
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
@@ -1209,6 +1225,10 @@ MonoBehaviour:
     holder: {fileID: 0}
   tempSpeed: 0
   attackedTeam: 0
+  pointMarker: {fileID: 0}
+  canBeSelected: 1
+  visionTool: {fileID: 0}
+  unitSelectionComponent: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -1251,8 +1271,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 5791970414735973560}
-  viewIdField: 15
-  InstantiationId: 15
+  viewIdField: 0
+  InstantiationId: 43
   isRuntimeInstantiated: 0
 --- !u!114 &5791970414735973560
 MonoBehaviour:
@@ -1851,7 +1871,7 @@ Projector:
   m_FieldOfView: 60
   m_AspectRatio: 1
   m_Orthographic: 1
-  m_OrthographicSize: 0.57
+  m_OrthographicSize: 0.42
   m_Material: {fileID: 2100000, guid: 9e921ee33f8e5ee4884f95bba0a27ce7, type: 2}
   m_IgnoreLayers:
     serializedVersion: 2

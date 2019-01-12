@@ -108,34 +108,65 @@ public class TerrainGenerator : MonoBehaviour
             t.terrainData.SetDetailLayer((int)terrainPosition.x, (int)terrainPosition.y, i, grassLayers);
     }
 
-    public Dictionary<string, List<Vector3>> GetSpawnData(int spawnCount)
+    public List<Vector3> GetCoordinates(float minValue, int step, float randomOffset = 0.0f, float offsetFromBorder = 0.01f)
     {
-        Dictionary<string, List<Vector3>> newData = new Dictionary<string, List<Vector3>>();
+        List<Vector3> positions = new List<Vector3>();
         int sizeX = Terrain.activeTerrain.terrainData.alphamapWidth;
         int sizeY = Terrain.activeTerrain.terrainData.alphamapHeight;
 
-        float spawnOffset = 0.15f;
-        float minValue = 0.5f;
+        int offsetFromBorderMap = 0;
+        if (offsetFromBorder > 0.0f)
+            offsetFromBorderMap = (int)(sizeX * offsetFromBorder);
 
-        // Spawn coordinates
-        List<Vector3> avalibleSpawnPositions = new List<Vector3>();
-        int offset = (int)(sizeX * spawnOffset);
+        for (int y = offsetFromBorderMap; y < sizeX - offsetFromBorderMap; y += step)
+        {
+            for (int x = offsetFromBorderMap; x < sizeY - offsetFromBorderMap; x += step)
+            {
+                if (mapData[x, y] > minValue)
+                {
+                    Vector3 newPos = CalculateTerrainToPosition(x, y);
+                    if (randomOffset > 0.0f)
+                        newPos += new Vector3(Random.Range(0.0f, randomOffset), 0, Random.Range(randomOffset * -1, randomOffset));
+
+                    positions.Add(newPos);
+                }
+            }
+        }
+        return positions;
+    }
+
+    public List<Vector3> GetCoordinatesInBorder(float maxValue, float offsetPos)
+    {
+        List<Vector3> positions = new List<Vector3>();
+        int sizeX = Terrain.activeTerrain.terrainData.alphamapWidth;
+        int sizeY = Terrain.activeTerrain.terrainData.alphamapHeight;
+        int offset = (int)(sizeX * offsetPos);
 
         for (int y = offset; y < sizeY - offset; y++)
-            if (mapData[offset, y] < minValue)
-                avalibleSpawnPositions.Add(CalculateTerrainToPosition(offset, y));
+            if (mapData[offset, y] < maxValue)
+                positions.Add(CalculateTerrainToPosition(offset, y));
 
         for (int x = offset; x < sizeX - offset; x++)
-            if (mapData[x, sizeY - offset] < minValue)
-                avalibleSpawnPositions.Add(CalculateTerrainToPosition(x, sizeY - offset));
+            if (mapData[x, sizeY - offset] < maxValue)
+                positions.Add(CalculateTerrainToPosition(x, sizeY - offset));
 
         for (int y = sizeY - offset; y > offset; y--)
-            if (mapData[sizeX - offset, y] < minValue)
-                avalibleSpawnPositions.Add(CalculateTerrainToPosition(sizeX - offset, y));
+            if (mapData[sizeX - offset, y] < maxValue)
+                positions.Add(CalculateTerrainToPosition(sizeX - offset, y));
 
         for (int x = sizeX - offset; x > offset; x--)
-            if (mapData[x, offset] < minValue)
-                avalibleSpawnPositions.Add(CalculateTerrainToPosition(x, offset));
+            if (mapData[x, offset] < maxValue)
+                positions.Add(CalculateTerrainToPosition(x, offset));
+
+        return positions;
+    }
+
+    public Dictionary<string, List<Vector3>> GetSpawnData(int spawnCount)
+    {
+        Dictionary<string, List<Vector3>> newData = new Dictionary<string, List<Vector3>>();
+        
+        // Spawn coordinates
+        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.20f, offsetPos: 0.15f);
         
         newData["spawn"] = new List<Vector3>();
         for (int i = 1; i <= spawnCount; i++)
@@ -144,6 +175,8 @@ public class TerrainGenerator : MonoBehaviour
             newData["spawn"].Add(avalibleSpawnPositions[positionIndex]);
             // Debug.Log(positionIndex + " (" + avalibleSpawnPositions.Count + "): " + avalibleSpawnPositions[positionIndex]);
         }
+
+        newData["trees"] = GetCoordinates(minValue: 0.8f, step: 4, randomOffset: 1.0f);
 
         return newData;
     }
@@ -160,7 +193,7 @@ public class TerrainGenerator : MonoBehaviour
         t.terrainData.size = new Vector3(100 * newSize, 100, 100 * newSize);
         scale = newSize / 1.5f;
 
-        Debug.Log("Terrain Generate: size:" + newSize + " " + t.terrainData.size);
+        // Debug.Log("Terrain Generate: size:" + newSize + " " + t.terrainData.size);
 
         int sizeX = t.terrainData.alphamapWidth;
         int sizeY = t.terrainData.alphamapHeight;

@@ -1169,7 +1169,7 @@ Projector:
   m_FieldOfView: 60
   m_AspectRatio: 1
   m_Orthographic: 1
-  m_OrthographicSize: 0.57
+  m_OrthographicSize: 0.42
   m_Material: {fileID: 2100000, guid: 9e921ee33f8e5ee4884f95bba0a27ce7, type: 2}
   m_IgnoreLayers:
     serializedVersion: 2
@@ -2175,6 +2175,7 @@ GameObject:
   - component: {fileID: 3218}
   - component: {fileID: 3298}
   - component: {fileID: 3324}
+  - component: {fileID: 7924636672153355099}
   - component: {fileID: 3449}
   - component: {fileID: 3456}
   - component: {fileID: 3514}
@@ -2196,7 +2197,7 @@ Transform:
   m_GameObject: {fileID: 1294}
   m_LocalRotation: {x: 0, y: 0.9961947, z: -0, w: -0.08715578}
   m_LocalPosition: {x: 3.99, y: 1.067, z: 67.78}
-  m_LocalScale: {x: 0.10000005, y: 0.099999994, z: 0.10000005}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_Children:
   - {fileID: 2125}
   - {fileID: 2045}
@@ -2233,7 +2234,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 3.49
+  m_Radius: 3.2
   m_Height: 19.39
   m_Direction: 1
   m_Center: {x: 0, y: 9.23, z: 0}
@@ -2246,7 +2247,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 1294}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 2.71
+  m_Radius: 2.2
   m_Speed: 2.9
   m_Acceleration: 50
   avoidancePriority: 50
@@ -2259,6 +2260,22 @@ NavMeshAgent:
   m_BaseOffset: -0.1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
+--- !u!208 &7924636672153355099
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1294}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 2.76, y: 9.24, z: 2.76}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 10.33, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!114 &3449
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2415,8 +2432,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3482}
-  viewIdField: 0
-  InstantiationId: 26
+  viewIdField: 76
+  InstantiationId: 76
   isRuntimeInstantiated: 0
 --- !u!114 &3482
 MonoBehaviour:

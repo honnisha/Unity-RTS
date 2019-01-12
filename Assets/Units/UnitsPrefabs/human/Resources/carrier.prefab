@@ -2384,7 +2384,7 @@ Transform:
   m_GameObject: {fileID: 832}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.48112488, y: 0, z: 61.349766}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_Children:
   - {fileID: 1805}
   - {fileID: 1755}
@@ -2518,6 +2518,7 @@ MonoBehaviour:
   tempDestinationPoint: {x: 0, y: 0, z: 0}
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
+  cameraController: {fileID: 0}
   skillList: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
   InfoHTMLOffset: {x: 0, y: 2, z: 0}
@@ -2595,8 +2596,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3391}
-  viewIdField: 38
-  InstantiationId: 38
+  viewIdField: 32
+  InstantiationId: 32
   isRuntimeInstantiated: 0
 --- !u!114 &3391
 MonoBehaviour:
@@ -2691,7 +2692,7 @@ Projector:
   m_FieldOfView: 60
   m_AspectRatio: 1
   m_Orthographic: 1
-  m_OrthographicSize: 0.87
+  m_OrthographicSize: 0.7
   m_Material: {fileID: 2100000, guid: 9e921ee33f8e5ee4884f95bba0a27ce7, type: 2}
   m_IgnoreLayers:
     serializedVersion: 2

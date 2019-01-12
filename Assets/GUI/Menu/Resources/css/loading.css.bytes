@@ -9,8 +9,8 @@
 	display: inline-block;
 	position: relative;
 	top: 40%;
-	height: 10%;
-	width: 20%;
+	height: 60px;
+	width: 240px;
 	padding: 20px;
 	background-size: 100%;
 }

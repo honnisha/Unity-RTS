@@ -695,6 +695,7 @@ GameObject:
   - component: {fileID: 95817415564536518}
   - component: {fileID: 136723234380539532}
   - component: {fileID: 195085245352450722}
+  - component: {fileID: 1724487832338956250}
   - component: {fileID: 114714962409301328}
   - component: {fileID: 114024932627925992}
   - component: {fileID: 5544117149830189870}
@@ -716,7 +717,7 @@ Transform:
   m_GameObject: {fileID: 1323032547063684}
   m_LocalRotation: {x: 0, y: 0.9961947, z: -0, w: -0.08715578}
   m_LocalPosition: {x: -1.04, y: 1.018, z: 66.55}
-  m_LocalScale: {x: 0.1000001, y: 0.099999994, z: 0.1000001}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_Children:
   - {fileID: 4461477545677158}
   - {fileID: 4290340846660774}
@@ -753,7 +754,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 4.63
+  m_Radius: 3.2
   m_Height: 18.61
   m_Direction: 1
   m_Center: {x: 0, y: -2.93, z: 0}
@@ -766,7 +767,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 1323032547063684}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 3.97
+  m_Radius: 2.2
   m_Speed: 2.3
   m_Acceleration: 50
   avoidancePriority: 50
@@ -779,6 +780,22 @@ NavMeshAgent:
   m_BaseOffset: 8.82
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
+--- !u!208 &1724487832338956250
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1323032547063684}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 2.76, y: 9.24, z: 2.76}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: -3, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!114 &114714962409301328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -811,6 +828,7 @@ MonoBehaviour:
   health: 0
   live: 1
   pointToInteract: {fileID: 0}
+  debug: 0
   isWalkAround: 0
   timeToWalk: 0
   timerToWalk: 0
@@ -864,6 +882,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   agent: {fileID: 0}
+  obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
   tempDestinationPoint: {x: 0, y: 0, z: 0}
@@ -889,6 +908,7 @@ MonoBehaviour:
   pointMarker: {fileID: 0}
   canBeSelected: 1
   visionTool: {fileID: 0}
+  unitSelectionComponent: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -931,8 +951,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 240754948708690846}
-  viewIdField: 83
-  InstantiationId: 83
+  viewIdField: 22
+  InstantiationId: 22
   isRuntimeInstantiated: 0
 --- !u!114 &240754948708690846
 MonoBehaviour:

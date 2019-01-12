@@ -1952,6 +1952,10 @@ MonoBehaviour:
   health: 100
   live: 1
   pointToInteract: {fileID: 0}
+  debug: 0
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 10
   uniqueName: "\u0421arrier"
   readableName: "\u0421arrier"
@@ -1962,7 +1966,7 @@ MonoBehaviour:
   costGold: 0
   costWood: 0
   productionHotkey: 0
-  canAttack: 0
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 10
   rangeAttack: 1.5
   interactType: 0
@@ -1995,6 +1999,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   agent: {fileID: 0}
+  obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
   tempDestinationPoint: {x: 0, y: 0, z: 0}
@@ -2005,20 +2010,27 @@ MonoBehaviour:
   InfoHTMLOffset: {x: 0, y: 2, z: 0}
   pointMarkerPrefab: {fileID: 1174494487606054, guid: 7723961c7b4a2cf4cbfa8e9a6c45ba62,
     type: 3}
-  pointMarker: {fileID: 0}
   HTMLHealthSize: {x: 40, y: 40}
   visionToolPrefab: {fileID: 1311408724359970, guid: fc937d29efbc7d146a830e8e4d19ea62,
     type: 3}
-  visionTool: {fileID: 0}
-  canBeSelected: 1
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
+  timerToCreateHolder: 0
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
+  attackedTeam: 0
+  pointMarker: {fileID: 0}
+  canBeSelected: 1
+  visionTool: {fileID: 0}
+  unitSelectionComponent: {fileID: 0}
   resourceCapacityType: 0
   resourceCapacity: 0
+  resourceEndless: 0
+  sourceType: 0
+  storedResources: 
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}
@@ -2026,6 +2038,17 @@ MonoBehaviour:
   resourceGatherInfo: []
   resourceHold: 0
   resourceType: 0
+  farmInfo:
+    type: 0
+    gatherPerSecond: 0.5
+    maximumCapacity: 10
+    carryObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
+    toolObject:
+      prefab: {fileID: 0}
+      holder: {fileID: 0}
+  interactObject: {fileID: 0}
 --- !u!114 &1794032085
 MonoBehaviour:
   m_ObjectHideFlags: 0

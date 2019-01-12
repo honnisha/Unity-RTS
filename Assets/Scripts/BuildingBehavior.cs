@@ -58,17 +58,23 @@ public class BuildingBehavior : BaseBehavior
     {
         base.Update();
 
-        if(!terrainHasChanged && state == BuildingState.Builded && IsVisible())
+        UnityEngine.Profiling.Profiler.BeginSample("p Update terrain"); // Profiler
+        if (IsInCameraView() && !terrainHasChanged && state == BuildingState.Builded && IsVisible())
         {
             terrainHasChanged = true;
             TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
-            Vector2 newPosition = new Vector2(transform.transform.position.x + terrainChangeInfo.offset.y, transform.transform.position.z + terrainChangeInfo.offset.x);
-            if (terrainChangeInfo.changeTexture)
-                terrainGenerator.SetTextureOnTerrain(newPosition, terrainChangeInfo.size, terrainChangeInfo.layer, terrainChangeInfo.value);
-            if(terrainChangeInfo.removeGrass)
-                terrainGenerator.RemoveGrassOnTerrain(newPosition, terrainChangeInfo.size);
+            if (terrainGenerator)
+            {
+                Vector2 newPosition = new Vector2(transform.transform.position.x + terrainChangeInfo.offset.y, transform.transform.position.z + terrainChangeInfo.offset.x);
+                if (terrainChangeInfo.changeTexture)
+                    terrainGenerator.SetTextureOnTerrain(newPosition, terrainChangeInfo.size, terrainChangeInfo.layer, terrainChangeInfo.value);
+                if (terrainChangeInfo.removeGrass)
+                    terrainGenerator.RemoveGrassOnTerrain(newPosition, terrainChangeInfo.size);
+            }
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
+        UnityEngine.Profiling.Profiler.BeginSample("p Update unitsQuery"); // Profiler
         if (unitsQuery.Count > 0)
         {
             buildTimer -= Time.deltaTime;
@@ -83,17 +89,22 @@ public class BuildingBehavior : BaseBehavior
                 }
             }
         }
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        UnitSelectionComponent unitSelectionComponent = GetComponent<UnitSelectionComponent>();
-        if (unitSelectionComponent.isSelected && team == cameraController.team)
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
+        UnityEngine.Profiling.Profiler.BeginSample("p Update marker"); // Profiler
+        if (IsInCameraView())
         {
-            if (spawnTargetObject != null)
-                CreateOrUpdatePointMarker(Color.green, spawnTargetObject.transform.position, 0.0f, true);
-            else
-                CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true);
+            if (unitSelectionComponent.isSelected && team == cameraController.team)
+            {
+                if (spawnTargetObject != null)
+                    CreateOrUpdatePointMarker(Color.green, spawnTargetObject.transform.position, 0.0f, true);
+                else
+                    CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true);
+            }
+            if (!unitSelectionComponent.isSelected)
+                DestroyPointMarker();
         }
-        if (!unitSelectionComponent.isSelected)
-            DestroyPointMarker();
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public List<GameObject> ProduceUnit(string createdPrefabName)

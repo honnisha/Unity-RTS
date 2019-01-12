@@ -219,6 +219,7 @@ MonoBehaviour:
   tempDestinationPoint: {x: 0, y: 0, z: 0}
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
+  cameraController: {fileID: 0}
   skillList: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
   InfoHTMLOffset: {x: 0, y: 6, z: 0}
@@ -295,8 +296,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3389}
-  viewIdField: 11
-  InstantiationId: 11
+  viewIdField: 33
+  InstantiationId: 33
   isRuntimeInstantiated: 0
 --- !u!114 &3389
 MonoBehaviour:

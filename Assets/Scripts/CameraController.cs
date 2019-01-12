@@ -25,7 +25,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public int team = 1;
     public string userId = "1";
-    public int userNumber = 1;
+    private int userNumber = 0;
 
     [HideInInspector]
     public bool chatInput = false;
@@ -55,6 +55,9 @@ public class CameraController : MonoBehaviourPunCallbacks
             return _whiteTexture;
         }
     }
+
+    public List<GameObject> treePrefabs;
+
     [HideInInspector]
     public GameObject buildedObject;
     [HideInInspector]
@@ -83,10 +86,17 @@ public class CameraController : MonoBehaviourPunCallbacks
     public Dictionary<WindowType, List<object>> menuInfo = new Dictionary<WindowType, List<object>>();
 
     Dictionary<string, List<Vector3>> spawnData;
+    bool[,] chanksView;
+    float chunkSize = 15.0f;
+    float distanceChunkVisible = 3.0f;
 
     // Use this for initialization
     void Start()
     {
+        int chanksSizeX = (int)(Terrain.activeTerrain.terrainData.size.x / chunkSize);
+        int chanksSizeY = (int)(Terrain.activeTerrain.terrainData.size.z / chunkSize);
+        chanksView = new bool[chanksSizeX, chanksSizeY];
+
         UI.document.Run("CreateLoadingScreen", "Retrieving data");
 
         menuInfo.Add(WindowType.MainMenu, new List<object>());
@@ -129,29 +139,76 @@ public class CameraController : MonoBehaviourPunCallbacks
 
             userId = PhotonNetwork.LocalPlayer.UserId;
             playerCount = PhotonNetwork.PlayerList.Length;
-            Debug.Log("userNumber: " + userNumber + " team: " + team + " userId: " + userId + " mapSeed: " + mapSeed);
+            // Debug.Log("userNumber: " + userNumber + " team: " + team + " userId: " + userId + " mapSeed: " + mapSeed);
         }
         // Singleplayer
         else
         {
             PhotonNetwork.OfflineMode = true;
         }
-        
+
         UI.document.Run("UpdateLoadingDescription", "Create terrain");
         TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
-        terrainGenerator.Generate(mapSeed, mapSize);
-        if (GameInfo.IsMasterClient())
+        if (terrainGenerator)
         {
-            spawnData = terrainGenerator.GetSpawnData(spawnCount: playerCount + GameInfo.GetNPCInfo().Count);
-            if (PhotonNetwork.InRoom)
-                GetComponent<PhotonView>().RPC("InstantiateObjects", PhotonTargets.All, spawnData);
+            terrainGenerator.Generate(mapSeed, mapSize);
+            if (GameInfo.IsMasterClient())
+            {
+                spawnData = terrainGenerator.GetSpawnData(spawnCount: playerCount + GameInfo.GetNPCInfo().Count);
+                if (PhotonNetwork.InRoom)
+                    GetComponent<PhotonView>().RPC("InstantiateAllSpawns", PhotonTargets.All, spawnData);
+                else
+                    InstantiateAllSpawns(spawnData);
+
+                InstantiateAllTrees(spawnData, maxTrees: 1000);
+            }
             else
-                InstantiateObjects(spawnData);
+            {
+                UI.document.Run("UpdateLoadingDescription", "Retrieving spawn data");
+            }
         }
         else
         {
-            UI.document.Run("UpdateLoadingDescription", "Retrieving spawn data");
+            StartGame();
         }
+    }
+
+    public void UpdateVisionChunks()
+    {
+        Vector3 centerCamera = transform.position;
+        centerCamera += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * 20.0f;
+        Vector2 viewCameraPosition = GetChunkByPosition(centerCamera);
+
+        for (int x = 0; x < chanksView.GetLength(0); x++)
+            for (int y = 0; y < chanksView.GetLength(1); y++)
+            {
+                float distance = Vector2.Distance(viewCameraPosition, new Vector2(x, y));
+                if (distance < distanceChunkVisible)
+                    chanksView[x, y] = true;
+                else
+                    chanksView[x, y] = false;
+            }
+    }
+
+    public Vector2 GetChunkByPosition(Vector3 position)
+    {
+        int x = (int)(chanksView.GetLength(0) * (position.x / Terrain.activeTerrain.terrainData.size.x));
+        int y = (int)(chanksView.GetLength(1) * (position.z / Terrain.activeTerrain.terrainData.size.z));
+        if (x < 0)
+            x = 0;
+        if (x > chanksView.GetLength(0))
+            x = chanksView.GetLength(0);
+        if (y < 0)
+            y = 0;
+        if (y > chanksView.GetLength(1))
+            y = chanksView.GetLength(1);
+        return new Vector2(x, y);
+    }
+
+    public bool IsInCameraView(Vector3 position)
+    {
+        Vector2 viewPosition = GetChunkByPosition(position);
+        return chanksView[(int)viewPosition.x, (int)viewPosition.y];
     }
 
     void OnDrawGizmos()
@@ -161,6 +218,10 @@ public class CameraController : MonoBehaviourPunCallbacks
             Gizmos.color = Color.yellow;
             foreach(Vector3 spawnPoint in spawnData["spawn"])
                 Gizmos.DrawSphere(spawnPoint, 0.4f);
+
+            // Gizmos.color = Color.green;
+            // foreach (Vector3 treePoint in spawnData["trees"])
+            //     Gizmos.DrawSphere(treePoint, 0.4f);
         }
     }
 
@@ -181,12 +242,28 @@ public class CameraController : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void InstantiateObjects(Dictionary<string, List<Vector3>> newSpawnData)
+    public void InstantiateAllTrees(Dictionary<string, List<Vector3>> newSpawnData, int maxTrees = 0)
+    {
+        int index = 0;
+        foreach(Vector3 treePosition in newSpawnData["trees"])
+        {
+            if (maxTrees > 0 && index > maxTrees)
+            {
+                Debug.Log(String.Format("Trees limit reached: {0} ({1})", maxTrees, newSpawnData["trees"].Count));
+                break;
+            }
+
+            Instantiate(treePrefabs[UnityEngine.Random.Range(0, treePrefabs.Count - 1)], treePosition, new Quaternion(0, UnityEngine.Random.Range(0, 360), 0, 0));
+            index++;
+        }
+    }
+
+    [PunRPC]
+    public void InstantiateAllSpawns(Dictionary<string, List<Vector3>> newSpawnData)
     {
         GameObject createdUnit = null;
-        spawnData = newSpawnData;
-
-        createdUnit = PhotonNetwork.Instantiate(createSpawnBuildingName, spawnData["spawn"][userNumber], new Quaternion(), 0);
+        
+        createdUnit = PhotonNetwork.Instantiate(createSpawnBuildingName, newSpawnData["spawn"][userNumber], new Quaternion(), 0);
         if (createdUnit == null)
         {
             UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
@@ -232,6 +309,8 @@ public class CameraController : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update()
     {
+        UpdateVisionChunks();
+
         countWorkersTimer -= Time.deltaTime;
         if (countWorkersTimer <= 0)
         {
@@ -244,6 +323,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             UI.Variables["wood"] = String.Format("{0:F0}", wood);
             if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
         }
+        UpdateMapsCamera();
 
         var activeOver = PowerUI.CameraPointer.All[0].ActiveOver;
 
@@ -460,7 +540,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                                 }
                             }
                         }
-                        SetOrderInFormation(formationList, hit.point, 1.7f, sendToQueue);
+                        SetOrderInFormation(formationList, hit.point, 1.3f, sendToQueue);
                     }
                 }
             }
@@ -657,11 +737,46 @@ public class CameraController : MonoBehaviourPunCallbacks
         transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
     }
 
-    public Vector2 GetPositionOnMap(GameObject unit)
+    public Vector2 GetPositionOnMap(Vector3 position)
     {
         Terrain terrain = Terrain.activeTerrain;
-        Vector3 positionOnTerrain = unit.transform.position - terrain.GetPosition();
+        Vector3 positionOnTerrain = position - terrain.GetPosition();
         return new Vector2(positionOnTerrain.x / terrain.terrainData.size.x, positionOnTerrain.z / terrain.terrainData.size.z);
+    }
+
+    public void CreateOrUpdateCameraOnMap(Dom.Element mapBlock, Dom.Element mapImage)
+    {
+        float cameraScale = 20.0f / (Terrain.activeTerrain.terrainData.size.x / 50.0f / 4.0f);
+        float cameraHeight = cameraScale / 1.2f;
+        float cameraWidtht = cameraScale;
+        Vector2 positionCameraOnMap = GetPositionOnMap(Camera.main.transform.position);
+        Dom.Element cameraDiv;
+        if (mapBlock.getElementsByClassName("mapCamera").length <= 0)
+        {
+            cameraDiv = UI.document.createElement("div");
+            cameraDiv.className = "mapCamera";
+            cameraDiv.style.height = String.Format("{0}%", cameraHeight);
+            cameraDiv.style.width = String.Format("{0}%", cameraWidtht);
+            mapImage.appendChild(cameraDiv);
+        }
+        else
+        {
+            cameraDiv = mapBlock.getElementsByClassName("mapCamera")[0];
+        }
+        if (cameraDiv != null)
+        {
+            cameraDiv.style.left = String.Format("{0}%", positionCameraOnMap.x * 100.0f - cameraHeight / 2);
+            cameraDiv.style.bottom = String.Format("{0}%", positionCameraOnMap.y * 100.0f);
+        }
+    }
+
+    public void UpdateMapsCamera()
+    {
+        foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
+        {
+            var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
+            CreateOrUpdateCameraOnMap(mapBlock, mapImage);
+        }
     }
 
     public void UpdateMapsAndStatistic()
@@ -692,6 +807,8 @@ public class CameraController : MonoBehaviourPunCallbacks
                 mapImage.style.width = "100%";
             }
 
+            CreateOrUpdateCameraOnMap(mapBlock, mapImage);
+
             var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
             unitsBlock.innerHTML = "";
 
@@ -719,7 +836,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                     Dom.Element unitDiv = UI.document.createElement("div");
                     unitDiv.className = "unit clckable";
                     unitDiv.id = unit.GetComponent<PhotonView>().ViewID.ToString();
-                    Vector2 positionOnMap = GetPositionOnMap(unit);
+                    Vector2 positionOnMap = GetPositionOnMap(unit.transform.position);
                     unitDiv.style.left = String.Format("{0}%", positionOnMap.x * 100.0f - 1.5);
                     unitDiv.style.bottom = String.Format("{0}%", positionOnMap.y * 100.0f - 1.5);
                     unitDiv.style.backgroundColor = unitBaseBehavior.GetDisplayMapColor();

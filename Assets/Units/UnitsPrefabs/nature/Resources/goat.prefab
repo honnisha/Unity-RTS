@@ -1264,7 +1264,7 @@ Transform:
   m_GameObject: {fileID: 1677176852055214}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 5.45, y: -0.0018310547, z: 59.68}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_Children:
   - {fileID: 4245257308710294}
   - {fileID: 4418246668786970}
@@ -1322,6 +1322,7 @@ MonoBehaviour:
   health: 50
   live: 1
   pointToInteract: {fileID: 0}
+  debug: 0
   isWalkAround: 1
   timeToWalk: 0
   timerToWalk: 0
@@ -1368,6 +1369,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   agent: {fileID: 0}
+  obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
   tempDestinationPoint: {x: 0, y: 0, z: 0}
@@ -1377,11 +1379,8 @@ MonoBehaviour:
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
   InfoHTMLOffset: {x: 0, y: 1.3, z: 0}
   pointMarkerPrefab: {fileID: 0}
-  pointMarker: {fileID: 0}
   HTMLHealthSize: {x: 40, y: 40}
   visionToolPrefab: {fileID: 0}
-  visionTool: {fileID: 0}
-  canBeSelected: 1
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
@@ -1389,6 +1388,12 @@ MonoBehaviour:
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
+  attackedTeam: 0
+  pointMarker: {fileID: 0}
+  canBeSelected: 1
+  visionTool: {fileID: 0}
+  unitSelectionComponent: {fileID: 0}
   resourceCapacityType: 1
   resourceCapacity: 100
   resourceEndless: 0
@@ -1467,8 +1472,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 6685409450178812008}
-  viewIdField: 34
-  InstantiationId: 34
+  viewIdField: 13
+  InstantiationId: 13
   isRuntimeInstantiated: 0
 --- !u!114 &6685409450178812008
 MonoBehaviour:
@@ -1685,7 +1690,7 @@ Projector:
   m_FieldOfView: 60
   m_AspectRatio: 1
   m_Orthographic: 1
-  m_OrthographicSize: 0.57
+  m_OrthographicSize: 0.42
   m_Material: {fileID: 2100000, guid: 9e921ee33f8e5ee4884f95bba0a27ce7, type: 2}
   m_IgnoreLayers:
     serializedVersion: 2

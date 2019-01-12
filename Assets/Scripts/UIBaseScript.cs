@@ -62,7 +62,7 @@ public class UIBaseScript : MonoBehaviour
     {
         List<GameObject> selectegObjects = cameraController.GetSelectedObjects();
 
-        UnityEngine.Profiling.Profiler.BeginSample("Draw blocks"); // Profiler
+        UnityEngine.Profiling.Profiler.BeginSample("p Draw blocks"); // Profiler
         List<UIImage> selectedUnitUIImage = GetSelectedObjectsToUIImage(selectegObjects);
         DisplayUIImageObjects("center", selectedUnitUIImage, ref storageUIImages);
 
@@ -73,11 +73,11 @@ public class UIBaseScript : MonoBehaviour
         DisplayUIImageObjects("right", skillUIImages, ref storageSkillUIImages);
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
-        UnityEngine.Profiling.Profiler.BeginSample("DisplayCommands"); // Profiler
+        UnityEngine.Profiling.Profiler.BeginSample("p DisplayCommands"); // Profiler
         DisplayCommands(selectegObjects);
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
-        UnityEngine.Profiling.Profiler.BeginSample("HandleUIEvents"); // Profiler
+        UnityEngine.Profiling.Profiler.BeginSample("p HandleUIEvents"); // Profiler
         bool description = HandleUIEvents(selectegObjects, skillUIImages);
         if (!description)
             DestroyDescription();

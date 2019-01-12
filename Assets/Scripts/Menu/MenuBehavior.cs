@@ -747,7 +747,7 @@ namespace GangaGame
             }
             AddInfo(String.Format("NPC count: {0}", roomNPCList.Count));
             
-            List<string> mapNames = new List<string>(new string[] { "Very small", "Small", "Medium", "Big", "Very big", "Very much big", "Ultra-super big!" });
+            List<string> mapNames = new List<string>(new string[] { "Very small", "Small", "Medium", "Big", "Very big" });
             if (GameInfo.IsMasterClient())
             {
                 List<string> optionsArgs = new List<string>(new string[] { "Map size:", "MapSize", GameInfo.mapSize.ToString() });
