@@ -64,6 +64,9 @@ public class UnitBehavior : BaseBehavior
     override public void Update()
     {
         UnityEngine.Profiling.Profiler.BeginSample("UserUpdate"); // Profiler
+
+        UpdateIsInCameraView(cameraController.IsInCameraView(transform.position));
+
         base.Update();
         if (!live)
             return;
@@ -178,6 +181,11 @@ public class UnitBehavior : BaseBehavior
                     obstacle.enabled = false;
             }
         }
+    }
+
+    public override void UpdateIsInCameraView(bool newState)
+    {
+        isInCameraView = newState;
     }
 
     private bool stucked = true;
@@ -933,7 +941,9 @@ public class UnitBehavior : BaseBehavior
 
     public override bool IsVisible()
     {
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (GameInfo.playerSpectate)
+            return true;
+
         if (team == cameraController.team && live)
             return true;
         else
@@ -980,10 +990,15 @@ public class UnitBehavior : BaseBehavior
         }
     }
 
+    public override void SendToDestroy()
+    {
+        sendToDestroy = true;
+    }
+
     public override void ResourcesIsOut(GameObject worker)
     {
         timeToDestroy = 0.0f;
-        sendToDestroy = true;
+        SendToDestroy();
     }
 
     public override void TakeDamage(float damage, GameObject attacker)
@@ -1044,7 +1059,7 @@ public class UnitBehavior : BaseBehavior
         agent.enabled = false;
 
         if (resourceCapacity <= 0)
-            sendToDestroy = true;
+            SendToDestroy();
     }
 
     public void StopAction(bool deleteObject)
@@ -1143,7 +1158,7 @@ public class UnitBehavior : BaseBehavior
         UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
         if (team != cameraController.team || cameraController.chatInput)
             return result;
-   
+        
         foreach (GameObject skillObject in skillList)
         {
             if (skillObject != null)

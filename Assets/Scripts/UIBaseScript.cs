@@ -128,7 +128,7 @@ public class UIBaseScript : MonoBehaviour
                 cameraController.DeselectAllUnits();
 
                 UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
-                selection.isSelected = true;
+                selection.SetSelect(false);
 
                 cameraController.MoveCameraToPoint(unit.transform.position);
             }
@@ -241,12 +241,15 @@ public class UIBaseScript : MonoBehaviour
         List<UIImage> newUIImages = new List<UIImage>();
         foreach (GameObject unit in selectegObjects)
         {
-            BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-            string name = baseBehaviorComponent.uniqueName;
-            GetOrCreateUIImageToList(
-                ref newUIImages, name, baseBehaviorComponent.imagePath,
-                baseBehaviorComponent.readableName, baseBehaviorComponent.readableDescription, baseBehaviorComponent.GetStatistics(), new List<string>(), KeyCode.None
-                );
+            if (unit != null)
+            {
+                BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                string name = baseBehaviorComponent.uniqueName;
+                GetOrCreateUIImageToList(
+                    ref newUIImages, name, baseBehaviorComponent.imagePath,
+                    baseBehaviorComponent.readableName, baseBehaviorComponent.readableDescription, baseBehaviorComponent.GetStatistics(), new List<string>(), KeyCode.None
+                    );
+            }
         }
         return newUIImages;
     }

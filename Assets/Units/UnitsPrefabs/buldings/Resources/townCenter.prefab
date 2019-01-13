@@ -246,6 +246,7 @@ MonoBehaviour:
   resourceEndless: 0
   sourceType: 0
   storedResources: 010000000200000003000000
+  isInCameraView: 0
   state: 3
   magnitDistance: 5
   producedUnits:
@@ -275,6 +276,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e11b0a92f7104e4f8c2693c0cf315ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeSelected: 1
   isSelected: 0
   projector: {fileID: 778}
 --- !u!114 &3386

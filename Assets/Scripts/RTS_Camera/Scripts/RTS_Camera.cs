@@ -168,6 +168,7 @@ namespace RTS_Cam
         private void Start()
         {
             m_Transform = transform;
+            zoomPos = maxHeight;
         }
 
         private void Update()
@@ -251,6 +252,11 @@ namespace RTS_Cam
 
                 m_Transform.Translate(desiredMove, Space.Self);
             }
+        }
+
+        public void SetMaxHeight()
+        {
+            m_Transform.position = new Vector3(m_Transform.position.x, maxHeight * 2.0f, m_Transform.position.z);
         }
 
         /// <summary>

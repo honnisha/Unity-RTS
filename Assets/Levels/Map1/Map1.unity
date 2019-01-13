@@ -104,8 +104,8 @@ NavMeshSettings:
     ledgeDropHeight: 0
     maxJumpAcrossDistance: 0
     minRegionArea: 2
-    manualCellSize: 0
-    cellSize: 0.16666667
+    manualCellSize: 1
+    cellSize: 0.04
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
@@ -156,7 +156,7 @@ Terrain:
   m_TreeBillboardDistance: 50
   m_TreeCrossFadeLength: 5
   m_TreeMaximumFullLODCount: 50
-  m_DetailObjectDistance: 50
+  m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 5
   m_SplatMapDistance: 1000
@@ -204,18 +204,61 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32f28993822a05a49b08935373d93274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  treePrefabs:
+  - {fileID: 6468036793243662981, guid: 61a1f22d84531ce4a81edf9962cb0e8b, type: 3}
+  - {fileID: 7207943571960021215, guid: 1eb6237fb7b4e134589dd6850214fc5e, type: 3}
+  - {fileID: 7993852223387248859, guid: b67cb0bc41f5f83408bb90b5309828da, type: 3}
+  - {fileID: 5504205912774389098, guid: bdc71a60401a51d42b661605e6cac048, type: 3}
+  goldPrefabs:
+  - {fileID: 156588864358899212, guid: a71994c5ee0ba014d853a4b5c52796ca, type: 3}
+  animalsPrefabs:
+  - {fileID: 1937853774954928, guid: 5933b4810ee168c43b7e430718f8fa76, type: 3}
+  - {fileID: 1677176852055214, guid: 57d5c75ff596c3047a4ebbba9f351416, type: 3}
   layersCount: 8
-  fractalType: 3
-  basisType: 3
-  interpType: 3
-  octaves: 3
-  frequency: 2
-  lacunarity: 2
-  seed: 1
-  scale: 1
+  mainMapGenerateInfo:
+    fractalType: 3
+    basisType: 3
+    interpType: 3
+    octaves: 3
+    frequency: 2
+    lacunarity: 2
+    seed: 1
+    scale: 1
   mapTexture: {fileID: 0}
   generate: 0
---- !u!84 &828483461
+--- !u!84 &580018945
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_Width: 1221
+  m_Height: 644
+  m_AntiAliasing: 1
+  m_DepthFormat: 1
+  m_ColorFormat: 7
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
+--- !u!84 &1087028853
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -302,9 +345,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 108310390962599886, guid: 0d4b6e21aae4e904aac9abc028f13e9a,
+        type: 3}
+      propertyPath: m_CookieSize
+      value: 300
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d4b6e21aae4e904aac9abc028f13e9a, type: 3}
---- !u!84 &1641326729
+--- !u!84 &1295370904
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -348,7 +396,7 @@ GameObject:
   - component: {fileID: 1840556872}
   m_Layer: 0
   m_Name: Directional Light
-  m_TagString: Untagged
+  m_TagString: Light
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -418,11 +466,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4268199838658806, guid: a37812fc8ef302a4e8a2b87d0fd1470e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 19.668125
+      value: 27.5
       objectReference: {fileID: 0}
     - target: {fileID: 4268199838658806, guid: a37812fc8ef302a4e8a2b87d0fd1470e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9.79
+      value: 13.7
       objectReference: {fileID: 0}
     - target: {fileID: 4268199838658806, guid: a37812fc8ef302a4e8a2b87d0fd1470e, type: 3}
       propertyPath: m_LocalPosition.z
@@ -464,24 +512,66 @@ PrefabInstance:
         type: 3}
       propertyPath: m_TargetTexture
       value: 
-      objectReference: {fileID: 1641326729}
-    - target: {fileID: 114397657945217350, guid: a37812fc8ef302a4e8a2b87d0fd1470e,
+      objectReference: {fileID: 1087028853}
+    - target: {fileID: 114774791167206152, guid: a37812fc8ef302a4e8a2b87d0fd1470e,
         type: 3}
-      propertyPath: minHeight
-      value: 8
+      propertyPath: outlineShaderMaterial
+      value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 114774791167206152, guid: a37812fc8ef302a4e8a2b87d0fd1470e,
+        type: 3}
+      propertyPath: renderTexture
+      value: 
+      objectReference: {fileID: 580018945}
+    - target: {fileID: 114774791167206152, guid: a37812fc8ef302a4e8a2b87d0fd1470e,
+        type: 3}
+      propertyPath: extraRenderTexture
+      value: 
+      objectReference: {fileID: 2105385541}
     - target: {fileID: 7758606727617589273, guid: a37812fc8ef302a4e8a2b87d0fd1470e,
         type: 3}
       propertyPath: viewIdField
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7758606727617589273, guid: a37812fc8ef302a4e8a2b87d0fd1470e,
         type: 3}
       propertyPath: InstantiationId
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a37812fc8ef302a4e8a2b87d0fd1470e, type: 3}
+--- !u!84 &2105385541
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_Width: 1221
+  m_Height: 644
+  m_AntiAliasing: 1
+  m_DepthFormat: 1
+  m_ColorFormat: 7
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
 --- !u!1001 &1714221969794727756
 PrefabInstance:
   m_ObjectHideFlags: 0

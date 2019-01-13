@@ -23,16 +23,6 @@
     border: 2px solid red;
 	display: inline-block;
 }
-.players > div > select {
-	left: 38%;
-	position: absolute;
-	width: 40px;
-}
-.players > div > .spectator {
-	padding-top: 7px;
-	left: 27%;
-	position: absolute;
-}
 .active {
 	color: white;
 }
@@ -44,7 +34,6 @@
 }
 .notActive:hover {
 	color: white;
-
 }
 .kick {
 	padding-left: 10px;
@@ -63,11 +52,6 @@
 }
 .players > .add:hover {
 	background: #333333;
-}
-.team {
-	padding-top: 15px;
-	left: 40%;
-	position: absolute;
 }
 .button {
     background: url("button gray.png") no-repeat;
@@ -122,21 +106,22 @@
 }
 </style>
 
-<div class="content room">
-	<div class="roomMenu">
-		<div class="players">
-		</div>
-		<div class="chat">
-		</div>
+<div class="html roomHtml">
+	<div class="content room">
+		<div class="roomMenu">
+			<div class="players">
+			</div>
+			<div class="chat">
+			</div>
 		
-		<input type="text" class="chatInput">
-		<div class="button chatSend">Send</div>
-	</div>
-	<div class="infoBlock">
-		<div class="roomInfo">
+			<input type="text" class="chatInput">
+			<div class="button chatSend">Send</div>
 		</div>
-		<div class="button backToMenu">Back</div>
-		<div class="button button-red setReady">Set ready</div>
+		<div class="infoBlock">
+			<div class="roomInfo">
+			</div>
+			<div class="button backToMenu">Back</div>
+			<div class="button button-red setReady">Set ready</div>
+		</div>
 	</div>
-
 </div>

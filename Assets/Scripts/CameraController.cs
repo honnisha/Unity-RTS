@@ -24,7 +24,7 @@ public class CameraController : MonoBehaviourPunCallbacks
     private Vector3 mousePosition1;
 
     public int team = 1;
-    public string userId = "1";
+    public string userId = "123";
     private int userNumber = 0;
 
     [HideInInspector]
@@ -56,8 +56,6 @@ public class CameraController : MonoBehaviourPunCallbacks
         }
     }
 
-    public List<GameObject> treePrefabs;
-
     [HideInInspector]
     public GameObject buildedObject;
     [HideInInspector]
@@ -85,10 +83,11 @@ public class CameraController : MonoBehaviourPunCallbacks
     public WindowType selectedWindowType = WindowType.None;
     public Dictionary<WindowType, List<object>> menuInfo = new Dictionary<WindowType, List<object>>();
 
+    List<GameObject> selectedObjects = new List<GameObject>();
+
     Dictionary<string, List<Vector3>> spawnData;
     bool[,] chanksView;
-    float chunkSize = 15.0f;
-    float distanceChunkVisible = 3.0f;
+    float chunkSize = 10.0f;
 
     // Use this for initialization
     void Start()
@@ -112,17 +111,25 @@ public class CameraController : MonoBehaviourPunCallbacks
 
         int mapSeed = UnityEngine.Random.Range(0, 1000);
         int mapSize = GameInfo.mapSize;
-        int playerCount = 1;
+        int playerCount = 0;
         // Multiplayer
         if (PhotonNetwork.InRoom)
         {
             // Getting userNumber
-            int index = 1;
+            int index = 0;
             foreach (var player in PhotonNetwork.PlayerList)
             {
                 if (player == PhotonNetwork.LocalPlayer)
                     userNumber = index;
                 index += 1;
+
+                bool isPlayerSpec = false;
+                object playerSpecObd;
+                if (player.CustomProperties.TryGetValue(GameInfo.PLAYER_SPECTATOR, out playerSpecObd))
+                    isPlayerSpec = (bool)playerSpecObd;
+
+                if (!isPlayerSpec)
+                    playerCount += 1;
             }
 
             object playerTeamObd;
@@ -138,170 +145,68 @@ public class CameraController : MonoBehaviourPunCallbacks
                 mapSize = (int)mapSizeObd;
 
             userId = PhotonNetwork.LocalPlayer.UserId;
-            playerCount = PhotonNetwork.PlayerList.Length;
             // Debug.Log("userNumber: " + userNumber + " team: " + team + " userId: " + userId + " mapSeed: " + mapSeed);
         }
         // Singleplayer
         else
         {
+            if (!GameInfo.playerSpectate)
+                playerCount += 1;
+
             PhotonNetwork.OfflineMode = true;
         }
+        GetComponent<RTS_Cam.RTS_Camera>().SetMaxHeight();
 
         UI.document.Run("UpdateLoadingDescription", "Create terrain");
         TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
         if (terrainGenerator)
         {
             terrainGenerator.Generate(mapSeed, mapSize);
+            spawnData = terrainGenerator.GetSpawnData(
+                spawnCount: playerCount + GameInfo.GetNPCInfo().Count, maxTrees: 1000 * mapSize,
+                goldCountOnRow: 4 * mapSize, goldRows: mapSize,
+                animalsCountOnRow: 3 * mapSize, animalsRows: mapSize);
+
+            InstantiateObjects(
+                spawnData, maxTrees: 1000 * mapSize + 100, 
+                treePrefabs: terrainGenerator.treePrefabs, goldPrefabs: terrainGenerator.goldPrefabs, animalPrefabs: terrainGenerator.animalsPrefabs);
+
+            // Create bots
             if (GameInfo.IsMasterClient())
             {
-                spawnData = terrainGenerator.GetSpawnData(spawnCount: playerCount + GameInfo.GetNPCInfo().Count);
-                if (PhotonNetwork.InRoom)
-                    GetComponent<PhotonView>().RPC("InstantiateAllSpawns", PhotonTargets.All, spawnData);
-                else
-                    InstantiateAllSpawns(spawnData);
-
-                InstantiateAllTrees(spawnData, maxTrees: 1000);
+                int indexNPC = 0;
+                foreach (int NPCTeam in GameInfo.GetNPCInfo())
+                {
+                    InstantiateSpawn(spawnData, newUserNumber: playerCount + indexNPC, newUserId: (playerCount + indexNPC).ToString(), NewTeam: NPCTeam);
+                    indexNPC++;
+                }
             }
+
+            if (!GameInfo.playerSpectate)
+                InstantiateSpawn(spawnData, newUserNumber: userNumber, newUserId: userId, NewTeam: team);
             else
             {
-                UI.document.Run("UpdateLoadingDescription", "Retrieving spawn data");
-            }
-        }
-        else
-        {
-            StartGame();
-        }
-    }
-
-    public void UpdateVisionChunks()
-    {
-        Vector3 centerCamera = transform.position;
-        centerCamera += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * 20.0f;
-        Vector2 viewCameraPosition = GetChunkByPosition(centerCamera);
-
-        for (int x = 0; x < chanksView.GetLength(0); x++)
-            for (int y = 0; y < chanksView.GetLength(1); y++)
-            {
-                float distance = Vector2.Distance(viewCameraPosition, new Vector2(x, y));
-                if (distance < distanceChunkVisible)
-                    chanksView[x, y] = true;
-                else
-                    chanksView[x, y] = false;
-            }
-    }
-
-    public Vector2 GetChunkByPosition(Vector3 position)
-    {
-        int x = (int)(chanksView.GetLength(0) * (position.x / Terrain.activeTerrain.terrainData.size.x));
-        int y = (int)(chanksView.GetLength(1) * (position.z / Terrain.activeTerrain.terrainData.size.z));
-        if (x < 0)
-            x = 0;
-        if (x > chanksView.GetLength(0))
-            x = chanksView.GetLength(0);
-        if (y < 0)
-            y = 0;
-        if (y > chanksView.GetLength(1))
-            y = chanksView.GetLength(1);
-        return new Vector2(x, y);
-    }
-
-    public bool IsInCameraView(Vector3 position)
-    {
-        Vector2 viewPosition = GetChunkByPosition(position);
-        return chanksView[(int)viewPosition.x, (int)viewPosition.y];
-    }
-
-    void OnDrawGizmos()
-    {
-        if (spawnData != null)
-        {
-            Gizmos.color = Color.yellow;
-            foreach(Vector3 spawnPoint in spawnData["spawn"])
-                Gizmos.DrawSphere(spawnPoint, 0.4f);
-
-            // Gizmos.color = Color.green;
-            // foreach (Vector3 treePoint in spawnData["trees"])
-            //     Gizmos.DrawSphere(treePoint, 0.4f);
-        }
-    }
-
-    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
-    {
-        int countLoadedPlayers = 0;
-        foreach (Player player in PhotonNetwork.PlayerList)
-        {
-            object playerLoadedObd;
-            bool playerLoaded = false;
-            if (player.CustomProperties.TryGetValue(GameInfo.PLAYER_LOADED_LEVEL, out playerLoadedObd))
-                playerLoaded = (bool)playerLoadedObd;
-            if (playerLoaded)
-                countLoadedPlayers++;
-        }
-        if (countLoadedPlayers >= PhotonNetwork.PlayerList.Length)
-            StartGame();
-    }
-
-    [PunRPC]
-    public void InstantiateAllTrees(Dictionary<string, List<Vector3>> newSpawnData, int maxTrees = 0)
-    {
-        int index = 0;
-        foreach(Vector3 treePosition in newSpawnData["trees"])
-        {
-            if (maxTrees > 0 && index > maxTrees)
-            {
-                Debug.Log(String.Format("Trees limit reached: {0} ({1})", maxTrees, newSpawnData["trees"].Count));
-                break;
+                MoveCameraToPoint(spawnData["spawn"][0]);
+                team = -10;
+                GameObject DLight = GameObject.FindGameObjectWithTag("Light");
+                DLight.GetComponent<Light>().intensity = 1.3f;
             }
 
-            Instantiate(treePrefabs[UnityEngine.Random.Range(0, treePrefabs.Count - 1)], treePosition, new Quaternion(0, UnityEngine.Random.Range(0, 360), 0, 0));
-            index++;
-        }
-    }
-
-    [PunRPC]
-    public void InstantiateAllSpawns(Dictionary<string, List<Vector3>> newSpawnData)
-    {
-        GameObject createdUnit = null;
-        
-        createdUnit = PhotonNetwork.Instantiate(createSpawnBuildingName, newSpawnData["spawn"][userNumber], new Quaternion(), 0);
-        if (createdUnit == null)
-        {
-            UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-            cameraUIBaseScript.DisplayMessage("Could not find free spawn place.", 3000);
-        }
-        else
-        {
-            BaseBehavior baseBehaviorComponent = createdUnit.GetComponent<BaseBehavior>();
             if (PhotonNetwork.InRoom)
-                createdUnit.GetComponent<PhotonView>().RPC("ChangeOwner", PhotonTargets.All, userId, team);
+            {
+                ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_LOADED_LEVEL, true} };
+                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+                UI.document.Run("UpdateLoadingDescription", "Waiting for other players");
+            }
             else
-                baseBehaviorComponent.ChangeOwner(userId, team);
-
-            MoveCaeraToUnit(createdUnit);
-        }
-        foreach (var startUnitInfo in startUnitsInfo)
-        {
-            BuildingBehavior createdUnitBuildingBehavior = createdUnit.GetComponent<BuildingBehavior>();
-            createdUnitBuildingBehavior.ProduceUnit(startUnitInfo.prefabName, startUnitInfo.number, startUnitInfo.distance);
-        }
-
-        if (PhotonNetwork.InRoom)
-        {
-            ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() {
-                { GameInfo.PLAYER_LOADED_LEVEL, true}
-            };
-            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-            UI.document.Run("UpdateLoadingDescription", "Waiting for other players");
+            {
+                StartGame();
+            }
         }
         else
         {
             StartGame();
         }
-    }
-
-    public void StartGame()
-    {
-        UI.document.Run("DeleteLoadingScreen");
     }
 
     private int workedOnFood, workedOnGold, workedOnWood = 0;
@@ -315,15 +220,15 @@ public class CameraController : MonoBehaviourPunCallbacks
         if (countWorkersTimer <= 0)
         {
             UpdateMapsAndStatistic();
-
-            UI.Variables["food"] = String.Format("{0:F0}", food);
-            if (workedOnFood > 0) UI.Variables["food"] += String.Format(" ({0})", workedOnFood);
-            UI.Variables["gold"] = String.Format("{0:F0}", gold);
-            if (workedOnGold > 0) UI.Variables["gold"] += String.Format(" ({0})", workedOnGold);
-            UI.Variables["wood"] = String.Format("{0:F0}", wood);
-            if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
         }
         UpdateMapsCamera();
+
+        UI.Variables["food"] = String.Format("{0:F0}", food);
+        if (workedOnFood > 0) UI.Variables["food"] += String.Format(" ({0})", workedOnFood);
+        UI.Variables["gold"] = String.Format("{0:F0}", gold);
+        if (workedOnGold > 0) UI.Variables["gold"] += String.Format(" ({0})", workedOnGold);
+        UI.Variables["wood"] = String.Format("{0:F0}", wood);
+        if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
 
         var activeOver = PowerUI.CameraPointer.All[0].ActiveOver;
 
@@ -373,9 +278,10 @@ public class CameraController : MonoBehaviourPunCallbacks
                 if (freeWorkers.Count <= workersIterate)
                     workersIterate = 0;
                 DeselectAllUnits();
+                selectedObjects.Add(freeWorkers[workersIterate]);
 
                 UnitSelectionComponent selection = freeWorkers[workersIterate].GetComponent<UnitSelectionComponent>();
-                selection.isSelected = true;
+                selection.SetSelect(true);
                 MoveCaeraToUnit(freeWorkers[workersIterate]);
                 workersIterate++;
             }
@@ -384,10 +290,9 @@ public class CameraController : MonoBehaviourPunCallbacks
         bool isClickGUI = false;
         if (activeOver != null && activeOver.className.Contains("clckable"))
             isClickGUI = true;
-
-        if (!isClickGUI)
-            SelectBinds();
         
+        SelectBinds();
+
         WindowType newWindowType = GetNewWindow(activeOver);
         if ((newWindowType != WindowType.None && selectedWindowType != WindowType.None) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
         {
@@ -432,9 +337,167 @@ public class CameraController : MonoBehaviourPunCallbacks
         }
 
         bool objectPlaced = PlaceBuildingOnTerrainUpdate();
-        
+
         if (!objectPlaced && buildedObject == null)
             SelectUnitsUpdate(isClickGUI);
+    }
+
+    public void UpdateIsInCameraView(int x, int y, bool newState)
+    {
+        List<GameObject> objectsInChunk = BaseBehavior.GetObjectsInRange(GetPositionByChunk(x, y), chunkSize, units: false);
+        foreach (GameObject objectinChunk in objectsInChunk)
+        {
+            BaseBehavior baseBehaviorComponent = objectinChunk.GetComponent<BaseBehavior>();
+            baseBehaviorComponent.UpdateIsInCameraView(newState);
+        }
+    } 
+
+    public void UpdateVisionChunks()
+    {
+        Vector3 centerCamera = transform.position;
+        centerCamera += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset() * -1.0f;
+        Vector2 viewCameraPosition = GetChunkByPosition(centerCamera);
+
+        for (int x = 0; x < chanksView.GetLength(0); x++)
+            for (int y = 0; y < chanksView.GetLength(1); y++)
+            {
+                float distance = Vector2.Distance(viewCameraPosition, new Vector2(x, y));
+                bool newState = false;
+
+                float distanceDraw = transform.position.y / 4.0f;
+                if (distanceDraw < 4.0f)
+                    distanceDraw = 4.0f;
+
+                if (distance < distanceDraw)
+                    newState = true;
+
+                if (chanksView[x, y] != newState)
+                    UpdateIsInCameraView(x, y, newState);
+
+                chanksView[x, y] = newState;
+            }
+    }
+
+    public Vector3 GetPositionByChunk(int x, int y)
+    {
+        return new Vector3(x * chunkSize, 0, y * chunkSize);
+    }
+
+    public Vector2 GetChunkByPosition(Vector3 position)
+    {
+        int x = (int)(chanksView.GetLength(0) * (position.x / Terrain.activeTerrain.terrainData.size.x));
+        int y = (int)(chanksView.GetLength(1) * (position.z / Terrain.activeTerrain.terrainData.size.z));
+        if (x < 0)
+            x = 0;
+        if (x > chanksView.GetLength(0) - 1)
+            x = chanksView.GetLength(0) - 1;
+        if (y < 0)
+            y = 0;
+        if (y > chanksView.GetLength(1) - 1)
+            y = chanksView.GetLength(1) - 1;
+        return new Vector2(x, y);
+    }
+
+    public bool IsInCameraView(Vector3 position)
+    {
+        Vector2 viewPosition = GetChunkByPosition(position);
+        return chanksView[(int)viewPosition.x, (int)viewPosition.y];
+    }
+
+    void OnDrawGizmos()
+    {
+        if (spawnData != null)
+        {
+            Gizmos.color = Color.white;
+            foreach(Vector3 spawnPoint in spawnData["spawn"])
+                Gizmos.DrawSphere(spawnPoint, 0.4f);
+
+            // Gizmos.color = Color.green;
+            // foreach (Vector3 treePoint in spawnData["trees"])
+            //     Gizmos.DrawSphere(treePoint, 0.4f);
+
+            Gizmos.color = Color.yellow;
+            foreach (Vector3 treePoint in spawnData["gold"])
+                Gizmos.DrawSphere(treePoint, 0.4f);
+
+            Gizmos.color = Color.blue;
+            foreach (Vector3 treePoint in spawnData["animals"])
+                Gizmos.DrawSphere(treePoint, 0.4f);
+        }
+    }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+    {
+        int countLoadedPlayers = 0;
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            object playerLoadedObd;
+            bool playerLoaded = false;
+            if (player.CustomProperties.TryGetValue(GameInfo.PLAYER_LOADED_LEVEL, out playerLoadedObd))
+                playerLoaded = (bool)playerLoadedObd;
+            if (playerLoaded)
+                countLoadedPlayers++;
+        }
+        if (countLoadedPlayers >= PhotonNetwork.PlayerList.Length)
+            StartGame();
+    }
+
+    [PunRPC]
+    public void InstantiateObjects(Dictionary<string, List<Vector3>> newSpawnData, List<GameObject> treePrefabs, List<GameObject> goldPrefabs, List<GameObject> animalPrefabs, int maxTrees = 0)
+    {
+        int index = 0;
+        foreach(Vector3 objectPosition in newSpawnData["trees"])
+        {
+            if (maxTrees > 0 && index > maxTrees)
+            {
+                Debug.Log(String.Format("Trees limit reached: {0} ({1})", maxTrees, newSpawnData["trees"].Count));
+                break;
+            }
+
+            GameObject newTree = Instantiate(treePrefabs[UnityEngine.Random.Range(0, treePrefabs.Count - 1)], objectPosition, new Quaternion(0, 0, 0, 0));
+            newTree.transform.eulerAngles = new Vector3(0, UnityEngine.Random.Range(0.0f, 360.0f), 0);
+            newTree.transform.SetParent(Terrain.activeTerrain.transform);
+            index++;
+        }
+        foreach (Vector3 objectPosition in newSpawnData["gold"])
+        {
+            GameObject prefab = goldPrefabs[UnityEngine.Random.Range(0, goldPrefabs.Count - 1)];
+            GameObject newGold = Instantiate(prefab, objectPosition, prefab.transform.rotation);
+            newGold.transform.SetParent(Terrain.activeTerrain.transform);
+        }
+    }
+
+    [PunRPC]
+    public void InstantiateSpawn(Dictionary<string, List<Vector3>> newSpawnData, int newUserNumber, string newUserId, int NewTeam)
+    {
+        GameObject createdUnit = null;
+        
+        createdUnit = PhotonNetwork.Instantiate(createSpawnBuildingName, newSpawnData["spawn"][newUserNumber], new Quaternion(), 0);
+        if (createdUnit == null)
+        {
+            UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+            cameraUIBaseScript.DisplayMessage("Could not find free spawn place.", 3000);
+        }
+        else
+        {
+            BaseBehavior baseBehaviorComponent = createdUnit.GetComponent<BaseBehavior>();
+            if (PhotonNetwork.InRoom)
+                createdUnit.GetComponent<PhotonView>().RPC("ChangeOwner", PhotonTargets.All, newUserId, NewTeam);
+            else
+                baseBehaviorComponent.ChangeOwner(newUserId, NewTeam);
+
+            MoveCaeraToUnit(createdUnit);
+        }
+        foreach (var startUnitInfo in startUnitsInfo)
+        {
+            BuildingBehavior createdUnitBuildingBehavior = createdUnit.GetComponent<BuildingBehavior>();
+            createdUnitBuildingBehavior.ProduceUnit(startUnitInfo.prefabName, startUnitInfo.number, startUnitInfo.distance);
+        }
+    }
+
+    public void StartGame()
+    {
+        UI.document.Run("DeleteLoadingScreen");
     }
 
     public WindowType GetNewWindow(Dom.Element activeOver)
@@ -459,15 +522,31 @@ public class CameraController : MonoBehaviourPunCallbacks
         return WindowType.None;
     }
 
+    GameObject objectUnderMouse;
     public void SelectUnitsUpdate(bool isClickGUI)
     {
         clickTimer -= Time.deltaTime;
         bool selectObject = false;
+        RaycastHit hit;
+        bool raycast = Physics.Raycast(Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition), out hit, 100);
+        if (raycast)
+        {
+            if(objectUnderMouse != null)
+                objectUnderMouse.gameObject.GetComponent<UnitSelectionComponent>().SetOutline(false);
+
+            UnitSelectionComponent hitUnitSelectionComponent = hit.transform.gameObject.GetComponent<UnitSelectionComponent>();
+            if (hitUnitSelectionComponent != null)
+            {
+                hitUnitSelectionComponent.SetOutline(true);
+                objectUnderMouse = hit.transform.gameObject;
+            }
+        }
+        else if (objectUnderMouse != null)
+            objectUnderMouse.gameObject.GetComponent<UnitSelectionComponent>().SetOutline(false);
+
         if (UnityEngine.Input.GetMouseButtonUp(0) || UnityEngine.Input.GetMouseButtonDown(1))
         {
-            RaycastHit hit;
-
-            if (!isClickGUI && Physics.Raycast(Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition), out hit, 100))
+            if (!isClickGUI && raycast)
             {
                 if (UnityEngine.Input.GetMouseButtonUp(0))
                     if (Vector3.Distance(mousePosition1, UnityEngine.Input.mousePosition) < 0.5)
@@ -488,14 +567,16 @@ public class CameraController : MonoBehaviourPunCallbacks
                                     foreach (GameObject selectedUnit in GetSelectUnitsOnScreen(hit.transform.gameObject))
                                     {
                                         UnitSelectionComponent selection = selectedUnit.GetComponent<UnitSelectionComponent>();
-                                        selection.isSelected = true;
+                                        selection.SetSelect(true);
+                                        selectedObjects.Add(selectedUnit);
                                     }
                                 }
                                 else
                                 {
                                     clickTimer = 0.4f;
                                     UnitSelectionComponent selectionComponent = hit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-                                    selectionComponent.isSelected = true;
+                                    selectionComponent.SetSelect(true);
+                                    selectedObjects.Add(hit.transform.gameObject);
                                 }
                                 selectObject = true;
                                 isSelecting = false;
@@ -504,44 +585,41 @@ public class CameraController : MonoBehaviourPunCallbacks
 
                 if (UnityEngine.Input.GetMouseButtonDown(1))
                 {
-                    foreach (TagToSelect tag in tagsToSelect)
+                    bool sendToQueue = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
+                    Dictionary<GameObject, float> formationList = new Dictionary<GameObject, float>();
+
+                    foreach (GameObject unit in GetSelectedObjects())
                     {
-                        bool sendToQueue = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
-                        Dictionary<GameObject, float> formationList = new Dictionary<GameObject, float>();
-                        var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
-                        foreach (GameObject unit in allUnits)
+                        BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                        UnitSelectionComponent selectionComponent = unit.GetComponent<UnitSelectionComponent>();
+                        if (
+                            selectionComponent != null && selectionComponent.isSelected == true && baseBehaviorComponent.team == team && baseBehaviorComponent.live &&
+                            baseBehaviorComponent.ownerId == userId)
                         {
-                            BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-                            UnitSelectionComponent selectionComponent = unit.GetComponent<UnitSelectionComponent>();
-                            if (
-                                selectionComponent != null && selectionComponent.isSelected == true && baseBehaviorComponent.team == team && baseBehaviorComponent.live &&
-                                baseBehaviorComponent.ownerId == userId)
+                            if (tagsToSelect.Exists(x => (x.name == hit.transform.gameObject.tag)))
                             {
-                                if (tagsToSelect.Exists(x => (x.name == hit.transform.gameObject.tag)))
-                                {
-                                    if (sendToQueue)
-                                        baseBehaviorComponent.AddCommandToQueue(hit.transform.gameObject);
-                                    else
-                                    {
-                                        PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
-                                        if (PhotonNetwork.InRoom)
-                                        {
-                                            unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, hit.transform.gameObject.GetComponent<PhotonView>().ViewID, true, true);
-                                        }
-                                        else
-                                            baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true, true);
-                                    }
-                                }
+                                if (sendToQueue)
+                                    baseBehaviorComponent.AddCommandToQueue(hit.transform.gameObject);
                                 else
                                 {
-                                    //baseBehaviorComponent.GiveOrder(hit.point);
-                                    float distance = Vector3.Distance(unit.transform.position, hit.point);
-                                    formationList.Add(unit, distance);
+                                    PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
+                                    if (PhotonNetwork.InRoom)
+                                    {
+                                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, hit.transform.gameObject.GetComponent<PhotonView>().ViewID, true, true);
+                                    }
+                                    else
+                                        baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true, true);
                                 }
                             }
+                            else
+                            {
+                                //baseBehaviorComponent.GiveOrder(hit.point);
+                                float distance = Vector3.Distance(unit.transform.position, hit.point);
+                                formationList.Add(unit, distance);
+                            }
                         }
-                        SetOrderInFormation(formationList, hit.point, 1.3f, sendToQueue);
                     }
+                    SetOrderInFormation(formationList, hit.point, 1.3f, sendToQueue);
                 }
             }
         }
@@ -560,7 +638,8 @@ public class CameraController : MonoBehaviourPunCallbacks
             foreach (GameObject unit in GetSelectingObjects())
             {
                 UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-                selection.isSelected = true;
+                selection.SetSelect(true);
+                selectedObjects.Add(unit.transform.gameObject);
             }
         }
     }
@@ -638,7 +717,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                             cameraUIBaseScript.DisplayMessage("Something is blocked", 3000);
                         }
                     }
-                    if (UnityEngine.Input.GetMouseButtonDown(1))
+                    if (UnityEngine.Input.GetMouseButtonDown(1) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
                     {
                         buildedObjectBuildingBehavior.StopAction();
                         buildedObject = null;
@@ -708,6 +787,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                         {
                             UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
                             selection.isSelected = true;
+                            selectedObjects.Add(unit);
                         }
                         if (keyTimer > 0)
                             MoveCameraToPoint(GetCenterOfObjects(units));
@@ -719,10 +799,15 @@ public class CameraController : MonoBehaviourPunCallbacks
         }
     }
 
+    public float GetCameraOffset()
+    {
+        return (20.0f + transform.position.y - 16.0f) * -1.0f;
+    }
+
     public void MoveCaeraToUnit(GameObject unit)
     {
         transform.position = new Vector3(unit.transform.position.x, transform.position.y, unit.transform.position.z);
-        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
+        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset();
     }
 
     public Vector3 mapPointToPosition(Vector2 mapPosition)
@@ -734,7 +819,7 @@ public class CameraController : MonoBehaviourPunCallbacks
     public void MoveCameraToPoint(Vector3 position)
     {
         transform.position = new Vector3(position.x, transform.position.y, position.z);
-        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * -20.0f;
+        transform.position += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset();
     }
 
     public Vector2 GetPositionOnMap(Vector3 position)
@@ -781,6 +866,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void UpdateMapsAndStatistic()
     {
+        bool workersCalculated = false;
         List<GameObject> freeWorkers = new List<GameObject>();
         foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
         {
@@ -816,21 +902,26 @@ public class CameraController : MonoBehaviourPunCallbacks
             // Draw units + calculate statistic
             foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
             {
-                UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
-                if (unitUnitBehavior.interactObject != null)
-                {
-                    BaseBehavior interactObjectBehaviorComponent = unitUnitBehavior.interactObject.GetComponent<BaseBehavior>();
-                    if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId)
-                    {
-                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Food)
-                            workedOnFood += 1;
-                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Gold)
-                            workedOnGold += 1;
-                        if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Wood)
-                            workedOnWood += 1;
-                    }
-                }
                 BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
+                if (!workersCalculated)
+                {
+                    UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
+                    if (unitUnitBehavior.interactObject != null)
+                    {
+                        BaseBehavior interactObjectBehaviorComponent = unitUnitBehavior.interactObject.GetComponent<BaseBehavior>();
+                        if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId)
+                        {
+                            if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Food)
+                                workedOnFood += 1;
+                            if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Gold)
+                                workedOnGold += 1;
+                            if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Wood)
+                                workedOnWood += 1;
+                        }
+                    }
+                    if (unitUnitBehavior.team == team && unitUnitBehavior.resourceGatherInfo.Count > 0 && unitBaseBehavior.IsIdle())
+                        freeWorkers.Add(unit);
+                }
                 if (unitBaseBehavior.IsDisplayOnMap())
                 {
                     Dom.Element unitDiv = UI.document.createElement("div");
@@ -839,12 +930,11 @@ public class CameraController : MonoBehaviourPunCallbacks
                     Vector2 positionOnMap = GetPositionOnMap(unit.transform.position);
                     unitDiv.style.left = String.Format("{0}%", positionOnMap.x * 100.0f - 1.5);
                     unitDiv.style.bottom = String.Format("{0}%", positionOnMap.y * 100.0f - 1.5);
-                    unitDiv.style.backgroundColor = unitBaseBehavior.GetDisplayMapColor();
+                    unitDiv.style.backgroundColor = unitBaseBehavior.GetDisplayColor();
                     unitsBlock.appendChild(unitDiv);
                 }
-                if (unitUnitBehavior.resourceGatherInfo.Count > 0 && unitBaseBehavior.IsIdle())
-                    freeWorkers.Add(unit);
             }
+            workersCalculated = true;
         }
 
         var gameInfoBlock = (HtmlElement)UI.document.getElementsByClassName("gameInfo")[0];
@@ -903,18 +993,19 @@ public class CameraController : MonoBehaviourPunCallbacks
     {
         BaseBehavior baseBehaviorComponent = selectUnit.GetComponent<BaseBehavior>();
         List<GameObject> objects = new List<GameObject>();
-        foreach (TagToSelect tag in tagsToSelect)
+
+        Vector3 centerCamera = transform.position;
+        centerCamera += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * 20.0f;
+
+        var allUnits = BaseBehavior.GetObjectsInRange(centerCamera, 50.0f, live: true);
+        foreach (GameObject unit in allUnits)
         {
-            var allUnits = GameObject.FindGameObjectsWithTag(selectUnit.transform.tag);
-            foreach (GameObject unit in allUnits)
+            BaseBehavior baseUnitBehaviorComponent = unit.GetComponent<BaseBehavior>();
+            if (baseUnitBehaviorComponent.uniqueName == baseBehaviorComponent.uniqueName)
             {
-                BaseBehavior baseUnitBehaviorComponent = unit.GetComponent<BaseBehavior>();
-                if (baseUnitBehaviorComponent.uniqueName == baseBehaviorComponent.uniqueName)
-                {
-                    UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-                    if (selection != null && IsWithinSelectionBounds(unit, new Vector3(0, 0, 0), new Vector3(Screen.width, Screen.height, 0)))
-                        objects.Add(unit);
-                }
+                UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
+                if (selection != null && IsWithinSelectionBounds(unit, new Vector3(0, 0, 0), new Vector3(Screen.width, Screen.height, 0)))
+                    objects.Add(unit);
             }
         }
         return GetFilteredObjects(objects);
@@ -959,32 +1050,21 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public List<GameObject> GetSelectedObjects()
     {
-        List<GameObject> objects = new List<GameObject>();
-        foreach (TagToSelect tag in tagsToSelect)
-        {
-            var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
-            foreach (GameObject unit in allUnits)
-            {
-                UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
-                if (selection != null && selection.isSelected == true)
-                    objects.Add(unit);
-            }
-        }
-        return GetFilteredObjects(objects);
+        return selectedObjects;
     }
 
     public List<GameObject> GetSelectingObjects()
     {
         List<GameObject> objects = new List<GameObject>();
-        foreach (TagToSelect tag in tagsToSelect)
+        Vector3 centerCamera = transform.position;
+        centerCamera += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * 20.0f;
+
+        var allUnits = BaseBehavior.GetObjectsInRange(centerCamera, 50.0f, live: true);
+        foreach (GameObject unit in allUnits)
         {
-            var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
-            foreach (GameObject unit in allUnits)
-            {
-                UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-                if (selection != null && IsWithinSelectionBounds(unit, mousePosition1, UnityEngine.Input.mousePosition))
-                    objects.Add(unit);
-            }
+            UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
+            if (selection != null && IsWithinSelectionBounds(unit, mousePosition1, UnityEngine.Input.mousePosition))
+                objects.Add(unit);
         }
         return GetFilteredObjects(objects);
     }
@@ -1078,6 +1158,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void DeselectAllUnits()
     {
+        selectedObjects.Clear();
         foreach (TagToSelect tag in tagsToSelect)
         {
             var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
@@ -1085,7 +1166,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             {
                 UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
                 if(selection != null)
-                    selection.isSelected = false;
+                    selection.SetSelect(false);
             }
         }
     }

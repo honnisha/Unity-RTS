@@ -83,27 +83,30 @@ function CreateUser(username, playerTeam, playerReady, canEdit, canKick, value, 
 		playerDiv.className += " NPCINDEX" + value;
 	}
 
-	var teamDiv;
-	if(canEdit)
+	if(!spectateActive)
 	{
-		var teamDiv = document.createElement("select");
-		for (var i = 1; i <= 9; i++) {
-			teamDiv.innerHTML += "<option value=" + i + ">" + i + "</option>";
+		var teamDiv;
+		if(canEdit)
+		{
+			var teamDiv = document.createElement("select");
+			for (var i = 1; i <= 9; i++) {
+				teamDiv.innerHTML += "<option value=" + i + ">" + i + "</option>";
+			}
+			teamDiv.setAttribute("onchange", "selectFunction(this)");
+			teamDiv.name = "teamSelect";
+			teamDiv.className = "teamSelect";
+			teamDiv.className += " " + username;
+			teamDiv.id = playerTeam;
+			teamDiv.childNodes[playerTeam - 1].setAttribute("selected", "selected");
 		}
-		teamDiv.setAttribute("onchange", "selectFunction(this)");
-		teamDiv.name = "teamSelect";
-		teamDiv.className = "teamSelect";
-		teamDiv.className += " " + username;
-		teamDiv.id = playerTeam;
-		teamDiv.childNodes[playerTeam - 1].setAttribute("selected", "selected");
+		else
+		{
+			var teamDiv = document.createElement("p");
+			teamDiv.className = "team";
+			teamDiv.textContent = playerTeam;
+		}
+		playerDiv.appendChild(teamDiv);
 	}
-	else
-	{
-		var teamDiv = document.createElement("p");
-		teamDiv.className = "team";
-		teamDiv.textContent = playerTeam;
-	}
-	playerDiv.appendChild(teamDiv);
 	
 	var div = document.createElement("div");
 	if(playerReady)

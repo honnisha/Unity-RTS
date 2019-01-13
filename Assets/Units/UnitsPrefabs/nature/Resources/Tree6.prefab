@@ -75,7 +75,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5510088395898949124}
-  - component: {fileID: 5673472258854238494}
   - component: {fileID: 5658048350611727552}
   - component: {fileID: 5586131755083225862}
   - component: {fileID: 5616231489790895418}
@@ -103,25 +102,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &5673472258854238494
-LODGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5504205912774389098}
-  serializedVersion: 2
-  m_LocalReferencePoint: {x: 0.029491663, y: 3.4068997, z: 0.02241373}
-  m_Size: 6.8137994
-  m_FadeMode: 0
-  m_AnimateCrossFading: 0
-  m_LastLODIsBillboard: 0
-  m_LODs:
-  - screenRelativeHeight: 0.121335745
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 0}
-  m_Enabled: 1
 --- !u!208 &5658048350611727552
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -247,6 +227,7 @@ MonoBehaviour:
   resourceEndless: 0
   sourceType: 0
   storedResources: 
+  isInCameraView: 0
   state: 3
   magnitDistance: 2
   producedUnits: []

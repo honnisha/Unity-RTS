@@ -11,6 +11,7 @@ TagManager:
   - BuildingsParent
   - Ambient
   - Spawn
+  - Light
   layers:
   - Default
   - TransparentFX

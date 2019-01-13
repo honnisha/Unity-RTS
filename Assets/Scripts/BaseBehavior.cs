@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using Photon.Pun;
 using UnityEngine.AI;
+using GangaGame;
 
 public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 {
@@ -230,53 +231,30 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         renders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
     }
 
-    private bool isInCameraView = false;
-    public bool IsInCameraView()
-    {
-        return isInCameraView;
-    }
+
+    [HideInInspector]
+    public bool isInCameraView = false;
+    public bool IsInCameraView() { return isInCameraView; }
+    public virtual void UpdateIsInCameraView(bool newState) { }
 
     private bool isRender = true;
     virtual public void Update()
     {
-        isInCameraView = cameraController.IsInCameraView(transform.position);
-
-        UnityEngine.Profiling.Profiler.BeginSample("p Update Render"); // Profiler
-        bool newIsRender = IsInCameraView() && (IsVisible() || beenSeen);
-        if (newIsRender != isRender)
-        {
-            isRender = newIsRender;
-            foreach (Renderer render in renders)
-                render.enabled = isRender;
-
-            // foreach (Collider collider in gameObject.GetComponents<Collider>().Concat(gameObject.GetComponentsInChildren<Collider>()).ToArray())
-            //     collider.enabled = IsVisible() || beenSeen;
-        }
-        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+        UpdateVision();
         
-        UnityEngine.Profiling.Profiler.BeginSample("p Update vision tool"); // Profiler
-        if (team == cameraController.team && ownerId == cameraController.userId && live)
-        {
-            if (visionTool == null && visionToolPrefab != null)
-            {
-                visionTool = (GameObject)Instantiate(visionToolPrefab, gameObject.transform.transform.position + new Vector3(0, 1.5f, 0), gameObject.transform.rotation);
-                visionTool.transform.SetParent(gameObject.transform);
-                FieldOfView fieldOfView = visionTool.GetComponent<FieldOfView>();
-                fieldOfView.viewRadius = visionDistanve;
-            }
-        }
-        else
-        {
-            if (visionTool != null)
-            {
-                FieldOfView fieldOfView = visionTool.GetComponent<FieldOfView>();
-                fieldOfView.FindVisibleTargets();
-                Destroy(visionTool);
-            }
-        }
-        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+        UpdateDestroyBehavior();
+        
+        UpdateVisionTool();
 
-        UnityEngine.Profiling.Profiler.BeginSample("p Update health"); // Profiler
+        UpdateHealth();
+        
+        if (unitSelectionComponent.isSelected && UnityEngine.Input.anyKeyDown)
+            UICommand(null);
+    }
+
+    public void UpdateHealth()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateHealth"); // Profiler
         if (IsInCameraView() && HTMLHealthFile != null)
         {
             bool healthVisible = true;
@@ -295,18 +273,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                     objectUIInfo.transform.position += InfoHTMLOffset;
                     objectUIInfo.document.innerHTML = HTMLHealthFile.text;
                     objectUIInfo.Layer = LayerMask.NameToLayer("HP");
-
-                    if (team <= 0)
-                        objectUIInfo.document.getElementById("health").style.background = "white";
-                    else if (cameraController.team != team)
-                        objectUIInfo.document.getElementById("health").style.background = "red";
-                    else
-                    {
-                        if (cameraController.userId == ownerId)
-                            objectUIInfo.document.getElementById("health").style.background = "green";
-                        else
-                            objectUIInfo.document.getElementById("health").style.background = "white";
-                    }
+                    
+                    objectUIInfo.document.getElementById("health").style.background = GetDisplayColor(false);
                     tempHealth = 0.0f;
                 }
             }
@@ -330,14 +298,61 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 }
             }
         }
+        else if (objectUIInfo != null)
+        {
+            objectUIInfo.Destroy();
+            objectUIInfo = null;
+        }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
 
-        UnityEngine.Profiling.Profiler.BeginSample("p Update UICommand"); // Profiler
-        if (cameraController.isSelecting && UnityEngine.Input.anyKeyDown)
-            UICommand(null);
+    public void UpdateVisionTool()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateVisionTool"); // Profiler
+        if (team == cameraController.team && ownerId == cameraController.userId && live)
+        {
+            if (visionTool == null && visionToolPrefab != null)
+            {
+                visionTool = (GameObject)Instantiate(visionToolPrefab, gameObject.transform.transform.position + new Vector3(0, 1.5f, 0), gameObject.transform.rotation);
+                visionTool.transform.SetParent(gameObject.transform);
+                FieldOfView fieldOfView = visionTool.GetComponent<FieldOfView>();
+                fieldOfView.viewRadius = visionDistanve;
+            }
+        }
+        else
+        {
+            if (visionTool != null)
+            {
+                FieldOfView fieldOfView = visionTool.GetComponent<FieldOfView>();
+                fieldOfView.FindVisibleTargets();
+                Destroy(visionTool);
+            }
+        }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
 
-        UnityEngine.Profiling.Profiler.BeginSample("p Update Destroy beh."); // Profiler
+    public void UpdateVision()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateVision"); // Profiler
+        bool newIsRender = IsInCameraView() && (IsVisible() || beenSeen);
+
+        if (newIsRender != isRender)
+        {
+            isRender = newIsRender;
+            foreach (Renderer render in renders)
+                render.enabled = isRender;
+
+            // foreach (Collider collider in gameObject.GetComponents<Collider>().Concat(gameObject.GetComponentsInChildren<Collider>()).ToArray())
+            //     collider.enabled = IsVisible() || beenSeen;
+        }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
+
+    public virtual void SendToDestroy() { }
+
+    public void UpdateDestroyBehavior()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateDestroyBehavior"); // Profiler
         if (sendToDestroy == true && !sendToUnderground)
         {
             timeToDestroy -= Time.deltaTime;
@@ -385,9 +400,11 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         return IsVisible();
     }
 
-    public string GetDisplayMapColor()
+    public string GetDisplayColor(bool selected = true)
     {
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (GameInfo.playerSpectate)
+            return "#FFF";
+
         if (team <= 0)
             return "#FFF";
         else if (cameraController.team != team)
@@ -396,7 +413,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         {
             if (cameraController.userId == ownerId)
             {
-                if (unitSelectionComponent.isSelected)
+                if (selected && unitSelectionComponent.isSelected)
                     return "#A7FFA9";
                 else
                     return "#00A500";
@@ -506,11 +523,12 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         pointMarker = null;
     }
 
-    public List<GameObject> GetObjectsInRange(Vector3 position, float radius, bool live = true, int team = -1, bool units = true, bool buildings = true)
+    public static List<GameObject> GetObjectsInRange(Vector3 position, float radius, bool live = true, int team = -1, bool units = true, bool buildings = true, bool ambient = true)
     {
         List<GameObject> objects = new List<GameObject>();
         int unitsMask = 1 << LayerMask.NameToLayer("Unit");
         int buildingMask = 1 << LayerMask.NameToLayer("Building");
+        int ambientMask = 1 << LayerMask.NameToLayer("Ambient");
         int mask = 1;
         if (units && !buildings)
             mask = unitsMask;
@@ -518,6 +536,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
             mask = buildingMask;
         else
             mask = unitsMask | buildingMask;
+        if (ambient)
+            mask |= ambientMask;
 
         foreach (Collider collider in Physics.OverlapSphere(position, radius, mask))
         {

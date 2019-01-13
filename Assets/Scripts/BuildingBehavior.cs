@@ -6,6 +6,7 @@ using System;
 using UnityEngine.AI;
 using Photon.Pun;
 using System.Linq;
+using GangaGame;
 
 public class BuildingBehavior : BaseBehavior
 {
@@ -51,30 +52,96 @@ public class BuildingBehavior : BaseBehavior
         base.Awake();
         if (spawnPoint != null)
             spawnTarget = spawnPoint.transform.position;
+
+        UpdateIsInCameraView(cameraController.IsInCameraView(transform.position));
+        UpdateVision();
+
+        if (DisableUpdate())
+            enabled = false;
+    }
+
+    public bool DisableUpdate()
+    {
+        if (resourceCapacityType == ResourceType.Wood)
+            return true;
+        return false;
+    }
+
+    public override void UpdateIsInCameraView(bool newState)
+    {
+        isInCameraView = newState;
+        UpdateVision();
     }
 
     // Update is called once per frame
     override public void Update()
     {
-        base.Update();
+        UpdateDestroyBehavior();
+        
+        if (resourceCapacityType == ResourceType.Wood)
+            return;
 
-        UnityEngine.Profiling.Profiler.BeginSample("p Update terrain"); // Profiler
-        if (IsInCameraView() && !terrainHasChanged && state == BuildingState.Builded && IsVisible())
+        UpdateVisionTool();
+
+        UpdateHealth();
+
+        if (unitSelectionComponent.isSelected && UnityEngine.Input.anyKeyDown)
+            UICommand(null);
+        
+        UpdateTerrain();
+
+        UpdateUnitsQuery();
+
+        UpdatePointMarker();
+    }
+
+    public override void SendToDestroy()
+    {
+        enabled = true;
+        sendToDestroy = true;
+    }
+
+    public void UpdatePointMarker()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdatePointMarker"); // Profiler
+        if (IsInCameraView())
         {
-            terrainHasChanged = true;
-            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
-            if (terrainGenerator)
+            if (unitSelectionComponent.isSelected && team == cameraController.team)
             {
-                Vector2 newPosition = new Vector2(transform.transform.position.x + terrainChangeInfo.offset.y, transform.transform.position.z + terrainChangeInfo.offset.x);
-                if (terrainChangeInfo.changeTexture)
-                    terrainGenerator.SetTextureOnTerrain(newPosition, terrainChangeInfo.size, terrainChangeInfo.layer, terrainChangeInfo.value);
-                if (terrainChangeInfo.removeGrass)
-                    terrainGenerator.RemoveGrassOnTerrain(newPosition, terrainChangeInfo.size);
+                if (spawnTargetObject != null)
+                    CreateOrUpdatePointMarker(Color.green, spawnTargetObject.transform.position, 0.0f, true);
+                else
+                    CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true);
             }
+            if (!unitSelectionComponent.isSelected)
+                DestroyPointMarker();
         }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
 
-        UnityEngine.Profiling.Profiler.BeginSample("p Update unitsQuery"); // Profiler
+    public void UpdateTerrain()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateTerrain"); // Profiler
+        if (!terrainHasChanged)
+            if (state == BuildingState.Builded && IsVisible())
+            {
+                terrainHasChanged = true;
+                TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
+                if (terrainGenerator)
+                {
+                    Vector2 newPosition = new Vector2(transform.transform.position.x + terrainChangeInfo.offset.y, transform.transform.position.z + terrainChangeInfo.offset.x);
+                    if (terrainChangeInfo.changeTexture)
+                        terrainGenerator.SetTextureOnTerrain(newPosition, terrainChangeInfo.size, terrainChangeInfo.layer, terrainChangeInfo.value);
+                    if (terrainChangeInfo.removeGrass)
+                        terrainGenerator.RemoveGrassOnTerrain(newPosition, terrainChangeInfo.size);
+                }
+            }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
+
+    public void UpdateUnitsQuery()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateUnitsQuery"); // Profiler
         if (unitsQuery.Count > 0)
         {
             buildTimer -= Time.deltaTime;
@@ -88,21 +155,6 @@ public class BuildingBehavior : BaseBehavior
                     buildTimer = firstElementBehaviorComponent.timeToBuild;
                 }
             }
-        }
-        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
-
-        UnityEngine.Profiling.Profiler.BeginSample("p Update marker"); // Profiler
-        if (IsInCameraView())
-        {
-            if (unitSelectionComponent.isSelected && team == cameraController.team)
-            {
-                if (spawnTargetObject != null)
-                    CreateOrUpdatePointMarker(Color.green, spawnTargetObject.transform.position, 0.0f, true);
-                else
-                    CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true);
-            }
-            if (!unitSelectionComponent.isSelected)
-                DestroyPointMarker();
         }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
@@ -157,7 +209,7 @@ public class BuildingBehavior : BaseBehavior
     public override void ResourcesIsOut(GameObject worker)
     {
         timeToDestroy = 0.0f;
-        sendToDestroy = true;
+        SendToDestroy();
     }
 
     public override void TakeDamage(float damage, GameObject attacker)
@@ -183,12 +235,14 @@ public class BuildingBehavior : BaseBehavior
         live = false;
 
         if (resourceCapacity <= 0)
-            sendToDestroy = true;
+            SendToDestroy();
     }
 
     public override bool IsVisible()
     {
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (GameInfo.playerSpectate)
+            return true;
+
         if (state == BuildingState.Selected || state == BuildingState.Project)
         {
             if (cameraController.userId != ownerId)
@@ -211,8 +265,13 @@ public class BuildingBehavior : BaseBehavior
     {
         if (state == BuildingState.Building && live)
             return true;
+
         if (live && health < maxHealth)
+        {
+            if (cameraController.tagsToSelect.Find(x => x.name == tag).healthVisibleOnlyWhenSelect && !unitSelectionComponent.isSelected)
+                return false;
             return true;
+        }
         return false;
     }
 
@@ -220,7 +279,7 @@ public class BuildingBehavior : BaseBehavior
     public void SetAsSelected()
     {
         state = BuildingBehavior.BuildingState.Selected;
-        canBeSelected = false;
+        unitSelectionComponent.canBeSelected = false;
         health = 0;
         live = false;
         gameObject.layer = LayerMask.NameToLayer("Project");
@@ -249,7 +308,7 @@ public class BuildingBehavior : BaseBehavior
                 material.color = newColor;
 
         state = BuildingBehavior.BuildingState.Project;
-        canBeSelected = true;
+        unitSelectionComponent.canBeSelected = true;
     }
     
 
@@ -263,7 +322,7 @@ public class BuildingBehavior : BaseBehavior
             navMesh.enabled = true;
 
         state = BuildingState.Building;
-        canBeSelected = true;
+        unitSelectionComponent.canBeSelected = true;
         var allRenders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
         int index = 0;
         if (tempMaterialsMode.Count > 0)
@@ -422,11 +481,9 @@ public class BuildingBehavior : BaseBehavior
     public override bool[] UICommand(string commandName)
     {
         bool[] result = { false, false };
-        UnitSelectionComponent unitSelectionComponent = GetComponent<UnitSelectionComponent>();
         if (!unitSelectionComponent.isSelected)
             return result;
-
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        
         UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
         if (team != cameraController.team || cameraController.chatInput)
             return result;

@@ -47,4 +47,5 @@ MonoBehaviour:
   - KickPlayer
   - InstantiateAllSpawns
   - InstantiateAllTrees
+  - InstantiateSpawn
   DisableAutoOpenWizard: 1

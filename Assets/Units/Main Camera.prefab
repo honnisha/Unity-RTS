@@ -198,7 +198,7 @@ MonoBehaviour:
   wood: 200
   isSelecting: 0
   team: 1
-  userId: 1
+  userId: 123
   chatInput: 0
   tagsToSelect:
   - name: Unit
@@ -207,11 +207,6 @@ MonoBehaviour:
     healthVisibleOnlyWhenSelect: 1
   - name: Ambient
     healthVisibleOnlyWhenSelect: 1
-  treePrefabs:
-  - {fileID: 6468036793243662981, guid: 61a1f22d84531ce4a81edf9962cb0e8b, type: 3}
-  - {fileID: 7207943571960021215, guid: 1eb6237fb7b4e134589dd6850214fc5e, type: 3}
-  - {fileID: 7993852223387248859, guid: b67cb0bc41f5f83408bb90b5309828da, type: 3}
-  - {fileID: 5504205912774389098, guid: bdc71a60401a51d42b661605e6cac048, type: 3}
   buildedObject: {fileID: 0}
   createSpawnBuildingName: townCenter
   startUnitsInfo:
@@ -266,8 +261,8 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  maxHeight: 14
-  minHeight: 10
+  maxHeight: 12
+  minHeight: 8
   heightDampening: 5
   keyboardZoomingSensitivity: 150
   scrollWheelZoomingSensitivity: 50
@@ -307,7 +302,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lineThickness: 1
   lineIntensity: 0.2
-  fillAmount: 0.032
+  fillAmount: 0.048
   lineColor0: {r: 1, g: 0, b: 0, a: 1}
   lineColor1: {r: 0, g: 1, b: 0, a: 1}
   lineColor2: {r: 1, g: 1, b: 1, a: 1}
@@ -343,7 +338,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 0}
   viewIdField: 0
-  InstantiationId: 0
+  InstantiationId: 1
   isRuntimeInstantiated: 0
 --- !u!114 &4844609676478205319
 MonoBehaviour:

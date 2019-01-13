@@ -2,19 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 using AccidentalNoise;
+using System;
 
 public class TerrainGenerator : MonoBehaviour
 {
-    public int layersCount = 1;
-    public FractalType fractalType = FractalType.MULTI;
-    public BasisTypes basisType = BasisTypes.SIMPLEX;
-    public InterpTypes interpType = InterpTypes.QUINTIC;
+    public List<GameObject> treePrefabs;
+    public List<GameObject> goldPrefabs;
+    public List<GameObject> animalsPrefabs;
 
-    public int octaves = 3;
-    public double frequency = 2.0;
-    public double lacunarity = 2.0;
-    public uint seed = 1;
-    public double scale = 1.0;
+    public int layersCount = 1;
+
+    [System.Serializable]
+    public class GenerateInfo
+    {
+        public FractalType fractalType = FractalType.MULTI;
+        public BasisTypes basisType = BasisTypes.SIMPLEX;
+        public InterpTypes interpType = InterpTypes.QUINTIC;
+
+        public int octaves = 3;
+        public double frequency = 2.0;
+        public double lacunarity = 2.0;
+        public uint seed = 1;
+        public double scale = 1.0;
+    }
+    public GenerateInfo mainMapGenerateInfo;
 
     public Texture2D mapTexture;
 
@@ -31,19 +42,19 @@ public class TerrainGenerator : MonoBehaviour
         if (generate)
         {
             generate = false;
-            Generate((int)seed);
+            Generate((int)mainMapGenerateInfo.seed);
         }
     }
 
     public ModuleBase GetFractal()
     {
-        Fractal ground_shape_fractal = new Fractal(fractalType,
-                                            basisType,
-                                            interpType,
-                                            octaves,
-                                            frequency,
-                                            seed);
-        ground_shape_fractal.SetLacunarity(lacunarity);
+        Fractal ground_shape_fractal = new Fractal(mainMapGenerateInfo.fractalType,
+                                            mainMapGenerateInfo.basisType,
+                                            mainMapGenerateInfo.interpType,
+                                            mainMapGenerateInfo.octaves,
+                                            mainMapGenerateInfo.frequency,
+                                            mainMapGenerateInfo.seed);
+        ground_shape_fractal.SetLacunarity(mainMapGenerateInfo.lacunarity);
         return ground_shape_fractal as ModuleBase;
     }
 
@@ -104,11 +115,11 @@ public class TerrainGenerator : MonoBehaviour
             }
         }
         Vector2 terrainPosition = CalculatePositionToTerrain(position);
-        for(int i = 0; i <= 3; i++)
+        for (int i = 0; i <= 3; i++)
             t.terrainData.SetDetailLayer((int)terrainPosition.x, (int)terrainPosition.y, i, grassLayers);
     }
 
-    public List<Vector3> GetCoordinates(float minValue, int step, float randomOffset = 0.0f, float offsetFromBorder = 0.01f)
+    public List<Vector3> GetCoordinates(float minValue, int step = 1, int destCount = 0, float randomOffset = 0.0f, float offsetFromBorder = 0.01f)
     {
         List<Vector3> positions = new List<Vector3>();
         int sizeX = Terrain.activeTerrain.terrainData.alphamapWidth;
@@ -116,17 +127,28 @@ public class TerrainGenerator : MonoBehaviour
 
         int offsetFromBorderMap = 0;
         if (offsetFromBorder > 0.0f)
-            offsetFromBorderMap = (int)(sizeX * offsetFromBorder);
+            offsetFromBorderMap = (int)(sizeX * offsetFromBorder * 2.0f);
 
-        for (int y = offsetFromBorderMap; y < sizeX - offsetFromBorderMap; y += step)
+        int countPositions = 0;
+        int newStep = step;
+        if (destCount > 0)
         {
-            for (int x = offsetFromBorderMap; x < sizeY - offsetFromBorderMap; x += step)
+            for (int y = offsetFromBorderMap; y < sizeX - offsetFromBorderMap; y += step)
+                for (int x = offsetFromBorderMap; x < sizeY - offsetFromBorderMap; x += step)
+                    if (mapData[x, y] > minValue)
+                        countPositions += 1;
+            newStep = (int)Math.Ceiling(Math.Sqrt(countPositions / destCount));
+        }
+
+        for (int y = offsetFromBorderMap; y < sizeX - offsetFromBorderMap; y += newStep)
+        {
+            for (int x = offsetFromBorderMap; x < sizeY - offsetFromBorderMap; x += newStep)
             {
                 if (mapData[x, y] > minValue)
                 {
                     Vector3 newPos = CalculateTerrainToPosition(x, y);
                     if (randomOffset > 0.0f)
-                        newPos += new Vector3(Random.Range(0.0f, randomOffset), 0, Random.Range(randomOffset * -1, randomOffset));
+                        newPos += new Vector3(5 - x % 10, 0, 5 - y % 10);
 
                     positions.Add(newPos);
                 }
@@ -161,29 +183,53 @@ public class TerrainGenerator : MonoBehaviour
         return positions;
     }
 
-    public Dictionary<string, List<Vector3>> GetSpawnData(int spawnCount)
+    public List<Vector3> GetCoordinatesInBorderNested(int rows, int countOnRow)
+    {
+        List<Vector3> positions = new List<Vector3>();
+        for (int row = 1; row <= rows; row++)
+        {
+            float offsetPos = 0.49f / rows * row * 0.8f;
+            List<Vector3> avalibleGoldPositions = GetCoordinatesInBorder(maxValue: 0.7f, offsetPos: offsetPos);
+            int count = avalibleGoldPositions.Count;
+           
+            int limit = countOnRow - (row * 2);
+            for (int i = 1; i <= limit; i++)
+            {
+                float step = (count - 1) / limit;
+                int positionIndex = (int)((mainMapGenerateInfo.seed + step * i) % count);
+
+                positions.Add(avalibleGoldPositions[positionIndex]);
+            }
+        }
+        return positions;
+    }
+
+    public Dictionary<string, List<Vector3>> GetSpawnData(int spawnCount, int maxTrees, int goldCountOnRow, int goldRows, int animalsCountOnRow, int animalsRows)
     {
         Dictionary<string, List<Vector3>> newData = new Dictionary<string, List<Vector3>>();
         
         // Spawn coordinates
-        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.20f, offsetPos: 0.15f);
+        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.18f, offsetPos: 0.15f);
         
         newData["spawn"] = new List<Vector3>();
         for (int i = 1; i <= spawnCount; i++)
         {
             int positionIndex = (int)((avalibleSpawnPositions.Count - 1) / spawnCount * i);
             newData["spawn"].Add(avalibleSpawnPositions[positionIndex]);
-            // Debug.Log(positionIndex + " (" + avalibleSpawnPositions.Count + "): " + avalibleSpawnPositions[positionIndex]);
         }
 
-        newData["trees"] = GetCoordinates(minValue: 0.8f, step: 4, randomOffset: 1.0f);
+        newData["trees"] = GetCoordinates(minValue: 0.9f, destCount: maxTrees, randomOffset: 1.0f);
+
+        newData["gold"] = GetCoordinatesInBorderNested(goldRows, goldCountOnRow);
+
+        newData["animals"] = GetCoordinatesInBorderNested(animalsRows, animalsCountOnRow);
 
         return newData;
     }
 
     public void Generate(int mapSeed, int newSize = 3)
     {
-        seed = (uint)mapSeed;
+        mainMapGenerateInfo.seed = (uint)mapSeed;
         Terrain t = Terrain.activeTerrain;
 
         int newTerrainSize = (int)(newSize * 128 * 1.5f);
@@ -191,7 +237,7 @@ public class TerrainGenerator : MonoBehaviour
         t.terrainData.alphamapResolution = newTerrainSize;
         t.terrainData.heightmapResolution = newTerrainSize;
         t.terrainData.size = new Vector3(100 * newSize, 100, 100 * newSize);
-        scale = newSize / 1.5f;
+        mainMapGenerateInfo.scale = newSize / 2.0f;
 
         // Debug.Log("Terrain Generate: size:" + newSize + " " + t.terrainData.size);
 
@@ -217,7 +263,7 @@ public class TerrainGenerator : MonoBehaviour
                 nx = ranges.mapx0 + p * (ranges.mapx1 - ranges.mapx0);
                 ny = ranges.mapy0 + q * (ranges.mapy1 - ranges.mapy0);
 
-                float val = (float)moduleBase.Get(nx * scale, ny * scale);
+                float val = (float)moduleBase.Get(nx * mainMapGenerateInfo.scale, ny * mainMapGenerateInfo.scale);
 
                 float textureScale = (val + 1.0f);
                 mapData[x, y] = textureScale;

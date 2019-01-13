@@ -75,7 +75,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7211063808405955505}
-  - component: {fileID: 7410994888314148011}
   - component: {fileID: 7413048816767273333}
   - component: {fileID: 7341132770799433395}
   - component: {fileID: 7319968599620192399}
@@ -103,25 +102,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &7410994888314148011
-LODGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7207943571960021215}
-  serializedVersion: 2
-  m_LocalReferencePoint: {x: 0.0074409246, y: 2.0464497, z: -0.06727886}
-  m_Size: 4.186593
-  m_FadeMode: 0
-  m_AnimateCrossFading: 0
-  m_LastLODIsBillboard: 0
-  m_LODs:
-  - screenRelativeHeight: 0.10371759
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 2766992522883966720}
-  m_Enabled: 1
 --- !u!208 &7413048816767273333
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -247,6 +227,7 @@ MonoBehaviour:
   resourceEndless: 0
   sourceType: 0
   storedResources: 
+  isInCameraView: 0
   state: 3
   magnitDistance: 2
   producedUnits: []
@@ -358,12 +339,6 @@ GameObject:
 --- !u!4 &2766992522882170798 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 481256, guid: 8b2d47fdc2e25ac4f9721480a68bbefa,
-    type: 3}
-  m_PrefabInstance: {fileID: 2766992522881984582}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &2766992522883966720 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 2346822, guid: 8b2d47fdc2e25ac4f9721480a68bbefa,
     type: 3}
   m_PrefabInstance: {fileID: 2766992522881984582}
   m_PrefabAsset: {fileID: 0}

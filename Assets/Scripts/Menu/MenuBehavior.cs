@@ -61,7 +61,7 @@ namespace GangaGame
         {
             mapSize = newMapSize;
             if (PhotonNetwork.InRoom)
-                PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { GameInfo.MAP_SIZE, mapSize } });
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { GameInfo.MAP_SIZE, mapSize } });
         }
         public static List<int> GetNPCInfo()
         {

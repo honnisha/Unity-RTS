@@ -59,7 +59,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2364362785264599790}
-  - component: {fileID: 6841661322722478640}
   - component: {fileID: 3552350676028839467}
   - component: {fileID: 3448529602354022951}
   - component: {fileID: 3153985949789970143}
@@ -87,25 +86,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &6841661322722478640
-LODGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6468036793243662981}
-  serializedVersion: 2
-  m_LocalReferencePoint: {x: 0.0074409246, y: 2.0464497, z: -0.06727886}
-  m_Size: 4.186593
-  m_FadeMode: 0
-  m_AnimateCrossFading: 0
-  m_LastLODIsBillboard: 0
-  m_LODs:
-  - screenRelativeHeight: 0.10371759
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 0}
-  m_Enabled: 1
 --- !u!208 &3552350676028839467
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -287,6 +267,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tree9_2
       objectReference: {fileID: 0}
+    - target: {fileID: 114418, guid: be878d9ea17907f4a8068678a5ce7908, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 481256, guid: be878d9ea17907f4a8068678a5ce7908, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -337,7 +321,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: e7d50b9377d978245aca3e64987765ee, type: 2}
     - target: {fileID: 2346822, guid: be878d9ea17907f4a8068678a5ce7908, type: 3}
       propertyPath: m_SelectedEditorRenderState
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: be878d9ea17907f4a8068678a5ce7908, type: 3}
