@@ -67,12 +67,6 @@ public class BuildingBehavior : BaseBehavior
         return false;
     }
 
-    public override void UpdateIsInCameraView(bool newState)
-    {
-        isInCameraView = newState;
-        UpdateVision();
-    }
-
     // Update is called once per frame
     override public void Update()
     {
@@ -95,6 +89,32 @@ public class BuildingBehavior : BaseBehavior
         UpdatePointMarker();
     }
 
+    public override void UpdateIsInCameraView(bool newState)
+    {
+        isInCameraView = newState;
+        UpdateVision();
+    }
+
+    public override void StartVisible(BaseBehavior senderBaseBehaviorComponent)
+    {
+        // Debug.Log("StartVisible + " + gameObject.name + " " + visionCount);
+        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (senderBaseBehaviorComponent != null && senderBaseBehaviorComponent.team == cameraController.team)
+            visionCount++;
+        
+        UpdateVision();
+    }
+
+    public override void StopVisible(BaseBehavior senderBaseBehaviorComponent)
+    {
+        // Debug.Log("StopVisible + " + gameObject.name + " " + visionCount);
+        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (senderBaseBehaviorComponent != null && senderBaseBehaviorComponent.team == cameraController.team && visionCount > 0)
+            visionCount--;
+
+        UpdateVision();
+    }
+
     public override void SendToDestroy()
     {
         enabled = true;
@@ -106,7 +126,7 @@ public class BuildingBehavior : BaseBehavior
         UnityEngine.Profiling.Profiler.BeginSample("p UpdatePointMarker"); // Profiler
         if (IsInCameraView())
         {
-            if (unitSelectionComponent.isSelected && team == cameraController.team)
+            if (unitSelectionComponent.isSelected && team == cameraController.team && ownerId == cameraController.userId)
             {
                 if (spawnTargetObject != null)
                     CreateOrUpdatePointMarker(Color.green, spawnTargetObject.transform.position, 0.0f, true);

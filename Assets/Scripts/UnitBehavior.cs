@@ -188,6 +188,22 @@ public class UnitBehavior : BaseBehavior
         isInCameraView = newState;
     }
 
+    public override void StartVisible(BaseBehavior senderBaseBehaviorComponent)
+    {
+        // Debug.Log("StartVisible + " + gameObject.name + " " + visionCount);
+        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (senderBaseBehaviorComponent != null && senderBaseBehaviorComponent.team == cameraController.team)
+            visionCount++;
+    }
+
+    public override void StopVisible(BaseBehavior senderBaseBehaviorComponent)
+    {
+        // Debug.Log("StopVisible + " + gameObject.name + " " + visionCount);
+        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (senderBaseBehaviorComponent != null && senderBaseBehaviorComponent.team == cameraController.team && visionCount > 0)
+            visionCount--;
+    }
+
     private bool stucked = true;
     float minDistanceToInteract = 0.2f;
     public Vector3 GetClosestPositionToTarget(Vector3 targetPosition)

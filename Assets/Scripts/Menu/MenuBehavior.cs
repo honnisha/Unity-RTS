@@ -25,7 +25,7 @@ namespace GangaGame
         public static int playerTeam = 1;
         public static bool playerSpectate = false;
         public static List<int> NPCList = new List<int>();
-        public static int mapSize = 3;
+        public static int mapSize = 2;
 
         public static bool IsMasterClient()
         {
@@ -219,7 +219,7 @@ namespace GangaGame
                     GameInfo.NPCList.Clear();
                     UI.document.innerHTML = RoomHTMLFile.text;
                     GameInfo.SetReady(false);
-                    GameInfo.mapSize = 3;
+                    GameInfo.mapSize = 2;
                     UpdateRoomView();
                     return;
                 }
@@ -326,6 +326,7 @@ namespace GangaGame
 
                 else if ((PhotonNetwork.InRoom || singleplayer) && className.Contains("backToMenu"))
                 {
+                    gameStarted = false;
                     PhotonNetwork.LeaveRoom();
                     CreateMessage("Leaving...");
                 }
@@ -562,7 +563,7 @@ namespace GangaGame
 
             if (GameInfo.IsMasterClient())
             {
-                GameInfo.mapSize = 3;
+                GameInfo.mapSize = 2;
                 ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() {
                     { GameInfo.MAP_SEED, UnityEngine.Random.Range(0, 1000) }, { GameInfo.MAP_SIZE, GameInfo.mapSize }
                 };

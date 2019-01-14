@@ -141,7 +141,7 @@ public class UIBaseScript : MonoBehaviour
         //Display query to build
         BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
         BuildingBehavior buildingBehaviorComponent = unit.GetComponent<BuildingBehavior>();
-        if (buildingBehaviorComponent != null && buildingBehaviorComponent.team == cameraController.team)
+        if (buildingBehaviorComponent != null && buildingBehaviorComponent.team == cameraController.team && buildingBehaviorComponent.ownerId == cameraController.userId)
             updateQueue(buildingBehaviorComponent.unitsQuery, buildingBehaviorComponent.uqeryLimit, buildingBehaviorComponent.buildTimer);
 
         // Set health
@@ -290,7 +290,7 @@ public class UIBaseScript : MonoBehaviour
             if (buildingBehaviorComponent != null && buildingBehaviorComponent.state == BuildingBehavior.BuildingState.Project)
                 inProject = true;
 
-            if (baseBehavior.team == cameraController.team && (baseBehavior.live || inProject))
+            if (baseBehavior.team == cameraController.team && baseBehavior.ownerId == cameraController.userId && (baseBehavior.live || inProject))
             {
                 // Building commands
                 if (buildingBehaviorComponent != null)

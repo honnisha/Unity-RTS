@@ -183,7 +183,7 @@ public class TerrainGenerator : MonoBehaviour
         return positions;
     }
 
-    public List<Vector3> GetCoordinatesInBorderNested(int rows, int countOnRow)
+    public List<Vector3> GetCoordinatesInBorderNested(int rows, int countOnRow, int randValue)
     {
         List<Vector3> positions = new List<Vector3>();
         for (int row = 1; row <= rows; row++)
@@ -196,7 +196,7 @@ public class TerrainGenerator : MonoBehaviour
             for (int i = 1; i <= limit; i++)
             {
                 float step = (count - 1) / limit;
-                int positionIndex = (int)((mainMapGenerateInfo.seed + step * i) % count);
+                int positionIndex = (int)((randValue + step * i) % count);
 
                 positions.Add(avalibleGoldPositions[positionIndex]);
             }
@@ -209,7 +209,7 @@ public class TerrainGenerator : MonoBehaviour
         Dictionary<string, List<Vector3>> newData = new Dictionary<string, List<Vector3>>();
         
         // Spawn coordinates
-        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.18f, offsetPos: 0.15f);
+        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.3f, offsetPos: 0.15f);
         
         newData["spawn"] = new List<Vector3>();
         for (int i = 1; i <= spawnCount; i++)
@@ -220,9 +220,9 @@ public class TerrainGenerator : MonoBehaviour
 
         newData["trees"] = GetCoordinates(minValue: 0.9f, destCount: maxTrees, randomOffset: 1.0f);
 
-        newData["gold"] = GetCoordinatesInBorderNested(goldRows, goldCountOnRow);
+        newData["gold"] = GetCoordinatesInBorderNested(goldRows, goldCountOnRow, (int)mainMapGenerateInfo.seed);
 
-        newData["animals"] = GetCoordinatesInBorderNested(animalsRows, animalsCountOnRow);
+        newData["animals"] = GetCoordinatesInBorderNested(animalsRows, animalsCountOnRow, (int)(mainMapGenerateInfo.seed / 2));
 
         return newData;
     }

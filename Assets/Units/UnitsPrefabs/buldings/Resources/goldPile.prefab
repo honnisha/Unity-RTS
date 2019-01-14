@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 57512553685111792}
   - component: {fileID: 269181197283994982}
   - component: {fileID: 269716401572185406}
-  m_Layer: 14
+  m_Layer: 13
   m_Name: goldPile
   m_TagString: Building
   m_Icon: {fileID: 0}
@@ -241,7 +241,7 @@ GameObject:
   m_Component:
   - component: {fileID: 154812419464938898}
   - component: {fileID: 252491951502529062}
-  m_Layer: 14
+  m_Layer: 13
   m_Name: Projector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -308,13 +308,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: rock_02
       objectReference: {fileID: 0}
+    - target: {fileID: 100002, guid: 5d8dad0ff619a0e4fa6ace1dad9b9765, type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 5d8dad0ff619a0e4fa6ace1dad9b9765, type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 400002, guid: 5d8dad0ff619a0e4fa6ace1dad9b9765, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.00008
+      value: 0.0035
       objectReference: {fileID: 0}
     - target: {fileID: 400002, guid: 5d8dad0ff619a0e4fa6ace1dad9b9765, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.00295
+      value: -0.003
       objectReference: {fileID: 0}
     - target: {fileID: 400002, guid: 5d8dad0ff619a0e4fa6ace1dad9b9765, type: 3}
       propertyPath: m_LocalPosition.z

@@ -309,7 +309,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public void UpdateVisionTool()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateVisionTool"); // Profiler
-        if (team == cameraController.team && ownerId == cameraController.userId && live)
+        if (team == cameraController.team && live)
         {
             if (visionTool == null && visionToolPrefab != null)
             {
@@ -434,22 +434,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (objectUIInfo != null)
             objectUIInfo.document.Run("CreateMessage", new string[2] { message, timer.ToString() });
-    }
-
-    public void StartVisible(BaseBehavior senderBaseBehaviorComponent)
-    {
-        // Debug.Log("StartVisible + " + gameObject.name + " " + visionCount);
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        if (senderBaseBehaviorComponent != null && senderBaseBehaviorComponent.team == cameraController.team)
-            visionCount++;
-    }
-
-    public void StopVisible(BaseBehavior senderBaseBehaviorComponent)
-    {
-        // Debug.Log("StopVisible + " + gameObject.name + " " + visionCount);
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        if (senderBaseBehaviorComponent != null && senderBaseBehaviorComponent.team == cameraController.team && visionCount > 0)
-            visionCount--;
     }
 
     public GameObject GetIntersection(GameObject exceptionUnit)
@@ -639,6 +623,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     {
         GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker, overrideQueueCommands);
     }
+
+    public virtual void StartVisible(BaseBehavior senderBaseBehaviorComponent){ }
+    public virtual void StopVisible(BaseBehavior senderBaseBehaviorComponent) { }
 
     public virtual void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands) { }
     public virtual void GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands) { }

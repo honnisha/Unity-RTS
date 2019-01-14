@@ -89,13 +89,11 @@ public class CameraController : MonoBehaviourPunCallbacks
     bool[,] chanksView;
     float chunkSize = 10.0f;
 
+    public bool debugVisionGrid = false;
+
     // Use this for initialization
     void Start()
     {
-        int chanksSizeX = (int)(Terrain.activeTerrain.terrainData.size.x / chunkSize);
-        int chanksSizeY = (int)(Terrain.activeTerrain.terrainData.size.z / chunkSize);
-        chanksView = new bool[chanksSizeX, chanksSizeY];
-
         UI.document.Run("CreateLoadingScreen", "Retrieving data");
 
         menuInfo.Add(WindowType.MainMenu, new List<object>());
@@ -162,10 +160,11 @@ public class CameraController : MonoBehaviourPunCallbacks
         if (terrainGenerator)
         {
             terrainGenerator.Generate(mapSeed, mapSize);
+            UpdateViewChunks();
             spawnData = terrainGenerator.GetSpawnData(
                 spawnCount: playerCount + GameInfo.GetNPCInfo().Count, maxTrees: 1000 * mapSize,
                 goldCountOnRow: 4 * mapSize, goldRows: mapSize,
-                animalsCountOnRow: 3 * mapSize, animalsRows: mapSize);
+                animalsCountOnRow: 4 * mapSize, animalsRows: mapSize);
 
             InstantiateObjects(
                 spawnData, maxTrees: 1000 * mapSize + 100, 
@@ -342,6 +341,13 @@ public class CameraController : MonoBehaviourPunCallbacks
             SelectUnitsUpdate(isClickGUI);
     }
 
+    public void UpdateViewChunks()
+    {
+        int chanksSizeX = (int)(Terrain.activeTerrain.terrainData.size.x / chunkSize);
+        int chanksSizeY = (int)(Terrain.activeTerrain.terrainData.size.z / chunkSize);
+        chanksView = new bool[chanksSizeX, chanksSizeY];
+    }
+
     public void UpdateIsInCameraView(int x, int y, bool newState)
     {
         List<GameObject> objectsInChunk = BaseBehavior.GetObjectsInRange(GetPositionByChunk(x, y), chunkSize, units: false);
@@ -409,7 +415,7 @@ public class CameraController : MonoBehaviourPunCallbacks
         if (spawnData != null)
         {
             Gizmos.color = Color.white;
-            foreach(Vector3 spawnPoint in spawnData["spawn"])
+            foreach (Vector3 spawnPoint in spawnData["spawn"])
                 Gizmos.DrawSphere(spawnPoint, 0.4f);
 
             // Gizmos.color = Color.green;
@@ -423,6 +429,20 @@ public class CameraController : MonoBehaviourPunCallbacks
             Gizmos.color = Color.blue;
             foreach (Vector3 treePoint in spawnData["animals"])
                 Gizmos.DrawSphere(treePoint, 0.4f);
+        }
+        if (debugVisionGrid)
+        {
+            Vector2 cameraPos = GetChunkByPosition(transform.position);
+            for (int x = 0; x < chanksView.GetLength(0); x++)
+                for (int y = 0; y < chanksView.GetLength(1); y++)
+                {
+                    Gizmos.color = Color.gray;
+                    if (chanksView[x, y])
+                        Gizmos.color = Color.white;
+                    if (cameraPos.x == x && cameraPos.y == y)
+                        Gizmos.color = Color.yellow;
+                    Gizmos.DrawCube(GetPositionByChunk(x, y), new Vector3(chunkSize, 0.5f, chunkSize));
+                }
         }
     }
 
@@ -463,7 +483,7 @@ public class CameraController : MonoBehaviourPunCallbacks
         {
             GameObject prefab = goldPrefabs[UnityEngine.Random.Range(0, goldPrefabs.Count - 1)];
             GameObject newGold = Instantiate(prefab, objectPosition, prefab.transform.rotation);
-            newGold.transform.SetParent(Terrain.activeTerrain.transform);
+            // newGold.transform.SetParent(Terrain.activeTerrain.transform);
         }
     }
 
@@ -534,8 +554,9 @@ public class CameraController : MonoBehaviourPunCallbacks
             if(objectUnderMouse != null)
                 objectUnderMouse.gameObject.GetComponent<UnitSelectionComponent>().SetOutline(false);
 
+            BaseBehavior baseBehaviorComponent = hit.transform.gameObject.GetComponent<BaseBehavior>();
             UnitSelectionComponent hitUnitSelectionComponent = hit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-            if (hitUnitSelectionComponent != null)
+            if (hitUnitSelectionComponent != null && baseBehaviorComponent != null && baseBehaviorComponent.IsVisible())
             {
                 hitUnitSelectionComponent.SetOutline(true);
                 objectUnderMouse = hit.transform.gameObject;
@@ -557,7 +578,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                             if (baseBehaviorComponent != null && baseBehaviorComponent.canBeSelected == false)
                                 isCanBeSelected = false;
 
-                            if (isCanBeSelected)
+                            if (isCanBeSelected && baseBehaviorComponent.IsVisible())
                             {
                                 DeselectAllUnits();
 
@@ -637,9 +658,13 @@ public class CameraController : MonoBehaviourPunCallbacks
             isSelecting = false;
             foreach (GameObject unit in GetSelectingObjects())
             {
-                UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
-                selection.SetSelect(true);
-                selectedObjects.Add(unit.transform.gameObject);
+                BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                if (baseBehaviorComponent.IsVisible())
+                {
+                    UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
+                    selection.SetSelect(true);
+                    selectedObjects.Add(unit.transform.gameObject);
+                }
             }
         }
     }
@@ -919,7 +944,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                                 workedOnWood += 1;
                         }
                     }
-                    if (unitUnitBehavior.team == team && unitUnitBehavior.resourceGatherInfo.Count > 0 && unitBaseBehavior.IsIdle())
+                    if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId && unitUnitBehavior.resourceGatherInfo.Count > 0 && unitBaseBehavior.IsIdle())
                         freeWorkers.Add(unit);
                 }
                 if (unitBaseBehavior.IsDisplayOnMap())

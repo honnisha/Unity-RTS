@@ -226,7 +226,7 @@ MonoBehaviour:
     scale: 1
   mapTexture: {fileID: 0}
   generate: 0
---- !u!84 &580018945
+--- !u!84 &538603415
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -238,7 +238,7 @@ RenderTexture:
     Hash: 00000000000000000000000000000000
   m_ForcedFallbackFormat: 4
   m_DownscaleFallback: 0
-  m_Width: 1221
+  m_Width: 1220
   m_Height: 644
   m_AntiAliasing: 1
   m_DepthFormat: 1
@@ -258,7 +258,7 @@ RenderTexture:
     m_WrapW: 1
   m_Dimension: 2
   m_VolumeDepth: 1
---- !u!84 &1087028853
+--- !u!84 &580018945
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -303,7 +303,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4042261700560480, guid: 0d4b6e21aae4e904aac9abc028f13e9a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 150
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 4042261700560480, guid: 0d4b6e21aae4e904aac9abc028f13e9a, type: 3}
       propertyPath: m_LocalPosition.y
@@ -311,7 +311,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4042261700560480, guid: 0d4b6e21aae4e904aac9abc028f13e9a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 150
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 4042261700560480, guid: 0d4b6e21aae4e904aac9abc028f13e9a, type: 3}
       propertyPath: m_LocalRotation.x
@@ -348,11 +348,11 @@ PrefabInstance:
     - target: {fileID: 108310390962599886, guid: 0d4b6e21aae4e904aac9abc028f13e9a,
         type: 3}
       propertyPath: m_CookieSize
-      value: 300
+      value: 200
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d4b6e21aae4e904aac9abc028f13e9a, type: 3}
---- !u!84 &1295370904
+--- !u!84 &1394820157
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -364,7 +364,7 @@ RenderTexture:
     Hash: 00000000000000000000000000000000
   m_ForcedFallbackFormat: 4
   m_DownscaleFallback: 0
-  m_Width: 1221
+  m_Width: 1220
   m_Height: 644
   m_AntiAliasing: 1
   m_DepthFormat: 1
@@ -447,7 +447,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1840556871}
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 0, y: 76.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -512,7 +512,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_TargetTexture
       value: 
-      objectReference: {fileID: 1087028853}
+      objectReference: {fileID: 1394820157}
     - target: {fileID: 114774791167206152, guid: a37812fc8ef302a4e8a2b87d0fd1470e,
         type: 3}
       propertyPath: outlineShaderMaterial
