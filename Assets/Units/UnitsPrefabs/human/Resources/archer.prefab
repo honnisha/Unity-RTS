@@ -2288,6 +2288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e11b0a92f7104e4f8c2693c0cf315ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeSelected: 1
   isSelected: 0
   projector: {fileID: 1163}
 --- !u!114 &3456
@@ -2313,15 +2314,16 @@ MonoBehaviour:
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 15
-  uniqueName: Archer
-  readableName: Archer
-  readableDescription: Cool unit, can attack in distance!1
-  imagePath: bowman.png
-  timeToBuild: 40
-  costFood: 0
-  costGold: 30
-  costWood: 30
-  productionHotkey: 119
+  _skillInfo:
+    uniqueName: Archer
+    readableName: Archer
+    readableDescription: Archer
+    imagePath: units/bowman.png
+    timeToBuild: 30
+    costFood: 25
+    costGold: 0
+    costWood: 50
+    productionHotkey: 119
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 20
   rangeAttack: 10
@@ -2368,6 +2370,7 @@ MonoBehaviour:
   tempDestinationPoint: {x: 0, y: 0, z: 0}
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
+  cameraController: {fileID: 0}
   skillList:
   - {fileID: 0}
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
@@ -2395,6 +2398,7 @@ MonoBehaviour:
   resourceEndless: 0
   sourceType: 0
   storedResources: 
+  isInCameraView: 0
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}
@@ -2432,7 +2436,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3482}
-  viewIdField: 76
+  viewIdField: 0
   InstantiationId: 76
   isRuntimeInstantiated: 0
 --- !u!114 &3482

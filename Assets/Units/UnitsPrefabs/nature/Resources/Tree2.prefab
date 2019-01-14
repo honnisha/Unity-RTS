@@ -149,21 +149,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: -1
+  ownerId: 1
   maxHealth: 100
   health: 100
   live: 1
   pointToInteract: {fileID: 0}
+  debug: 0
+  isWalkAround: 0
+  timeToWalk: 0
+  timerToWalk: 0
   visionDistanve: 10
-  uniqueName: Tree
-  readableName: Tree
-  readableDescription: Tree
-  imagePath: pine-tree.png
-  timeToBuild: 10
-  costFood: 10
-  costGold: 50
-  costWood: 50
-  productionHotkey: 0
-  canAttack: 0
+  _skillInfo:
+    uniqueName: Tree
+    readableName: Tree
+    readableDescription: Tree
+    imagePath: buildings/pine-tree.png
+    timeToBuild: 0
+    costFood: 0
+    costGold: 0
+    costWood: 0
+    productionHotkey: 0
+  unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
   interactType: 0
@@ -195,35 +201,53 @@ MonoBehaviour:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   agent: {fileID: 0}
+  obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
   tempDestinationPoint: {x: 0, y: 0, z: 0}
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
+  cameraController: {fileID: 0}
   skillList: []
   HTMLHealthFile: {fileID: 0}
   InfoHTMLOffset: {x: 0, y: 4, z: 0}
   pointMarkerPrefab: {fileID: 0}
-  pointMarker: {fileID: 0}
   HTMLHealthSize: {x: 0, y: 50}
   visionToolPrefab: {fileID: 0}
-  visionTool: {fileID: 0}
-  canBeSelected: 1
   visionCount: 0
   beenSeen: 0
   holderObject: {fileID: 0}
+  timerToCreateHolder: 0
   holderToolInfo:
     prefab: {fileID: 0}
     holder: {fileID: 0}
+  tempSpeed: 0
+  attackedTeam: 0
+  pointMarker: {fileID: 0}
+  canBeSelected: 1
+  visionTool: {fileID: 0}
+  unitSelectionComponent: {fileID: 0}
   resourceCapacityType: 3
   resourceCapacity: 150
-  state: 3
+  resourceEndless: 0
+  sourceType: 0
   storedResources: 
+  isInCameraView: 0
+  state: 3
+  magnitDistance: 2
   producedUnits: []
   spawnPoint: {fileID: 0}
   unitsQuery: []
   uqeryLimit: 5
   buildTimer: 0
+  tempMaterialsMode: 
+  terrainChangeInfo:
+    offset: {x: 0, y: 0}
+    size: {x: 0, y: 0}
+    layer: 0
+    value: 0
+    changeTexture: 0
+    removeGrass: 0
 --- !u!114 &8751263088816255221
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -236,6 +260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e11b0a92f7104e4f8c2693c0cf315ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeSelected: 1
   isSelected: 0
   projector: {fileID: 4639373961477859325}
 --- !u!1001 &7056958305589021065

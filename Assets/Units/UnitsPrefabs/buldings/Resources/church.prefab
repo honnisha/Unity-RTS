@@ -171,15 +171,16 @@ MonoBehaviour:
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 15
-  uniqueName: Church
-  readableName: Church
-  readableDescription: Church
-  imagePath: church-img.png
-  timeToBuild: 10
-  costFood: 0
-  costGold: 100
-  costWood: 150
-  productionHotkey: 99
+  _skillInfo:
+    uniqueName: Church
+    readableName: Church
+    readableDescription: Church
+    imagePath: buildings/church-img.png
+    timeToBuild: 0
+    costFood: 0
+    costGold: 50
+    costWood: 100
+    productionHotkey: 118
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2

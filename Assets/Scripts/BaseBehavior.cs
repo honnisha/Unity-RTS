@@ -247,7 +247,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateHealth"); // Profiler
         if (IsInCameraView() && HTMLHealthFile != null)
         {
-            bool healthVisible = true;
+            bool healthVisible = false;
             if (IsHealthVisible())
                 healthVisible = true;
 
@@ -626,7 +626,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public virtual void BecomeDead() { }
     public virtual void StartInteract(GameObject targetObject) { }
     public virtual bool[] UICommand(string commandName) { return new bool[2] { false, false }; }
-    public virtual bool IsHealthVisible() { return false; }
+    public virtual bool IsHealthVisible() { return true; }
     public virtual List<string> GetCostInformation() { return new List<string>(); }
     public virtual bool IsVisible() { return false; }
     public virtual void AlertAttacking(GameObject attacker) { }

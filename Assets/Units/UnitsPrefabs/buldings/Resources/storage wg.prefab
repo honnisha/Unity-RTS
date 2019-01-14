@@ -217,15 +217,16 @@ MonoBehaviour:
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 10
-  uniqueName: Storage
-  readableName: Storage wood and gold
-  readableDescription: Storage, can store wood and gold resources.
-  imagePath: cardboard-box.png
-  timeToBuild: 30
-  costFood: 0
-  costGold: 0
-  costWood: 30
-  productionHotkey: 115
+  _skillInfo:
+    uniqueName: storageWG
+    readableName: Storage wood and gold
+    readableDescription: Can store wood and gold
+    imagePath: buildings/cardboard-box.png
+    timeToBuild: 30
+    costFood: 0
+    costGold: 0
+    costWood: 50
+    productionHotkey: 115
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
@@ -356,7 +357,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3521}
-  viewIdField: 7
+  viewIdField: 0
   InstantiationId: 7
   isRuntimeInstantiated: 0
 --- !u!114 &3521

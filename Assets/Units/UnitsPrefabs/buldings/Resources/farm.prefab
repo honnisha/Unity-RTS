@@ -78,15 +78,16 @@ MonoBehaviour:
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 0
-  uniqueName: Farm
-  readableName: Farm
-  readableDescription: Farm
-  imagePath: plow.png
-  timeToBuild: 10
-  costFood: 0
-  costGold: 0
-  costWood: 50
-  productionHotkey: 102
+  _skillInfo:
+    uniqueName: Farm
+    readableName: Farm
+    readableDescription: Farm
+    imagePath: buildings/plow.png
+    timeToBuild: 0
+    costFood: 0
+    costGold: 0
+    costWood: 80
+    productionHotkey: 102
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
@@ -200,7 +201,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3403}
-  viewIdField: 36
+  viewIdField: 0
   InstantiationId: 36
   isRuntimeInstantiated: 0
 --- !u!114 &3403

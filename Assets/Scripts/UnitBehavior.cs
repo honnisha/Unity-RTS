@@ -244,8 +244,8 @@ public class UnitBehavior : BaseBehavior
     {
         stucked = true;
         StopAction(false);
+        ActionIsDone(stopActionType: interactType);
         interactObject = null;
-        ActionIsDone();
     }
 
     public void WalkAround()
@@ -492,7 +492,7 @@ public class UnitBehavior : BaseBehavior
                                         baseObjectBehaviorComponent.resourceCapacity = 0;
                                         resourceHold += resourceInfo.gatherPerSecond;
                                         interactObject = null;
-                                        ActionIsDone();
+                                        ActionIsDone(stopActionType: interactType);
                                         interactType = InteractigType.None;
                                     }
 
@@ -521,7 +521,7 @@ public class UnitBehavior : BaseBehavior
                             bool builded = interactObjectBuildingBehavior.RepairOrBuild(buildHpPerSecond);
                             if (builded || !interactObjectBuildingBehavior.live)
                             {
-                                ActionIsDone();
+                                ActionIsDone(stopActionType: interactType);
                                 interactType = InteractigType.None;
                                 anim.SetBool(interactAnimation, false);
 
@@ -737,7 +737,7 @@ public class UnitBehavior : BaseBehavior
         return null;
     }
 
-    public void ActionIsDone()
+    public void ActionIsDone(InteractigType stopActionType = InteractigType.None)
     {
         SetAgentStopped(true);
         Destroy(pointMarker);
@@ -747,10 +747,11 @@ public class UnitBehavior : BaseBehavior
         if (isQueueNewOrder)
             return;
              
-        if(interactObject != null)
+        // Find new target
+        if(stopActionType != InteractigType.None)
         {
             PhotonView unitPhotonView = GetComponent<PhotonView>();
-            GameObject newTarget = GetObjectToInteract(type: interactType, targetResource: resourceType);
+            GameObject newTarget = GetObjectToInteract(type: stopActionType, targetResource: resourceType);
             if (newTarget != null)
             {
                 if (PhotonNetwork.InRoom)
@@ -762,6 +763,7 @@ public class UnitBehavior : BaseBehavior
                 return;
             }
         }
+
         SendOrderFromQueue();
         return;
     }
@@ -1236,6 +1238,13 @@ public class UnitBehavior : BaseBehavior
             return result;
         }
         return result;
+    }
+
+    public override bool IsHealthVisible()
+    {
+        if (cameraController.tagsToSelect.Find(x => x.name == tag).healthVisibleOnlyWhenSelect && !unitSelectionComponent.isSelected)
+            return false;
+        return true;
     }
 
     public override List<string> GetStatistics()

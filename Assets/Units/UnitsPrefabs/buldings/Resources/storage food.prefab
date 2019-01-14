@@ -218,15 +218,16 @@ MonoBehaviour:
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 10
-  uniqueName: StorageFood
-  readableName: Storage food
-  readableDescription: Storage, can store food resource.
-  imagePath: wooden-crate.png
-  timeToBuild: 30
-  costFood: 0
-  costGold: 0
-  costWood: 30
-  productionHotkey: 118
+  _skillInfo:
+    uniqueName: Food storage
+    readableName: Food storage
+    readableDescription: Food storage
+    imagePath: buildings/wooden-crate.png
+    timeToBuild: 30
+    costFood: 0
+    costGold: 0
+    costWood: 50
+    productionHotkey: 100
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
@@ -357,7 +358,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2274483802049673732}
-  viewIdField: 4
+  viewIdField: 0
   InstantiationId: 4
   isRuntimeInstantiated: 0
 --- !u!114 &2274483802049673732

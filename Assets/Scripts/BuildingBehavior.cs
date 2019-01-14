@@ -288,11 +288,11 @@ public class BuildingBehavior : BaseBehavior
 
         if (live && health < maxHealth)
         {
-            if (cameraController.tagsToSelect.Find(x => x.name == tag).healthVisibleOnlyWhenSelect && !unitSelectionComponent.isSelected)
-                return false;
             return true;
         }
-        return false;
+        if (cameraController.tagsToSelect.Find(x => x.name == tag).healthVisibleOnlyWhenSelect && !unitSelectionComponent.isSelected)
+            return false;
+        return true;
     }
 
     [PunRPC]

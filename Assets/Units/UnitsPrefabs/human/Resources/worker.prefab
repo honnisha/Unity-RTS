@@ -217,15 +217,15 @@ MonoBehaviour:
   timerToWalk: 0
   visionDistanve: 13
   _skillInfo:
-    uniqueName: 
-    readableName: 
-    readableDescription: 
-    imagePath: 
-    timeToBuild: 0
-    costFood: 0
+    uniqueName: Worker
+    readableName: Worker
+    readableDescription: Worker
+    imagePath: units/stone-crafting.png
+    timeToBuild: 30
+    costFood: 60
     costGold: 0
     costWood: 0
-    productionHotkey: 0
+    productionHotkey: 115
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 10
   rangeAttack: 2
@@ -385,8 +385,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3394}
-  viewIdField: 34
-  InstantiationId: 34
+  viewIdField: 17
+  InstantiationId: 17
   isRuntimeInstantiated: 0
 --- !u!114 &3394
 MonoBehaviour:

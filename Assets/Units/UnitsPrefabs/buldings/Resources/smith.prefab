@@ -254,15 +254,16 @@ MonoBehaviour:
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 10
-  uniqueName: Smith
-  readableName: Barracks
-  readableDescription: Building where is military units are trained.
-  imagePath: anvil.png
-  timeToBuild: 10
-  costFood: 0
-  costGold: 0
-  costWood: 100
-  productionHotkey: 100
+  _skillInfo:
+    uniqueName: Barraks
+    readableName: Barraks
+    readableDescription: Barraks
+    imagePath: buildings/anvil.png
+    timeToBuild: 0
+    costFood: 0
+    costGold: 0
+    costWood: 100
+    productionHotkey: 103
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
@@ -397,7 +398,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3516}
-  viewIdField: 11
+  viewIdField: 0
   InstantiationId: 11
   isRuntimeInstantiated: 0
 --- !u!114 &3516

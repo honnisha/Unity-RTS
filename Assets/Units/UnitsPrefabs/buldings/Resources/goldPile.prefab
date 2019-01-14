@@ -128,15 +128,16 @@ MonoBehaviour:
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 10
-  uniqueName: Gold pile
-  readableName: Gold pile
-  readableDescription: Gold pile
-  imagePath: stone-pile.png
-  timeToBuild: 10
-  costFood: 10
-  costGold: 50
-  costWood: 50
-  productionHotkey: 102
+  _skillInfo:
+    uniqueName: Pile of gold
+    readableName: Pile of gold
+    readableDescription: Pile of gold
+    imagePath: buildings/stone-pile.png
+    timeToBuild: 0
+    costFood: 0
+    costGold: 0
+    costWood: 0
+    productionHotkey: 0
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2

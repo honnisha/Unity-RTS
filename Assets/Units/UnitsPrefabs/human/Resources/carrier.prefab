@@ -2471,15 +2471,15 @@ MonoBehaviour:
   timerToWalk: 0
   visionDistanve: 6
   _skillInfo:
-    uniqueName: 
-    readableName: 
-    readableDescription: 
-    imagePath: 
-    timeToBuild: 0
-    costFood: 0
+    uniqueName: Carrier
+    readableName: Carrier
+    readableDescription: Carrier
+    imagePath: units/bindle.png
+    timeToBuild: 30
+    costFood: 50
     costGold: 0
     costWood: 0
-    productionHotkey: 0
+    productionHotkey: 99
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 10
   rangeAttack: 1.5
@@ -2599,8 +2599,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3391}
-  viewIdField: 32
-  InstantiationId: 32
+  viewIdField: 14
+  InstantiationId: 14
   isRuntimeInstantiated: 0
 --- !u!114 &3391
 MonoBehaviour:

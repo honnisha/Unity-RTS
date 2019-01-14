@@ -206,24 +206,23 @@ public class UIBaseScript : MonoBehaviour
             {
                 foreach (GameObject skillObject in unitBaseBehaviorComponent.skillList)
                 {
-                    ISkillInterface skillInfo = null;
                     SkillScript skillComponent = skillObject.GetComponent<SkillScript>();
+                    BaseBehavior skillBaseBehavior = skillObject.GetComponent<BaseBehavior>();
                     if (skillComponent != null)
-                        skillInfo = skillComponent;
-                    BuildingBehavior skillBuildingBehaviorComponent = skillObject.GetComponent<BuildingBehavior>();
-                    if (skillBuildingBehaviorComponent != null)
-                        skillInfo = (ISkillInterface)skillBuildingBehaviorComponent;
-
-                    if (skillObject != null && skillComponent != null)
-                    {
                         GetOrCreateUIImageToList(
-                            ref newUIImages, skillInfo.skillInfo.uniqueName, skillInfo.skillInfo.imagePath,
-                            skillInfo.skillInfo.readableName, skillInfo.skillInfo.readableDescription,
-                            skillInfo.GetStatistics(), skillInfo.GetCostInformation(),
-                            skillInfo.skillInfo.productionHotkey
+                            ref newUIImages, skillComponent.skillInfo.uniqueName, skillComponent.skillInfo.imagePath,
+                            skillComponent.skillInfo.readableName, skillComponent.skillInfo.readableDescription,
+                            skillComponent.GetStatistics(), skillComponent.GetCostInformation(),
+                            skillComponent.skillInfo.productionHotkey
                             );
-                        continue;
-                    }
+
+                    else if (skillBaseBehavior != null)
+                        GetOrCreateUIImageToList(
+                            ref newUIImages, skillBaseBehavior.skillInfo.uniqueName, skillBaseBehavior.skillInfo.imagePath,
+                            skillBaseBehavior.skillInfo.readableName, skillBaseBehavior.skillInfo.readableDescription,
+                            skillBaseBehavior.GetStatistics(), skillBaseBehavior.GetCostInformation(),
+                            skillBaseBehavior.skillInfo.productionHotkey
+                            );
                 }
             }
 
