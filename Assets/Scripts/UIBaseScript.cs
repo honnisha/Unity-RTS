@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Photon.Pun;
+using GangaGame;
 
 public class UIBaseScript : MonoBehaviour
 {
@@ -138,6 +139,9 @@ public class UIBaseScript : MonoBehaviour
 
     public void DisplayDetailInfo(GameObject unit)
     {
+        if (unit == null)
+            return;
+
         //Display query to build
         BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
         BuildingBehavior buildingBehaviorComponent = unit.GetComponent<BuildingBehavior>();
@@ -198,24 +202,27 @@ public class UIBaseScript : MonoBehaviour
                 continue;
 
             //Skills
-            UnitBehavior unitBehaviorComponent = unit.GetComponent<UnitBehavior>();
-            if (unitBehaviorComponent != null && unitBehaviorComponent.live)
+            if (unitBaseBehaviorComponent != null && unitBaseBehaviorComponent.live)
             {
-                foreach (GameObject skillObject in unitBehaviorComponent.skillList)
+                foreach (GameObject skillObject in unitBaseBehaviorComponent.skillList)
                 {
-                    if(skillObject != null)
+                    ISkillInterface skillInfo = null;
+                    SkillScript skillComponent = skillObject.GetComponent<SkillScript>();
+                    if (skillComponent != null)
+                        skillInfo = skillComponent;
+                    BuildingBehavior skillBuildingBehaviorComponent = skillObject.GetComponent<BuildingBehavior>();
+                    if (skillBuildingBehaviorComponent != null)
+                        skillInfo = (ISkillInterface)skillBuildingBehaviorComponent;
+
+                    if (skillObject != null && skillComponent != null)
                     {
-                        BuildingBehavior skillBuildingBehaviorComponent = skillObject.GetComponent<BuildingBehavior>();
-                        if (skillBuildingBehaviorComponent != null)
-                        {
-                            GetOrCreateUIImageToList(
-                                ref newUIImages, skillBuildingBehaviorComponent.uniqueName, skillBuildingBehaviorComponent.imagePath,
-                                skillBuildingBehaviorComponent.readableName, skillBuildingBehaviorComponent.readableDescription,
-                                skillBuildingBehaviorComponent.GetStatistics(), skillBuildingBehaviorComponent.GetCostInformation(),
-                                skillBuildingBehaviorComponent.productionHotkey
-                                );
-                            continue;
-                        }
+                        GetOrCreateUIImageToList(
+                            ref newUIImages, skillInfo.skillInfo.uniqueName, skillInfo.skillInfo.imagePath,
+                            skillInfo.skillInfo.readableName, skillInfo.skillInfo.readableDescription,
+                            skillInfo.GetStatistics(), skillInfo.GetCostInformation(),
+                            skillInfo.skillInfo.productionHotkey
+                            );
+                        continue;
                     }
                 }
             }
@@ -226,10 +233,10 @@ public class UIBaseScript : MonoBehaviour
                 {
                     BaseBehavior buildUnitBaseBehaviorComponent = buildUnit.GetComponent<BaseBehavior>();
                     GetOrCreateUIImageToList(
-                        ref newUIImages, buildUnitBaseBehaviorComponent.uniqueName, buildUnitBaseBehaviorComponent.imagePath,
-                        buildUnitBaseBehaviorComponent.readableName, buildUnitBaseBehaviorComponent.readableDescription,
+                        ref newUIImages, buildUnitBaseBehaviorComponent.skillInfo.uniqueName, buildUnitBaseBehaviorComponent.skillInfo.imagePath,
+                        buildUnitBaseBehaviorComponent.skillInfo.readableName, buildUnitBaseBehaviorComponent.skillInfo.readableDescription,
                         buildUnitBaseBehaviorComponent.GetStatistics(), buildUnitBaseBehaviorComponent.GetCostInformation(),
-                        buildUnitBaseBehaviorComponent.productionHotkey
+                        buildUnitBaseBehaviorComponent.skillInfo.productionHotkey
                         );
                 }
         }
@@ -244,10 +251,10 @@ public class UIBaseScript : MonoBehaviour
             if (unit != null)
             {
                 BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-                string name = baseBehaviorComponent.uniqueName;
+                string name = baseBehaviorComponent.skillInfo.uniqueName;
                 GetOrCreateUIImageToList(
-                    ref newUIImages, name, baseBehaviorComponent.imagePath,
-                    baseBehaviorComponent.readableName, baseBehaviorComponent.readableDescription, baseBehaviorComponent.GetStatistics(), new List<string>(), KeyCode.None
+                    ref newUIImages, name, baseBehaviorComponent.skillInfo.imagePath,
+                    baseBehaviorComponent.skillInfo.readableName, baseBehaviorComponent.skillInfo.readableDescription, baseBehaviorComponent.GetStatistics(), new List<string>(), KeyCode.None
                     );
             }
         }
@@ -562,16 +569,16 @@ public class UIBaseScript : MonoBehaviour
                 infoDiv.appendChild(progressBaseDiv);
 
                 Dom.Element elementDiv = UI.document.createElement("img");
-                elementDiv.setAttribute("src", unitBaseBehaviorComponent.imagePath);
+                elementDiv.setAttribute("src", unitBaseBehaviorComponent.skillInfo.imagePath);
                 elementDiv.className = String.Format("clckable {0}", index);
                 progressBaseDiv.appendChild(elementDiv);
                 
                 if (index == 0)
                 {
-                    float time = unitBaseBehaviorComponent.timeToBuild;
+                    float time = unitBaseBehaviorComponent.skillInfo.timeToBuild;
                     Dom.Element progressDiv = UI.document.createElement("div");
                     progressDiv.className = String.Format("clckable {0}", index);
-                    progressDiv.style.width = String.Format("{0:F0}%", buildTimer / unitBaseBehaviorComponent.timeToBuild * 100);
+                    progressDiv.style.width = String.Format("{0:F0}%", buildTimer / unitBaseBehaviorComponent.skillInfo.timeToBuild * 100);
                     progressBaseDiv.appendChild(progressDiv);
                     progressDiv.addEventListener("mousedown", delegate (MouseEvent e) {
                         cameraController.RemoveQueueElementFromSelected();

@@ -216,15 +216,16 @@ MonoBehaviour:
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 13
-  uniqueName: Worker
-  readableName: Worker
-  readableDescription: Can build, repair, eat.
-  imagePath: stone-crafting.png
-  timeToBuild: 30
-  costFood: 60
-  costGold: 0
-  costWood: 0
-  productionHotkey: 115
+  _skillInfo:
+    uniqueName: 
+    readableName: 
+    readableDescription: 
+    imagePath: 
+    timeToBuild: 0
+    costFood: 0
+    costGold: 0
+    costWood: 0
+    productionHotkey: 0
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 10
   rangeAttack: 2

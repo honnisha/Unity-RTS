@@ -29,20 +29,10 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public float timeToWalk = 0.0f;
     [HideInInspector]
     public float timerToWalk = 0.0f;
-
     public float visionDistanve = 10.0f;
 
-    [Header("UI")]
-    [Tooltip("Icons in UI will be stuck if name the same")]
-    public string uniqueName;
-    public string readableName;
-    public string readableDescription;
-    public string imagePath;
-    public float timeToBuild = 10.0f;
-    public float costFood = 10.0f;
-    public float costGold = 10.0f;
-    public float costWood = 10.0f;
-    public KeyCode productionHotkey;
+    public SkillInfo _skillInfo;
+    public SkillInfo skillInfo { get { return _skillInfo; } set { _skillInfo = value; } }
 
     [HideInInspector]
     public Vector3 unitPosition = new Vector3();
@@ -623,6 +613,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     {
         GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker, overrideQueueCommands);
     }
+
+    public virtual bool IsDisplayedAsSkill() { return true; }
 
     public virtual void StartVisible(BaseBehavior senderBaseBehaviorComponent){ }
     public virtual void StopVisible(BaseBehavior senderBaseBehaviorComponent) { }

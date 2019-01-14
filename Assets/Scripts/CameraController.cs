@@ -985,7 +985,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             }
             if (units.Count > 0)
             {
-                UI.document.Run("CreateInfoButton", "solders", units.Count, number, units[0].GetComponent<BaseBehavior>().imagePath);
+                UI.document.Run("CreateInfoButton", "solders", units.Count, number, units[0].GetComponent<BaseBehavior>().skillInfo.imagePath);
             }
         }
         countWorkersTimer = 1.0f;
@@ -1026,7 +1026,7 @@ public class CameraController : MonoBehaviourPunCallbacks
         foreach (GameObject unit in allUnits)
         {
             BaseBehavior baseUnitBehaviorComponent = unit.GetComponent<BaseBehavior>();
-            if (baseUnitBehaviorComponent.uniqueName == baseBehaviorComponent.uniqueName)
+            if (baseUnitBehaviorComponent.skillInfo.uniqueName == baseBehaviorComponent.skillInfo.uniqueName)
             {
                 UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
                 if (selection != null && IsWithinSelectionBounds(unit, new Vector3(0, 0, 0), new Vector3(Screen.width, Screen.height, 0)))
@@ -1326,7 +1326,7 @@ public class CameraController : MonoBehaviourPunCallbacks
         foreach (GameObject unit in GetSelectedObjects())
         {
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-            if(baseBehaviorComponent.uniqueName != uniqueName)
+            if(baseBehaviorComponent.skillInfo.uniqueName != uniqueName)
             {
                 UnitSelectionComponent unitSelectionComponent = baseBehaviorComponent.GetComponent<UnitSelectionComponent>();
                 unitSelectionComponent.isSelected = false;

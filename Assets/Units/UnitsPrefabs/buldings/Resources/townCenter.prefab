@@ -171,16 +171,16 @@ MonoBehaviour:
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 15
-  uniqueName: townCenter
-  readableName: Town center
-  readableDescription: Main building, can produce workers and store resources from
-    workers.
-  imagePath: family-house.png
-  timeToBuild: 10
-  costFood: 0
-  costGold: 100
-  costWood: 300
-  productionHotkey: 103
+  _skillInfo:
+    uniqueName: townCenter
+    readableName: Town Center
+    readableDescription: Town Center
+    imagePath: buildings/family-house.png
+    timeToBuild: 0
+    costFood: 200
+    costGold: 0
+    costWood: 100
+    productionHotkey: 99
   unitPosition: {x: 0, y: 0, z: 0}
   damage: 50
   rangeAttack: 2
@@ -220,7 +220,8 @@ MonoBehaviour:
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
   cameraController: {fileID: 0}
-  skillList: []
+  skillList:
+  - {fileID: 2023189790452245048, guid: df8d927a3b531654ea22978b99914068, type: 3}
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
   InfoHTMLOffset: {x: 0, y: 6, z: 0}
   pointMarkerPrefab: {fileID: 1174494487606054, guid: 7723961c7b4a2cf4cbfa8e9a6c45ba62,
@@ -298,8 +299,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3389}
-  viewIdField: 33
-  InstantiationId: 33
+  viewIdField: 1
+  InstantiationId: 1
   isRuntimeInstantiated: 0
 --- !u!114 &3389
 MonoBehaviour:

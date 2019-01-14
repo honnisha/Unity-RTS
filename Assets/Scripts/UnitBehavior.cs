@@ -747,17 +747,20 @@ public class UnitBehavior : BaseBehavior
         if (isQueueNewOrder)
             return;
              
-        PhotonView unitPhotonView = GetComponent<PhotonView>();
-        GameObject newTarget = GetObjectToInteract(type: interactType, targetResource: resourceType);
-        if (newTarget != null)
+        if(interactObject != null)
         {
-            if (PhotonNetwork.InRoom)
-                unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, newTarget.GetComponent<PhotonView>().ViewID, false, false);
-            else
-                GiveOrder(newTarget, false, false);
+            PhotonView unitPhotonView = GetComponent<PhotonView>();
+            GameObject newTarget = GetObjectToInteract(type: interactType, targetResource: resourceType);
+            if (newTarget != null)
+            {
+                if (PhotonNetwork.InRoom)
+                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, newTarget.GetComponent<PhotonView>().ViewID, false, false);
+                else
+                    GiveOrder(newTarget, false, false);
 
-            Destroy(pointMarker);
-            return;
+                Destroy(pointMarker);
+                return;
+            }
         }
         SendOrderFromQueue();
         return;
@@ -1184,8 +1187,8 @@ public class UnitBehavior : BaseBehavior
                 if (skillObject.GetComponent<BuildingBehavior>() != null)
                 {
                     BuildingBehavior buildingBehavior = skillObject.GetComponent<BuildingBehavior>();
-                    hotkey = buildingBehavior.productionHotkey;
-                    uniqueName = buildingBehavior.uniqueName;
+                    hotkey = buildingBehavior.skillInfo.productionHotkey;
+                    uniqueName = buildingBehavior.skillInfo.uniqueName;
                 }
 
                 if (uniqueName == commandName || Input.GetKeyDown(hotkey))
@@ -1198,7 +1201,7 @@ public class UnitBehavior : BaseBehavior
                             if (cameraController.buildedObject == null)
                             {
                                 // if not enough resources -> return second element true
-                                result[1] = !SpendResources(buildingBehavior.costFood, buildingBehavior.costGold, buildingBehavior.costWood);
+                                result[1] = !SpendResources(buildingBehavior.skillInfo.costFood, buildingBehavior.skillInfo.costGold, buildingBehavior.skillInfo.costWood);
                                 if (result[1])
                                     return result;
 
@@ -1244,13 +1247,18 @@ public class UnitBehavior : BaseBehavior
     public override List<string> GetCostInformation()
     {
         List<string> statistics = new List<string>();
-        statistics.Add(String.Format("Time to build: {0:F0} sec", timeToBuild));
-        if (costFood > 0)
-            statistics.Add(String.Format("Food: {0:F0}", costFood));
-        if (costGold > 0)
-            statistics.Add(String.Format("Gold: {0:F0}", costGold));
-        if (costWood > 0)
-            statistics.Add(String.Format("Wood: {0:F0}", costWood));
+        statistics.Add(String.Format("Time to build: {0:F0} sec", skillInfo.timeToBuild));
+        if (skillInfo.costFood > 0)
+            statistics.Add(String.Format("Food: {0:F0}", skillInfo.costFood));
+        if (skillInfo.costGold > 0)
+            statistics.Add(String.Format("Gold: {0:F0}", skillInfo.costGold));
+        if (skillInfo.costWood > 0)
+            statistics.Add(String.Format("Wood: {0:F0}", skillInfo.costWood));
         return statistics;
+    }
+
+    public override bool IsDisplayedAsSkill()
+    {
+        return true;
     }
 }

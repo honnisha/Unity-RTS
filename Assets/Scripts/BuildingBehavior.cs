@@ -172,7 +172,7 @@ public class BuildingBehavior : BaseBehavior
                 if (unitsQuery.Count > 0)
                 {
                     BaseBehavior firstElementBehaviorComponent = unitsQuery[0].GetComponent<BaseBehavior>();
-                    buildTimer = firstElementBehaviorComponent.timeToBuild;
+                    buildTimer = firstElementBehaviorComponent.skillInfo.timeToBuild;
                 }
             }
         }
@@ -466,13 +466,13 @@ public class BuildingBehavior : BaseBehavior
 
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         BaseBehavior baseBehavior = unitsQuery[index].GetComponent<BaseBehavior>();
-        cameraController.food += baseBehavior.costFood;
-        cameraController.gold += baseBehavior.costGold;
-        cameraController.wood += baseBehavior.costWood;
+        cameraController.food += baseBehavior.skillInfo.costFood;
+        cameraController.gold += baseBehavior.skillInfo.costGold;
+        cameraController.wood += baseBehavior.skillInfo.costWood;
         unitsQuery.RemoveAt(index);
         if (index == 0 && unitsQuery.Count > 0)
         {
-            buildTimer = unitsQuery[0].GetComponent<BaseBehavior>().timeToBuild;
+            buildTimer = unitsQuery[0].GetComponent<BaseBehavior>().skillInfo.timeToBuild;
         }
         return true;
     }
@@ -482,9 +482,9 @@ public class BuildingBehavior : BaseBehavior
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         if (state == BuildingState.Building || state == BuildingState.Project || state == BuildingState.Selected)
         {
-            cameraController.food += costFood;
-            cameraController.gold += costGold;
-            cameraController.wood += costWood;
+            cameraController.food += skillInfo.costFood;
+            cameraController.gold += skillInfo.costGold;
+            cameraController.wood += skillInfo.costWood;
             if (objectUIInfo != null)
             {
                 objectUIInfo.Destroy();
@@ -511,19 +511,19 @@ public class BuildingBehavior : BaseBehavior
         foreach (GameObject unit in producedUnits)
         {
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-            if (baseBehaviorComponent.uniqueName == commandName || Input.GetKeyDown(baseBehaviorComponent.productionHotkey))
+            if (baseBehaviorComponent.skillInfo.uniqueName == commandName || Input.GetKeyDown(baseBehaviorComponent.skillInfo.productionHotkey))
             {
                 if (unitsQuery.Count >= uqeryLimit)
                     return result;
                 //Debug.Log(producedUnits.Count);
 
                 // if not enough resources -> return second element true
-                result[1] = !SpendResources(baseBehaviorComponent.costFood, baseBehaviorComponent.costGold, baseBehaviorComponent.costWood);
+                result[1] = !SpendResources(baseBehaviorComponent.skillInfo.costFood, baseBehaviorComponent.skillInfo.costGold, baseBehaviorComponent.skillInfo.costWood);
                 if (result[1])
                     return result;
 
                 if (buildTimer <= 0.0f)
-                    buildTimer = baseBehaviorComponent.timeToBuild;
+                    buildTimer = baseBehaviorComponent.skillInfo.timeToBuild;
                 unitsQuery.Add(unit);
 
                 result[0] = true;
@@ -541,12 +541,17 @@ public class BuildingBehavior : BaseBehavior
     public override List<string> GetCostInformation()
     {
         List<string> statistics = new List<string>();
-        if (costFood > 0)
-            statistics.Add(String.Format("Food: {0:F0}", costFood));
-        if (costGold > 0)
-            statistics.Add(String.Format("Gold: {0:F0}", costGold));
-        if (costWood > 0)
-            statistics.Add(String.Format("Wood: {0:F0}", costWood));
+        if (skillInfo.costFood > 0)
+            statistics.Add(String.Format("Food: {0:F0}", skillInfo.costFood));
+        if (skillInfo.costGold > 0)
+            statistics.Add(String.Format("Gold: {0:F0}", skillInfo.costGold));
+        if (skillInfo.costWood > 0)
+            statistics.Add(String.Format("Wood: {0:F0}", skillInfo.costWood));
         return statistics;
+    }
+
+    public override bool IsDisplayedAsSkill()
+    {
+        return true;
     }
 }
