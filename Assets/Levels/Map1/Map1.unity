@@ -97,7 +97,7 @@ NavMeshSettings:
   m_BuildSettings:
     serializedVersion: 2
     agentTypeID: 0
-    agentRadius: 0.5
+    agentRadius: 0.4
     agentHeight: 2
     agentSlope: 45
     agentClimb: 0.4
@@ -214,7 +214,7 @@ MonoBehaviour:
   animalsPrefabs:
   - {fileID: 1937853774954928, guid: 5933b4810ee168c43b7e430718f8fa76, type: 3}
   - {fileID: 1677176852055214, guid: 57d5c75ff596c3047a4ebbba9f351416, type: 3}
-  layersCount: 8
+  layersCount: 9
   mainMapGenerateInfo:
     fractalType: 3
     basisType: 3
@@ -226,7 +226,7 @@ MonoBehaviour:
     scale: 1
   mapTexture: {fileID: 0}
   generate: 0
---- !u!84 &538603415
+--- !u!84 &580018945
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -238,7 +238,7 @@ RenderTexture:
     Hash: 00000000000000000000000000000000
   m_ForcedFallbackFormat: 4
   m_DownscaleFallback: 0
-  m_Width: 1220
+  m_Width: 1221
   m_Height: 644
   m_AntiAliasing: 1
   m_DepthFormat: 1
@@ -258,7 +258,7 @@ RenderTexture:
     m_WrapW: 1
   m_Dimension: 2
   m_VolumeDepth: 1
---- !u!84 &580018945
+--- !u!84 &773963113
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -350,9 +350,14 @@ PrefabInstance:
       propertyPath: m_CookieSize
       value: 200
       objectReference: {fileID: 0}
+    - target: {fileID: 20589384818792570, guid: 0d4b6e21aae4e904aac9abc028f13e9a,
+        type: 3}
+      propertyPath: orthographic size
+      value: 100
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d4b6e21aae4e904aac9abc028f13e9a, type: 3}
---- !u!84 &1394820157
+--- !u!84 &1568363821
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -364,7 +369,7 @@ RenderTexture:
     Hash: 00000000000000000000000000000000
   m_ForcedFallbackFormat: 4
   m_DownscaleFallback: 0
-  m_Width: 1220
+  m_Width: 1221
   m_Height: 644
   m_AntiAliasing: 1
   m_DepthFormat: 1
@@ -512,7 +517,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_TargetTexture
       value: 
-      objectReference: {fileID: 1394820157}
+      objectReference: {fileID: 1568363821}
     - target: {fileID: 114774791167206152, guid: a37812fc8ef302a4e8a2b87d0fd1470e,
         type: 3}
       propertyPath: outlineShaderMaterial

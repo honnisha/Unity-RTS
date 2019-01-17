@@ -14,7 +14,9 @@ public class UIBaseScript : MonoBehaviour
 {
     public class UIImage
     {
-        public UIImage(string _name, int _count, string _imagePath, string _readName, string _readDescr, List<string> _tableStats, List<string> _costInfo, KeyCode _hotkey)
+        public UIImage(
+            string _name, int _count, string _imagePath, string _readName, string _readDescr, List<string> _tableStats, List<string> _costInfo, 
+            KeyCode _hotkey, SkillType _skillType = SkillType.None, string _errorMessage = "")
         {
             name = _name;
             count = _count;
@@ -24,14 +26,20 @@ public class UIBaseScript : MonoBehaviour
             tableStatistics = _tableStats;
             costInfo = _costInfo;
             hotkey = _hotkey;
+            skillType = _skillType;
+            errorMessage = _errorMessage;
         }
-        public UIImage(string _name, string _readName, string _imagePath, string _readDescr, KeyCode _hotkey)
+        public UIImage(
+            string _name, string _readName, string _imagePath, string _readDescr, 
+            KeyCode _hotkey, SkillType _skillType = SkillType.None, string _errorMessage = "")
         {
             name = _name;
             readableName = _readName;
             imagePath = _imagePath;
             readableDescription = _readDescr;
             hotkey = _hotkey;
+            skillType = _skillType;
+            errorMessage = _errorMessage;
         }
 
         public GameObject image;
@@ -43,6 +51,8 @@ public class UIBaseScript : MonoBehaviour
         public List<string> tableStatistics = new List<string>();
         public List<string> costInfo = new List<string>();
         public KeyCode hotkey;
+        public SkillType skillType = SkillType.None;
+        public string errorMessage;
     }
 
     public List<UIImage> storageUIImages = new List<UIImage>();
@@ -146,7 +156,7 @@ public class UIBaseScript : MonoBehaviour
         BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
         BuildingBehavior buildingBehaviorComponent = unit.GetComponent<BuildingBehavior>();
         if (buildingBehaviorComponent != null && buildingBehaviorComponent.team == cameraController.team && buildingBehaviorComponent.ownerId == cameraController.userId)
-            updateQueue(buildingBehaviorComponent.unitsQuery, buildingBehaviorComponent.uqeryLimit, buildingBehaviorComponent.buildTimer);
+            updateQueue(buildingBehaviorComponent.productionQuery, buildingBehaviorComponent.uqeryLimit, buildingBehaviorComponent.buildTimer);
 
         // Set health
         foreach (var element in UI.document.getElementsByClassName("unitHealth"))
@@ -182,9 +192,13 @@ public class UIBaseScript : MonoBehaviour
         }
     }
 
-    public void DisplayMessage(string message, int timer)
+    public void DisplayMessage(string message, int timer, string uniqueMessage = "")
     {
-        string[] args = new string[2] { message, timer.ToString() };
+        if (uniqueMessage != "" && UI.document.getElementsByClassName(uniqueMessage).length > 0)
+            foreach (var element in UI.document.getElementsByClassName(uniqueMessage))
+                element.remove();
+
+        string[] args = new string[3] { message, timer.ToString(), uniqueMessage };
         UI.document.Run("CreateMessage", args);
     }
 
@@ -206,22 +220,22 @@ public class UIBaseScript : MonoBehaviour
             {
                 foreach (GameObject skillObject in unitBaseBehaviorComponent.skillList)
                 {
-                    SkillScript skillComponent = skillObject.GetComponent<SkillScript>();
-                    BaseBehavior skillBaseBehavior = skillObject.GetComponent<BaseBehavior>();
-                    if (skillComponent != null)
+                    BaseSkillScript skillComponent = skillObject.GetComponent<BaseSkillScript>();
+                    BaseBehavior baseBehavior = skillObject.GetComponent<BaseBehavior>();
+                    if (skillComponent != null && skillComponent.IsDisplayedAsSkill(unit))
                         GetOrCreateUIImageToList(
                             ref newUIImages, skillComponent.skillInfo.uniqueName, skillComponent.skillInfo.imagePath,
                             skillComponent.skillInfo.readableName, skillComponent.skillInfo.readableDescription,
                             skillComponent.GetStatistics(), skillComponent.GetCostInformation(),
-                            skillComponent.skillInfo.productionHotkey
+                            skillComponent.skillInfo.productionHotkey, skillComponent.skillInfo.skillType, skillComponent.ErrorMessage(unit)
                             );
 
-                    else if (skillBaseBehavior != null)
+                    else if (baseBehavior != null && baseBehavior.IsDisplayedAsSkill(unit))
                         GetOrCreateUIImageToList(
-                            ref newUIImages, skillBaseBehavior.skillInfo.uniqueName, skillBaseBehavior.skillInfo.imagePath,
-                            skillBaseBehavior.skillInfo.readableName, skillBaseBehavior.skillInfo.readableDescription,
-                            skillBaseBehavior.GetStatistics(), skillBaseBehavior.GetCostInformation(),
-                            skillBaseBehavior.skillInfo.productionHotkey
+                            ref newUIImages, baseBehavior.skillInfo.uniqueName, baseBehavior.skillInfo.imagePath,
+                            baseBehavior.skillInfo.readableName, baseBehavior.skillInfo.readableDescription,
+                            baseBehavior.GetStatistics(), baseBehavior.GetCostInformation(),
+                            baseBehavior.skillInfo.productionHotkey, baseBehavior.skillInfo.skillType, baseBehavior.ErrorMessage(unit)
                             );
                 }
             }
@@ -231,12 +245,13 @@ public class UIBaseScript : MonoBehaviour
                 foreach (GameObject buildUnit in buildingBehaviorComponent.producedUnits)
                 {
                     BaseBehavior buildUnitBaseBehaviorComponent = buildUnit.GetComponent<BaseBehavior>();
-                    GetOrCreateUIImageToList(
-                        ref newUIImages, buildUnitBaseBehaviorComponent.skillInfo.uniqueName, buildUnitBaseBehaviorComponent.skillInfo.imagePath,
-                        buildUnitBaseBehaviorComponent.skillInfo.readableName, buildUnitBaseBehaviorComponent.skillInfo.readableDescription,
-                        buildUnitBaseBehaviorComponent.GetStatistics(), buildUnitBaseBehaviorComponent.GetCostInformation(),
-                        buildUnitBaseBehaviorComponent.skillInfo.productionHotkey
-                        );
+                    if (buildUnitBaseBehaviorComponent != null && buildUnitBaseBehaviorComponent.IsDisplayedAsSkill(unit))
+                        GetOrCreateUIImageToList(
+                            ref newUIImages, buildUnitBaseBehaviorComponent.skillInfo.uniqueName, buildUnitBaseBehaviorComponent.skillInfo.imagePath,
+                            buildUnitBaseBehaviorComponent.skillInfo.readableName, buildUnitBaseBehaviorComponent.skillInfo.readableDescription,
+                            buildUnitBaseBehaviorComponent.GetStatistics(), buildUnitBaseBehaviorComponent.GetCostInformation(),
+                            buildUnitBaseBehaviorComponent.skillInfo.productionHotkey, buildUnitBaseBehaviorComponent.skillInfo.skillType, buildUnitBaseBehaviorComponent.ErrorMessage(unit)
+                            );
                 }
         }
         return newUIImages;
@@ -253,7 +268,8 @@ public class UIBaseScript : MonoBehaviour
                 string name = baseBehaviorComponent.skillInfo.uniqueName;
                 GetOrCreateUIImageToList(
                     ref newUIImages, name, baseBehaviorComponent.skillInfo.imagePath,
-                    baseBehaviorComponent.skillInfo.readableName, baseBehaviorComponent.skillInfo.readableDescription, baseBehaviorComponent.GetStatistics(), new List<string>(), KeyCode.None
+                    baseBehaviorComponent.skillInfo.readableName, baseBehaviorComponent.skillInfo.readableDescription, baseBehaviorComponent.GetStatistics(), new List<string>(), KeyCode.None,
+                    baseBehaviorComponent.skillInfo.skillType, ""
                     );
             }
         }
@@ -262,11 +278,11 @@ public class UIBaseScript : MonoBehaviour
 
     private void GetOrCreateUIImageToList(
         ref List<UIImage> list, string name, string imagePath,
-        string _readName, string _readDescr, List<string> _tableStats, List<string> _costInfo, KeyCode _hotkey
+        string _readName, string _readDescr, List<string> _tableStats, List<string> _costInfo, KeyCode _hotkey, SkillType _skillType = SkillType.Skill, string _errorMessage = ""
         )
     {
         if (!list.Exists(x => (x.name == name)))
-            list.Add(new UIImage(name, 1, imagePath, _readName, _readDescr, _tableStats, _costInfo, _hotkey));
+            list.Add(new UIImage(name, 1, imagePath, _readName, _readDescr, _tableStats, _costInfo, _hotkey, _skillType, _errorMessage));
         else
             list.Find(x => (x.name == name)).count += 1;
     }
@@ -418,42 +434,57 @@ public class UIBaseScript : MonoBehaviour
         }
 
         // Create new selected units
-        foreach (UIImage unitImageInfo in newImages.OrderBy(x => x.count).ToArray())
+        foreach (SkillType skillType in new SkillType[] { SkillType.None, SkillType.Skill, SkillType.Upgrade })
         {
-            if (!storageImages.Exists(x => (x.name == unitImageInfo.name)) || recreate)
+            foreach (UIImage unitImageInfo in newImages.OrderBy(x => x.count).ToArray())
             {
-                if (detailInfo)
-                {
-                    Dom.Element healthDiv = UI.document.createElement("div");
-                    healthDiv.className = "healthback";
-                    healthDiv.innerHTML = "<div class=\"health unitHealth\"></div>";
-                    proceduralContent.appendChild(healthDiv);
-                }
-                
-                Dom.Element elementsBlock = null;
-                var allElementsBlock = parentElement.getElementsByClassName("elementsObject");
-                if (allElementsBlock.length <= 0)
-                {
-                    elementsBlock = UI.document.createElement("div");
-                    elementsBlock.className = "elementsBlock elementsObject";
-                    proceduralContent.appendChild(elementsBlock);
-                }
-                else
-                    elementsBlock = allElementsBlock[0];
-                
-                Dom.Element createdImage = DrawInfo(elementsBlock, unitImageInfo, detailInfo, discriptable, true, detailInfo);
-                storageImages.Add(unitImageInfo);
-                if (tableName == "center" && !detailInfo)
-                {
-                    createdImage.addEventListener("mousedown", delegate (MouseEvent e) {
-                        cameraController.SelectOnly(unitImageInfo.name);
-                    });
-                }
+                if (unitImageInfo.skillType != skillType)
+                    continue;
 
-                if (tableName == "right")
-                    createdImage.addEventListener("mousedown", delegate (MouseEvent e) {
-                        cameraController.SendCommandToAllSelected(unitImageInfo.name);
-                    });
+                if (!storageImages.Exists(x => (x.name == unitImageInfo.name)) || recreate)
+                {
+                    if (detailInfo)
+                    {
+                        Dom.Element healthDiv = UI.document.createElement("div");
+                        healthDiv.className = "healthback";
+                        healthDiv.innerHTML = "<div class=\"health unitHealth\"></div>";
+                        proceduralContent.appendChild(healthDiv);
+                    }
+
+                    string blockImagesName = "elementsBlock elementsObject";
+                    if (!detailInfo)
+                    {
+                        if (unitImageInfo.skillType == SkillType.Skill)
+                            blockImagesName += " skills";
+                        if (unitImageInfo.skillType == SkillType.Upgrade)
+                            blockImagesName += " upgrades";
+                    }
+
+                    Dom.Element elementsBlock = null;
+                    var allElementsBlock = parentElement.getElementsByClassName(blockImagesName);
+                    if (allElementsBlock.length <= 0)
+                    {
+                        elementsBlock = UI.document.createElement("div");
+                        elementsBlock.className = blockImagesName;
+                        proceduralContent.appendChild(elementsBlock);
+                    }
+                    else
+                        elementsBlock = allElementsBlock[0];
+
+                    Dom.Element createdImage = DrawInfo(elementsBlock, unitImageInfo, detailInfo, discriptable, true, detailInfo);
+                    storageImages.Add(unitImageInfo);
+                    if (tableName == "center" && !detailInfo)
+                    {
+                        createdImage.addEventListener("mousedown", delegate (MouseEvent e) {
+                            cameraController.SelectOnly(unitImageInfo.name);
+                        });
+                    }
+
+                    if (tableName == "right")
+                        createdImage.addEventListener("mousedown", delegate (MouseEvent e) {
+                            cameraController.SendCommandToAllSelected(unitImageInfo.name);
+                        });
+                }
             }
         }
     }
@@ -527,6 +558,13 @@ public class UIBaseScript : MonoBehaviour
                     detailCostsDiv.appendChild(statsDiv);
                 }
             }
+            if (unitImageInfo.errorMessage != "")
+            {
+                Dom.Element errorMessageDiv = UI.document.createElement("div");
+                errorMessageDiv.className = "errorMessage";
+                errorMessageDiv.innerHTML = unitImageInfo.errorMessage;
+                parentElement.appendChild(errorMessageDiv);
+            }
             if (unitImageInfo.tableStatistics.Count > 0)
             {
                 Dom.Element detailStatusticsDiv = UI.document.createElement("div");
@@ -563,21 +601,35 @@ public class UIBaseScript : MonoBehaviour
             foreach (var unit in unitsQuery)
             {
                 BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                BaseSkillScript skillScript = unit.GetComponent<BaseSkillScript>();
+
+                string imagePath = "";
+                float timeToBuild = 0.0f;
+                if (unitBaseBehaviorComponent != null)
+                {
+                    imagePath = unitBaseBehaviorComponent.skillInfo.imagePath;
+                    timeToBuild = unitBaseBehaviorComponent.skillInfo.timeToBuild;
+                }
+                if (skillScript != null)
+                {
+                    imagePath = skillScript.skillInfo.imagePath;
+                    timeToBuild = skillScript.skillInfo.timeToBuild;
+                }
+
                 Dom.Element progressBaseDiv = UI.document.createElement("div");
                 progressBaseDiv.className = "production clckable";
                 infoDiv.appendChild(progressBaseDiv);
 
                 Dom.Element elementDiv = UI.document.createElement("img");
-                elementDiv.setAttribute("src", unitBaseBehaviorComponent.skillInfo.imagePath);
+                elementDiv.setAttribute("src", imagePath);
                 elementDiv.className = String.Format("clckable {0}", index);
                 progressBaseDiv.appendChild(elementDiv);
                 
                 if (index == 0)
                 {
-                    float time = unitBaseBehaviorComponent.skillInfo.timeToBuild;
                     Dom.Element progressDiv = UI.document.createElement("div");
                     progressDiv.className = String.Format("clckable {0}", index);
-                    progressDiv.style.width = String.Format("{0:F0}%", buildTimer / unitBaseBehaviorComponent.skillInfo.timeToBuild * 100);
+                    progressDiv.style.width = String.Format("{0:F0}%", buildTimer / timeToBuild * 100);
                     progressBaseDiv.appendChild(progressDiv);
                     progressDiv.addEventListener("mousedown", delegate (MouseEvent e) {
                         cameraController.RemoveQueueElementFromSelected();

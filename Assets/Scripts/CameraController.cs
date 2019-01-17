@@ -78,7 +78,8 @@ public class CameraController : MonoBehaviourPunCallbacks
     private Dictionary<KeyCode, List<GameObject>> unitsBinds = new Dictionary<KeyCode, List<GameObject>>();
     private KeyCode tempKey;
     private float keyTimer = 0.0f;
-    
+    private int keyPressed;
+
     public enum WindowType { None, MainMenu, BigMap };
     public WindowType selectedWindowType = WindowType.None;
     public Dictionary<WindowType, List<object>> menuInfo = new Dictionary<WindowType, List<object>>();
@@ -164,7 +165,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             spawnData = terrainGenerator.GetSpawnData(
                 spawnCount: playerCount + GameInfo.GetNPCInfo().Count, maxTrees: 1000 * mapSize,
                 goldCountOnRow: 4 * mapSize, goldRows: mapSize,
-                animalsCountOnRow: 4 * mapSize, animalsRows: mapSize);
+                animalsCountOnRow: 5 * mapSize, animalsRows: mapSize);
 
             InstantiateObjects(
                 spawnData, maxTrees: 1000 * mapSize + 100, 
@@ -474,16 +475,28 @@ public class CameraController : MonoBehaviourPunCallbacks
                 break;
             }
 
-            GameObject newTree = Instantiate(treePrefabs[UnityEngine.Random.Range(0, treePrefabs.Count - 1)], objectPosition, new Quaternion(0, 0, 0, 0));
+            GameObject newTree = Instantiate(treePrefabs[UnityEngine.Random.Range(0, treePrefabs.Count)], objectPosition, new Quaternion(0, 0, 0, 0));
             newTree.transform.eulerAngles = new Vector3(0, UnityEngine.Random.Range(0.0f, 360.0f), 0);
             newTree.transform.SetParent(Terrain.activeTerrain.transform);
             index++;
         }
         foreach (Vector3 objectPosition in newSpawnData["gold"])
         {
-            GameObject prefab = goldPrefabs[UnityEngine.Random.Range(0, goldPrefabs.Count - 1)];
+            GameObject prefab = goldPrefabs[UnityEngine.Random.Range(0, goldPrefabs.Count)];
             GameObject newGold = Instantiate(prefab, objectPosition, prefab.transform.rotation);
             // newGold.transform.SetParent(Terrain.activeTerrain.transform);
+        }
+
+        if (GameInfo.IsMasterClient())
+        {
+            foreach (Vector3 objectPosition in newSpawnData["animals"])
+            {
+                GameObject prefab = animalPrefabs[UnityEngine.Random.Range(0, animalPrefabs.Count)];
+                for(int i = 0; i < 7; i++)
+                {
+                    GameObject newAnimal = PhotonNetwork.Instantiate(prefab.name, BaseBehavior.GetRandomPoint(objectPosition, 10.0f), prefab.transform.rotation);
+                }
+            }
         }
     }
 
@@ -811,12 +824,13 @@ public class CameraController : MonoBehaviourPunCallbacks
                         foreach (GameObject unit in units)
                         {
                             UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
-                            selection.isSelected = true;
+                            selection.SetSelect(true);
                             selectedObjects.Add(unit);
                         }
-                        if (keyTimer > 0)
+                        if (keyTimer > 0 && keyPressed == number)
                             MoveCameraToPoint(GetCenterOfObjects(units));
                         tempKey = key;
+                        keyPressed = number;
                         keyTimer = 0.4f;
                     }
                 }
@@ -1026,7 +1040,7 @@ public class CameraController : MonoBehaviourPunCallbacks
         foreach (GameObject unit in allUnits)
         {
             BaseBehavior baseUnitBehaviorComponent = unit.GetComponent<BaseBehavior>();
-            if (baseUnitBehaviorComponent.skillInfo.uniqueName == baseBehaviorComponent.skillInfo.uniqueName)
+            if (baseUnitBehaviorComponent.skillInfo.uniqueName == baseBehaviorComponent.skillInfo.uniqueName && baseUnitBehaviorComponent.IsVisible())
             {
                 UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
                 if (selection != null && IsWithinSelectionBounds(unit, new Vector3(0, 0, 0), new Vector3(Screen.width, Screen.height, 0)))

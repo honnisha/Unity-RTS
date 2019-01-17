@@ -86,6 +86,16 @@ html {
     text-shadow: 1px 1px 1px #000;
 	display: inline-block;
 }
+.errorMessage {
+	font-weight: bold;
+	margin: 0px;
+	width: 99%;
+    font-size: 65%;
+	color: #FFC296;
+    text-shadow: 1px 1px 1px #000;
+	display: inline-block;
+	padding: 0px 0px 5px 0px;
+}
 .healthback {
 	right: 0px;
 	margin-top: 3%;
@@ -199,10 +209,10 @@ padding-bottom: 5px;
 .elementsBlock {
 	height: 28%;
 	width: 99%;
-	padding-bottom: 10px;
+	padding-bottom: 4%;
 }
 .elementsContent {
-	margin-right: 10px;
+	margin-right: 1.5%;
 	height: 100%;
 	width: 10%;
 	display: inline-block;
@@ -227,6 +237,12 @@ padding-bottom: 5px;
 	width: 25%;
 	display: inline-block;
 	text-align: center;
+}
+.skills {
+
+}
+.upgrades {
+
 }
 
 .mapBlock {
@@ -426,10 +442,12 @@ padding-bottom: 5px;
 }
 </style>
 <script>
-	function CreateMessage(message, timeout) {
+	function CreateMessage(message, timeout, uniqueMessage) {
         var parentElement = document.getElementsByClassName("messages")[0];
         var msgboxDiv = document.createElement("div");
         msgboxDiv.className = "msgbox";
+		if (uniqueMessage != "")
+			msgboxDiv.className += " " + uniqueMessage;
         parentElement.appendChild(msgboxDiv);
 
         var innerDiv = document.createElement("div");

@@ -96,7 +96,7 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 0
-  m_Extents: {x: 0.55, y: 2.535, z: 0.55}
+  m_Extents: {x: 0.75, y: 2.535, z: 0.75}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 0
@@ -112,7 +112,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.67
+  m_Radius: 0.9
   m_Height: 5.02
   m_Direction: 1
   m_Center: {x: 0.029491723, y: 2.31, z: 0.02241379}
@@ -129,11 +129,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: -1
+  tear: 0
   ownerId: 1
   maxHealth: 100
   health: 100
   live: 1
   pointToInteract: {fileID: 0}
+  tearDisplay: []
   debug: 0
   isWalkAround: 0
   timeToWalk: 0
@@ -149,25 +151,28 @@ MonoBehaviour:
     costGold: 0
     costWood: 0
     productionHotkey: 0
+    skillType: 1
+  _skillConditions: 0
   unitPosition: {x: 0, y: 0, z: 0}
-  damage: 50
-  rangeAttack: 2
   interactType: 0
-  attackTime: 1.2
-  attackDelay: 0
-  damageAfterTimer: 1
   attackTimer: 0
   attackDelayTimer: 0
   attacked: 0
-  attackType: 4
-  stabbingResist: 0
-  cuttingResist: 0
-  bitingResist: 0
-  magicResist: 0
-  behaviorType: 1
-  agrRange: 20
-  alertRange: 10
+  defaultStatistic:
+    damage: 10
+    rangeAttack: 2
+    attackTime: 2
+    attackDelay: 0.5
+    damageAfterTimer: 1
+    attackType: 4
+    stabbingResist: 0
+    cuttingResist: 0
+    bitingResist: 0
+    magicResist: 0
+    agrRange: 20
+    alertRange: 10
   actionEffect: {fileID: 0}
+  behaviorType: 1
   bloodEffect: {fileID: 0}
   bloodOnBroundEffects: []
   destroyEffectPrefab: {fileID: 0}
@@ -189,12 +194,19 @@ MonoBehaviour:
   curSpeed: 0
   cameraController: {fileID: 0}
   skillList: []
+  producedUnits: []
+  spawnPoint: {fileID: 0}
+  spawnTarget: {x: 0, y: 0, z: 0}
+  spawnTargetObject: {fileID: 0}
+  buildTimer: 0
+  productionQuery: []
   HTMLHealthFile: {fileID: 0}
   InfoHTMLOffset: {x: 0, y: 4, z: 0}
   pointMarkerPrefab: {fileID: 0}
   HTMLHealthSize: {x: 0, y: 50}
   visionToolPrefab: {fileID: 0}
   visionCount: 0
+  uqeryLimit: 5
   beenSeen: 0
   holderObject: {fileID: 0}
   timerToCreateHolder: 0
@@ -215,11 +227,6 @@ MonoBehaviour:
   isInCameraView: 0
   state: 3
   magnitDistance: 2
-  producedUnits: []
-  spawnPoint: {fileID: 0}
-  unitsQuery: []
-  uqeryLimit: 5
-  buildTimer: 0
   tempMaterialsMode: 
   terrainChangeInfo:
     offset: {x: 0, y: 0}

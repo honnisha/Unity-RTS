@@ -441,44 +441,49 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: -1
+  tear: 0
   ownerId: -1
   maxHealth: 100
   health: 100
   live: 1
   pointToInteract: {fileID: 1234786408475336}
+  tearDisplay: []
   debug: 0
   isWalkAround: 0
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 10
-  uniqueName: Gold mining
-  readableName: Gold mining
-  readableDescription: Gold mining
-  imagePath: gold-mine.png
-  timeToBuild: 10
-  costFood: 10
-  costGold: 50
-  costWood: 50
-  productionHotkey: 102
+  _skillInfo:
+    uniqueName: 
+    readableName: 
+    readableDescription: 
+    imagePath: 
+    timeToBuild: 0
+    costFood: 0
+    costGold: 0
+    costWood: 0
+    productionHotkey: 0
+    skillType: 1
   unitPosition: {x: 0, y: 0, z: 0}
-  damage: 50
-  rangeAttack: 2
   interactType: 0
-  attackTime: 1.2
-  attackDelay: 0
-  damageAfterTimer: 1
   attackTimer: 0
   attackDelayTimer: 0
   attacked: 0
-  attackType: 4
-  stabbingResist: 0
-  cuttingResist: 0
-  bitingResist: 0
-  magicResist: 0
-  behaviorType: 1
-  agrRange: 20
-  alertRange: 10
+  defaultStatistic:
+    damage: 10
+    rangeAttack: 2
+    attackTime: 2
+    attackDelay: 0.5
+    damageAfterTimer: 1
+    attackType: 4
+    stabbingResist: 0
+    cuttingResist: 0
+    bitingResist: 0
+    magicResist: 0
+    agrRange: 20
+    alertRange: 10
   actionEffect: {fileID: 0}
+  behaviorType: 1
   bloodEffect: {fileID: 0}
   bloodOnBroundEffects: []
   destroyEffectPrefab: {fileID: 0}
@@ -498,13 +503,21 @@ MonoBehaviour:
   tempDestinationPoint: {x: 0, y: 0, z: 0}
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
+  cameraController: {fileID: 0}
   skillList: []
+  producedUnits: []
+  spawnPoint: {fileID: 0}
+  spawnTarget: {x: 0, y: 0, z: 0}
+  spawnTargetObject: {fileID: 0}
+  buildTimer: 0
+  productionQuery: []
   HTMLHealthFile: {fileID: 0}
   InfoHTMLOffset: {x: 0, y: 3, z: 0}
   pointMarkerPrefab: {fileID: 0}
   HTMLHealthSize: {x: 100, y: 100}
   visionToolPrefab: {fileID: 0}
   visionCount: 0
+  uqeryLimit: 5
   beenSeen: 0
   holderObject: {fileID: 0}
   timerToCreateHolder: 0
@@ -522,13 +535,9 @@ MonoBehaviour:
   resourceEndless: 0
   sourceType: 0
   storedResources: 
+  isInCameraView: 0
   state: 3
   magnitDistance: 2
-  producedUnits: []
-  spawnPoint: {fileID: 0}
-  unitsQuery: []
-  uqeryLimit: 5
-  buildTimer: 0
   tempMaterialsMode: 
   terrainChangeInfo:
     offset: {x: 0, y: 0}
@@ -549,6 +558,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e11b0a92f7104e4f8c2693c0cf315ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeSelected: 1
   isSelected: 0
   projector: {fileID: 1794203526358786}
 --- !u!208 &208687129007450452

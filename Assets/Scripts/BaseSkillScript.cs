@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace GangaGame
 {
+    public enum SkillType { None, Skill, Upgrade };
+
     [System.Serializable]
     public class SkillInfo
     {
@@ -17,34 +19,40 @@ namespace GangaGame
         public float costGold = 0.0f;
         public float costWood = 0.0f;
         public KeyCode productionHotkey;
+        public SkillType skillType = SkillType.Skill;
     }
 
+    public enum SkillConditionType { None, TownCenterTear1, TownCenterTear2 };
     interface ISkillInterface
     {
         SkillInfo skillInfo { get; set; }
 
+        SkillConditionType skillConditions { get; set; }
+
         List<string> GetCostInformation();
         List<string> GetStatistics();
-        bool IsDisplayedAsSkill();
+        string ErrorMessage(GameObject sender);
+        bool IsDisplayedAsSkill(GameObject sender);
+        bool IsCanBeUsedAsSkill(GameObject sender);
     }
 
-    public class SkillScript : MonoBehaviour, ISkillInterface
+    public class BaseSkillScript : MonoBehaviour, ISkillInterface
     {
         public SkillInfo _skillInfo;
         public SkillInfo skillInfo { get { return _skillInfo; } set { _skillInfo = value; } }
+        public SkillConditionType _skillConditions;
+        public SkillConditionType skillConditions { get { return _skillConditions; } set { _skillConditions = value; } }
 
-        public enum SkillType { None, Skill, Upgrade };
-        public SkillType skillType = SkillType.None;
-
-        public bool IsDisplayedAsSkill()
-        {
-            return true;
-        }
+        public virtual bool Activate(GameObject sender) { return true; }
+        public virtual bool IsDisplayedAsSkill(GameObject sender) { return true; }
+        public virtual bool IsCanBeUsedAsSkill(GameObject sender) { return true; }
+        public virtual string ErrorMessage(GameObject sender) { return ""; }
 
         public List<string> GetCostInformation()
         {
             List<string> statistics = new List<string>();
-            statistics.Add(String.Format("Time to create: {0:F0} sec", skillInfo.timeToBuild));
+            if (skillInfo.timeToBuild > 0.0f)
+                statistics.Add(String.Format("Time to create: {0:F0} sec", skillInfo.timeToBuild));
             if (skillInfo.costFood > 0)
                 statistics.Add(String.Format("Food: {0:F0}", skillInfo.costFood));
             if (skillInfo.costGold > 0)

@@ -17,15 +17,6 @@ public class BuildingBehavior : BaseBehavior
     public BuildingState state = BuildingState.Builded;
     public float magnitDistance = 2.0f;
 
-    [Header("Units production")]
-    public List<GameObject> producedUnits = new List<GameObject>();
-    public GameObject spawnPoint;
-    private Vector3 spawnTarget = Vector3.zero;
-    private GameObject spawnTargetObject;
-    public List<GameObject> unitsQuery = new List<GameObject>();
-    public int uqeryLimit = 5;
-    public float buildTimer = 0.0f;
-
     public List<int> tempMaterialsMode = new List<int>();
 
     #endregion
@@ -50,8 +41,6 @@ public class BuildingBehavior : BaseBehavior
             beenSeen = true;
 
         base.Awake();
-        if (spawnPoint != null)
-            spawnTarget = spawnPoint.transform.position;
 
         UpdateIsInCameraView(cameraController.IsInCameraView(transform.position));
         UpdateVision();
@@ -77,14 +66,14 @@ public class BuildingBehavior : BaseBehavior
 
         UpdateVisionTool();
 
+        UpdateProductionQuery();
+
         UpdateHealth();
 
         if (unitSelectionComponent.isSelected && UnityEngine.Input.anyKeyDown)
             UICommand(null);
         
         UpdateTerrain();
-
-        UpdateUnitsQuery();
 
         UpdatePointMarker();
     }
@@ -157,69 +146,6 @@ public class BuildingBehavior : BaseBehavior
                 }
             }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
-    }
-
-    public void UpdateUnitsQuery()
-    {
-        UnityEngine.Profiling.Profiler.BeginSample("p UpdateUnitsQuery"); // Profiler
-        if (unitsQuery.Count > 0)
-        {
-            buildTimer -= Time.deltaTime;
-            if (buildTimer <= 0.0f)
-            {
-                ProduceUnit(unitsQuery[0].name);
-                unitsQuery.Remove(unitsQuery[0]);
-                if (unitsQuery.Count > 0)
-                {
-                    BaseBehavior firstElementBehaviorComponent = unitsQuery[0].GetComponent<BaseBehavior>();
-                    buildTimer = firstElementBehaviorComponent.skillInfo.timeToBuild;
-                }
-            }
-        }
-        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
-    }
-
-    public List<GameObject> ProduceUnit(string createdPrefabName)
-    {
-        return ProduceUnit(createdPrefabName, 1, 0.0f);
-    }
-
-    public List<GameObject> ProduceUnit(string createdPrefabName, int number, float distance)
-    {
-        List<GameObject> createdObjects = new List<GameObject>();
-        Vector3 dirToTarget = (spawnPoint.transform.position - transform.position).normalized;
-
-        for (int i = 1; i <= number; i++)
-        {
-            // Create object
-            GameObject createdObject = PhotonNetwork.Instantiate(createdPrefabName, spawnPoint.transform.position, spawnPoint.transform.rotation);
-
-            BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
-            PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();
-            // Set owner
-            if (PhotonNetwork.InRoom)
-                createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
-            else
-                createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
-
-            //Send command to created object to spawn target
-            if (PhotonNetwork.InRoom)
-            {
-                if (spawnTargetObject != null)
-                    createdPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, spawnTargetObject.GetComponent<PhotonView>().ViewID, true, false);
-                else
-                    createdPhotonView.RPC("GiveOrder", PhotonTargets.All, createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
-            }
-            else
-            {
-                if (spawnTargetObject != null)
-                    createdObjectBehaviorComponent.GiveOrder(spawnTargetObject, true, false);
-                else
-                    createdObjectBehaviorComponent.GiveOrder(createdObjectBehaviorComponent.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
-            }
-            createdObjects.Add(createdObject);
-        }
-        return createdObjects;
     }
 
     public override void AlertAttacking(GameObject attacker)
@@ -459,24 +385,6 @@ public class BuildingBehavior : BaseBehavior
         spawnTargetObject = targetObject;
     }
 
-    public bool DeleteFromProductionQuery(int index)
-    {
-        if (index >= unitsQuery.Count)
-            return false;
-
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        BaseBehavior baseBehavior = unitsQuery[index].GetComponent<BaseBehavior>();
-        cameraController.food += baseBehavior.skillInfo.costFood;
-        cameraController.gold += baseBehavior.skillInfo.costGold;
-        cameraController.wood += baseBehavior.skillInfo.costWood;
-        unitsQuery.RemoveAt(index);
-        if (index == 0 && unitsQuery.Count > 0)
-        {
-            buildTimer = unitsQuery[0].GetComponent<BaseBehavior>().skillInfo.timeToBuild;
-        }
-        return true;
-    }
-
     public bool StopAction()
     {
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
@@ -504,16 +412,19 @@ public class BuildingBehavior : BaseBehavior
         if (!unitSelectionComponent.isSelected)
             return result;
         
-        UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
         if (team != cameraController.team || cameraController.chatInput)
             return result;
+
+        bool[] skillResult = ActivateSkills(commandName);
+        if (skillResult[0] || skillResult[1])
+            return skillResult;
 
         foreach (GameObject unit in producedUnits)
         {
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
             if (baseBehaviorComponent.skillInfo.uniqueName == commandName || Input.GetKeyDown(baseBehaviorComponent.skillInfo.productionHotkey))
             {
-                if (unitsQuery.Count >= uqeryLimit)
+                if (productionQuery.Count >= uqeryLimit)
                     return result;
                 //Debug.Log(producedUnits.Count);
 
@@ -521,10 +432,10 @@ public class BuildingBehavior : BaseBehavior
                 result[1] = !SpendResources(baseBehaviorComponent.skillInfo.costFood, baseBehaviorComponent.skillInfo.costGold, baseBehaviorComponent.skillInfo.costWood);
                 if (result[1])
                     return result;
+                productionQuery.Add(unit);
 
-                if (buildTimer <= 0.0f)
+                if (productionQuery.Count <= 1)
                     buildTimer = baseBehaviorComponent.skillInfo.timeToBuild;
-                unitsQuery.Add(unit);
 
                 result[0] = true;
                 return result;
@@ -550,8 +461,8 @@ public class BuildingBehavior : BaseBehavior
         return statistics;
     }
 
-    public override bool IsDisplayedAsSkill()
+    public override UnitStatistic GetStatisticsInfo()
     {
-        return true;
+        return defaultStatistic;
     }
 }

@@ -183,12 +183,12 @@ public class TerrainGenerator : MonoBehaviour
         return positions;
     }
 
-    public List<Vector3> GetCoordinatesInBorderNested(int rows, int countOnRow, int randValue)
+    public List<Vector3> GetCoordinatesInBorderNested(int rows, int countOnRow, int randValue, float offsetPosDel)
     {
         List<Vector3> positions = new List<Vector3>();
         for (int row = 1; row <= rows; row++)
         {
-            float offsetPos = 0.49f / rows * row * 0.8f;
+            float offsetPos = 0.49f / rows * row * offsetPosDel;
             List<Vector3> avalibleGoldPositions = GetCoordinatesInBorder(maxValue: 0.7f, offsetPos: offsetPos);
             int count = avalibleGoldPositions.Count;
            
@@ -209,7 +209,7 @@ public class TerrainGenerator : MonoBehaviour
         Dictionary<string, List<Vector3>> newData = new Dictionary<string, List<Vector3>>();
         
         // Spawn coordinates
-        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.3f, offsetPos: 0.15f);
+        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.25f, offsetPos: 0.15f);
         
         newData["spawn"] = new List<Vector3>();
         for (int i = 1; i <= spawnCount; i++)
@@ -218,11 +218,11 @@ public class TerrainGenerator : MonoBehaviour
             newData["spawn"].Add(avalibleSpawnPositions[positionIndex]);
         }
 
-        newData["trees"] = GetCoordinates(minValue: 0.9f, destCount: maxTrees, randomOffset: 1.0f);
+        newData["trees"] = GetCoordinates(minValue: 1.0f, destCount: maxTrees, randomOffset: 0.7f);
 
-        newData["gold"] = GetCoordinatesInBorderNested(goldRows, goldCountOnRow, (int)mainMapGenerateInfo.seed);
+        newData["gold"] = GetCoordinatesInBorderNested(goldRows, goldCountOnRow, (int)mainMapGenerateInfo.seed / 2, offsetPosDel: 0.8f);
 
-        newData["animals"] = GetCoordinatesInBorderNested(animalsRows, animalsCountOnRow, (int)(mainMapGenerateInfo.seed / 2));
+        newData["animals"] = GetCoordinatesInBorderNested(animalsRows, animalsCountOnRow, (int)(mainMapGenerateInfo.seed / 1.25), offsetPosDel: 0.5f);
 
         return newData;
     }

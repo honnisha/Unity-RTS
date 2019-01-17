@@ -118,11 +118,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: -1
+  tear: 0
   ownerId: -1
   maxHealth: 100
   health: 100
   live: 1
   pointToInteract: {fileID: 0}
+  tearDisplay: []
   debug: 0
   isWalkAround: 0
   timeToWalk: 0
@@ -138,25 +140,28 @@ MonoBehaviour:
     costGold: 0
     costWood: 0
     productionHotkey: 0
+    skillType: 1
+  _skillConditions: 0
   unitPosition: {x: 0, y: 0, z: 0}
-  damage: 50
-  rangeAttack: 2
   interactType: 0
-  attackTime: 1.2
-  attackDelay: 0
-  damageAfterTimer: 1
   attackTimer: 0
   attackDelayTimer: 0
   attacked: 0
-  attackType: 4
-  stabbingResist: 0
-  cuttingResist: 0
-  bitingResist: 0
-  magicResist: 0
-  behaviorType: 1
-  agrRange: 20
-  alertRange: 10
+  defaultStatistic:
+    damage: 10
+    rangeAttack: 2
+    attackTime: 2
+    attackDelay: 0.5
+    damageAfterTimer: 1
+    attackType: 4
+    stabbingResist: 0
+    cuttingResist: 0
+    bitingResist: 0
+    magicResist: 0
+    agrRange: 20
+    alertRange: 10
   actionEffect: {fileID: 0}
+  behaviorType: 1
   bloodEffect: {fileID: 0}
   bloodOnBroundEffects: []
   destroyEffectPrefab: {fileID: 0}
@@ -178,12 +183,19 @@ MonoBehaviour:
   curSpeed: 0
   cameraController: {fileID: 0}
   skillList: []
+  producedUnits: []
+  spawnPoint: {fileID: 0}
+  spawnTarget: {x: 0, y: 0, z: 0}
+  spawnTargetObject: {fileID: 0}
+  buildTimer: 0
+  productionQuery: []
   HTMLHealthFile: {fileID: 0}
   InfoHTMLOffset: {x: 0, y: 3, z: 0}
   pointMarkerPrefab: {fileID: 0}
   HTMLHealthSize: {x: 100, y: 100}
   visionToolPrefab: {fileID: 0}
   visionCount: 0
+  uqeryLimit: 5
   beenSeen: 0
   holderObject: {fileID: 0}
   timerToCreateHolder: 0
@@ -204,19 +216,14 @@ MonoBehaviour:
   isInCameraView: 0
   state: 3
   magnitDistance: 3
-  producedUnits: []
-  spawnPoint: {fileID: 0}
-  unitsQuery: []
-  uqeryLimit: 5
-  buildTimer: 0
   tempMaterialsMode: 
   terrainChangeInfo:
-    offset: {x: 0, y: 0}
-    size: {x: 0, y: 0}
-    layer: 0
-    value: 0
-    changeTexture: 0
-    removeGrass: 0
+    offset: {x: -1.5, y: -1.5}
+    size: {x: 5, y: 5}
+    layer: 8
+    value: 1
+    changeTexture: 1
+    removeGrass: 1
 --- !u!114 &269716401572185406
 MonoBehaviour:
   m_ObjectHideFlags: 0

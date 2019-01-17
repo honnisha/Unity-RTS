@@ -9,7 +9,7 @@ using Photon.Pun;
 using UnityEngine.AI;
 using GangaGame;
 
-public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
+public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInterface
 {
     private PhotonView photonView;
 
@@ -17,11 +17,15 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     [Header("Unit info")]
     public int team = 1;
+    public int tear = 0;
     public string ownerId = "1";
     public float maxHealth = 100.0f;
     public float health;
     public bool live = true;
     public GameObject pointToInteract;
+
+    public List<GameObject> tearDisplay;
+
     public bool debug = false;
 
     public bool isWalkAround = false;
@@ -33,6 +37,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     public SkillInfo _skillInfo;
     public SkillInfo skillInfo { get { return _skillInfo; } set { _skillInfo = value; } }
+    public SkillConditionType _skillConditions;
+    public SkillConditionType skillConditions { get { return _skillConditions; } set { _skillConditions = value; } }
 
     [HideInInspector]
     public Vector3 unitPosition = new Vector3();
@@ -41,16 +47,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     #region Fight info
 
-    [Header("Attack Info")]
-    public float damage = 50.0f;
-    public float rangeAttack = 2.0f;
-
     public enum InteractigType { None, Attacking, Bulding, Gathering, CuttingTree, Farming };
     public InteractigType interactType = InteractigType.None;
 
-    public float attackTime = 1.2f;
-    public float attackDelay = 0.0f;
-    public bool damageAfterTimer = true;
     [HideInInspector]
     public float attackTimer;
     [HideInInspector]
@@ -59,19 +58,28 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public bool attacked;
 
     public enum AttackType { Stabbing, Cutting, Biting, Magic, None };
-    public AttackType attackType = AttackType.None;
-
-    public float stabbingResist = 0.0f;
-    public float cuttingResist = 0.0f;
-    public float bitingResist = 0.0f;
-    public float magicResist = 0.0f;
-
     public enum BehaviorType { Run, Hold, Counterattack, Aggressive };
-    public BehaviorType behaviorType = BehaviorType.Counterattack;
-    public float agrRange = 20.0f;
-    public float alertRange = 10.0f;
+    [System.Serializable]
+    public class UnitStatistic
+    {
+        public float damage = 10.0f;
+        public float rangeAttack = 2.0f;
+        public float attackTime = 2.0f;
+        public float attackDelay = 0.5f;
+        public bool damageAfterTimer = true;
 
+        public AttackType attackType = AttackType.None;
+        public float stabbingResist = 0.0f;
+        public float cuttingResist = 0.0f;
+        public float bitingResist = 0.0f;
+        public float magicResist = 0.0f;
+
+        public float agrRange = 20.0f;
+        public float alertRange = 10.0f;
+    }
+    public UnitStatistic defaultStatistic;
     public GameObject actionEffect;
+    public BehaviorType behaviorType = BehaviorType.Counterattack;
 
     #endregion
 
@@ -131,6 +139,22 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     #endregion
 
+    #region Units production
+
+    [Header("Units production")]
+    public List<GameObject> producedUnits = new List<GameObject>();
+    public GameObject spawnPoint;
+    [HideInInspector]
+    public Vector3 spawnTarget = Vector3.zero;
+    [HideInInspector]
+    public GameObject spawnTargetObject;
+    [HideInInspector]
+    public float buildTimer = 0.0f;
+    [HideInInspector]
+    public List<GameObject> productionQuery = new List<GameObject>();
+
+    #endregion
+
     #region Stuff
 
     [Header("Stuff")]
@@ -141,6 +165,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     private float tempHealth;
     public GameObject visionToolPrefab;
     public int visionCount = 0;
+    public int uqeryLimit = 5;
     [HideInInspector]
     public bool beenSeen = false;
     [HideInInspector]
@@ -219,6 +244,11 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
         unitPosition = transform.position;
         renders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
+
+        if (spawnPoint != null)
+            spawnTarget = spawnPoint.transform.position;
+
+        UpdateTearDisplay();
     }
 
 
@@ -237,9 +267,88 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         UpdateVisionTool();
 
         UpdateHealth();
-        
+
+        UpdateProductionQuery();
+
         if (unitSelectionComponent.isSelected && UnityEngine.Input.anyKeyDown)
             UICommand(null);
+    }
+
+    public void UpdateTearDisplay()
+    {
+        int index = 0;
+        foreach (GameObject tearObject in tearDisplay)
+        {
+            tearObject.SetActive(tear == index);
+            index++;
+        }
+    }
+
+    public void UpdateProductionQuery()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateProductionQuery"); // Profiler
+        if (productionQuery.Count > 0)
+        {
+            buildTimer -= Time.deltaTime;
+            if (buildTimer <= 0.0f)
+            {
+                if (productionQuery[0].GetComponent<BaseBehavior>() != null)
+                    ProduceUnit(productionQuery[0].name);
+                if (productionQuery[0].GetComponent<BaseSkillScript>() != null)
+                    productionQuery[0].GetComponent<BaseSkillScript>().Activate(gameObject);
+
+                productionQuery.Remove(productionQuery[0]);
+                if (productionQuery.Count > 0)
+                {
+                    BaseBehavior firstElementBehaviorComponent = productionQuery[0].GetComponent<BaseBehavior>();
+                    buildTimer = firstElementBehaviorComponent.skillInfo.timeToBuild;
+                }
+            }
+        }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
+
+    public List<GameObject> ProduceUnit(string createdPrefabName)
+    {
+        return ProduceUnit(createdPrefabName, 1, 0.0f);
+    }
+
+    public List<GameObject> ProduceUnit(string createdPrefabName, int number, float distance)
+    {
+        List<GameObject> createdObjects = new List<GameObject>();
+        Vector3 dirToTarget = (spawnPoint.transform.position - transform.position).normalized;
+
+        for (int i = 1; i <= number; i++)
+        {
+            // Create object
+            GameObject createdObject = PhotonNetwork.Instantiate(createdPrefabName, spawnPoint.transform.position, spawnPoint.transform.rotation);
+
+            BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
+            PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();
+            // Set owner
+            if (PhotonNetwork.InRoom)
+                createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
+            else
+                createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
+
+            //Send command to created object to spawn target
+            if (PhotonNetwork.InRoom)
+            {
+                if (spawnTargetObject != null)
+                    createdPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, spawnTargetObject.GetComponent<PhotonView>().ViewID, true, false);
+                else
+                    createdPhotonView.RPC("GiveOrder", PhotonTargets.All, BaseBehavior.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
+            }
+            else
+            {
+                if (spawnTargetObject != null)
+                    createdObjectBehaviorComponent.GiveOrder(spawnTargetObject, true, false);
+                else
+                    createdObjectBehaviorComponent.GiveOrder(BaseBehavior.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
+            }
+            createdObjects.Add(createdObject);
+        }
+        return createdObjects;
     }
 
     public void UpdateHealth()
@@ -477,16 +586,20 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     public float CalculateDamage(float damage, GameObject attacker)
     {
-        float newDamage = damage;
         BaseBehavior attackerBaseBehavior = attacker.GetComponent<BaseBehavior>();
-        if (attackerBaseBehavior.attackType == AttackType.Biting)
-            newDamage -= (newDamage * bitingResist / 100);
-        if (attackerBaseBehavior.attackType == AttackType.Cutting)
-            newDamage -= (newDamage * cuttingResist / 100);
-        if (attackerBaseBehavior.attackType == AttackType.Magic)
-            newDamage -= (newDamage * magicResist / 100);
-        if (attackerBaseBehavior.attackType == AttackType.Stabbing)
-            newDamage -= (newDamage * stabbingResist / 100);
+        UnitStatistic attackerStatisic = attackerBaseBehavior.GetStatisticsInfo();
+
+        UnitStatistic statisic = GetStatisticsInfo();
+
+        float newDamage = damage;
+        if (attackerStatisic.attackType == AttackType.Biting)
+            newDamage -= (newDamage * statisic.bitingResist / 100);
+        if (attackerStatisic.attackType == AttackType.Cutting)
+            newDamage -= (newDamage * statisic.cuttingResist / 100);
+        if (attackerStatisic.attackType == AttackType.Magic)
+            newDamage -= (newDamage * statisic.magicResist / 100);
+        if (attackerStatisic.attackType == AttackType.Stabbing)
+            newDamage -= (newDamage * statisic.stabbingResist / 100);
         return newDamage;
     }
 
@@ -528,7 +641,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
 
     public bool AttackNearEnemies(Vector3 centerOfSearch, float range, int attackTeam = -1, float randomRange = 0.0f)
     {
-        if (attackType == AttackType.None && interactType != InteractigType.Attacking)
+        UnitStatistic statisic = GetStatisticsInfo();
+        if (statisic.attackType == AttackType.None && interactType != InteractigType.Attacking)
             return false;
 
         var allObjects = GetObjectsInRange(transform.position, range, team: attackTeam);
@@ -577,19 +691,20 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 || unitBehaviorComponent.behaviorType == BehaviorType.Aggressive)
             {
                 float dist = Vector3.Distance(gameObject.transform.position, unit.transform.position);
-                if (unitBehaviorComponent.team == team && unitBehaviorComponent.live && dist <= alertRange)
+                UnitStatistic statisic = GetStatisticsInfo();
+                if (unitBehaviorComponent.team == team && unitBehaviorComponent.live && dist <= statisic.alertRange)
                 {
                     if (unitBehaviorComponent.interactType == InteractigType.None && unitBehaviorComponent.target == null
                         && !unitBehaviorComponent.agent.pathPending && !unitBehaviorComponent.agent.hasPath)
                     {
-                        unitBehaviorComponent.AttackNearEnemies(unit.transform.position, agrRange, attackerBaseBehavior.team);
+                        unitBehaviorComponent.AttackNearEnemies(unit.transform.position, statisic.agrRange, attackerBaseBehavior.team);
                     }
                 }
             }
         }
     }
 
-    public Vector3 GetRandomPoint(Vector3 point, float randomDistance)
+    public static Vector3 GetRandomPoint(Vector3 point, float randomDistance)
     {
         NavMeshHit hit;
         if (NavMesh.SamplePosition(point + UnityEngine.Random.insideUnitSphere * randomDistance, out hit, randomDistance, NavMesh.AllAreas))
@@ -614,7 +729,114 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker, overrideQueueCommands);
     }
 
-    public virtual bool IsDisplayedAsSkill() { return true; }
+    public bool[] ActivateSkills(string commandName)
+    {
+        bool[] result = { false, false };
+        foreach (GameObject skillObject in skillList)
+        {
+            if (skillObject != null)
+            {
+                UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+                KeyCode hotkey = KeyCode.None;
+                string uniqueName = "";
+                bool isCanBeUsedAsSkill = true;
+                string error = "";
+                BuildingBehavior buildingBehavior = skillObject.GetComponent<BuildingBehavior>();
+                BaseSkillScript skillScript = skillObject.GetComponent<BaseSkillScript>();
+                if (buildingBehavior != null)
+                {
+                    hotkey = buildingBehavior.skillInfo.productionHotkey;
+                    uniqueName = buildingBehavior.skillInfo.uniqueName;
+
+                    isCanBeUsedAsSkill = buildingBehavior.IsCanBeUsedAsSkill(gameObject);
+                    error = buildingBehavior.ErrorMessage(gameObject);
+                }
+                else if (skillScript != null)
+                {
+                    hotkey = skillScript.skillInfo.productionHotkey;
+                    uniqueName = skillScript.skillInfo.uniqueName;
+
+                    isCanBeUsedAsSkill = skillScript.IsCanBeUsedAsSkill(gameObject);
+                    error = skillScript.ErrorMessage(gameObject);
+                }
+
+                if (uniqueName == commandName || UnityEngine.Input.GetKeyDown(hotkey))
+                {
+                    if (!isCanBeUsedAsSkill)
+                    {
+                        if (error != "")
+                            cameraUIBaseScript.DisplayMessage(error, 3000, "isCanBeUsedAsSkill");
+
+                        result[1] = true;
+                        return result;
+                    }
+
+                    if (buildingBehavior != null)
+                    {
+                        if (cameraController.buildedObject == null)
+                        {
+                            // if not enough resources -> return second element true
+                            result[1] = !SpendResources(buildingBehavior.skillInfo.costFood, buildingBehavior.skillInfo.costGold, buildingBehavior.skillInfo.costWood);
+                            if (result[1])
+                                return result;
+
+                            cameraUIBaseScript.DisplayMessage("Select place to build", 3000, "selectPlace");
+                            cameraController.buildedObject = skillObject;
+                        }
+                    }
+                    else if(skillScript != null)
+                    {
+                        result[1] = !SpendResources(skillScript.skillInfo.costFood, skillScript.skillInfo.costGold, skillScript.skillInfo.costWood);
+                        if (result[1])
+                            return result;
+
+                        if (skillScript.skillInfo.skillType == SkillType.Skill)
+                            skillScript.Activate(gameObject);
+                        if (skillScript.skillInfo.skillType == SkillType.Upgrade)
+                        {
+                            productionQuery.Add(skillObject);
+                            if (productionQuery.Count <= 1)
+                                buildTimer = skillScript.skillInfo.timeToBuild;
+                        }
+                    }
+                    result[0] = true;
+                    return result;
+                }
+            }
+        }
+        return result;
+    }
+
+    public bool DeleteFromProductionQuery(int index)
+    {
+        if (index >= productionQuery.Count)
+            return false;
+        
+        BaseBehavior baseBehavior = productionQuery[index].GetComponent<BaseBehavior>();
+        BaseSkillScript skillScript = productionQuery[index].GetComponent<BaseSkillScript>();
+
+        if (baseBehavior != null)
+        {
+            cameraController.food += baseBehavior.skillInfo.costFood;
+            cameraController.gold += baseBehavior.skillInfo.costGold;
+            cameraController.wood += baseBehavior.skillInfo.costWood;
+        }
+        else if (skillScript)
+        {
+            cameraController.food += skillScript.skillInfo.costFood;
+            cameraController.gold += skillScript.skillInfo.costGold;
+            cameraController.wood += skillScript.skillInfo.costWood;
+        }
+        productionQuery.RemoveAt(index);
+        if (index == 0 && productionQuery.Count > 0)
+        {
+            if (productionQuery[0].GetComponent<BaseBehavior>() != null)
+                buildTimer = productionQuery[0].GetComponent<BaseBehavior>().skillInfo.timeToBuild;
+            if (productionQuery[0].GetComponent<BaseSkillScript>() != null)
+                buildTimer = productionQuery[0].GetComponent<BaseSkillScript>().skillInfo.timeToBuild;
+        }
+        return true;
+    }
 
     public virtual void StartVisible(BaseBehavior senderBaseBehaviorComponent){ }
     public virtual void StopVisible(BaseBehavior senderBaseBehaviorComponent) { }
@@ -631,6 +853,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
     public virtual bool IsVisible() { return false; }
     public virtual void AlertAttacking(GameObject attacker) { }
     public virtual void ResourcesIsOut(GameObject worker) { }
+    public virtual UnitStatistic GetStatisticsInfo() { return null; }
 
     public bool SpendResources(float food, float gold, float wood)
     {
@@ -647,7 +870,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
                 notEnoughMessage = String.Format("{0} wood: {1:F0}", notEnoughMessage, wood - cameraController.wood);
 
             UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-            cameraUIBaseScript.DisplayMessage(notEnoughMessage, 3000);
+            cameraUIBaseScript.DisplayMessage(notEnoughMessage, 3000, "notEnoughResources");
             return false;
         }
         cameraController.food -= food;
@@ -656,30 +879,66 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable
         return true;
     }
 
+    public static bool IsHasUnitWithTear(string unitName, int TCTear, int TCTeam)
+    {
+        foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Building"))
+        {
+            BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+            if (unit.name.Contains(unitName) && baseBehaviorComponent.team == TCTeam && baseBehaviorComponent.tear == TCTear)
+                return true;
+        }
+        return false;
+    }
+
+    public string ErrorMessage(GameObject sender)
+    {
+        if(skillConditions == SkillConditionType.TownCenterTear1 && !IsHasUnitWithTear("townCenter", 1, team))
+            return "You need to have at least one town center with first upgrade";
+        if (skillConditions == SkillConditionType.TownCenterTear2 && !IsHasUnitWithTear("townCenter", 2, team))
+            return "You need to have at least one town center with second upgrade";
+        return "";
+    }
+
+    public bool IsDisplayedAsSkill(GameObject sender)
+    {
+        return true;
+    }
+
+    public bool IsCanBeUsedAsSkill(GameObject sender)
+    {
+        if (skillConditions == SkillConditionType.TownCenterTear1 && !IsHasUnitWithTear("townCenter", 1, team))
+            return false;
+        if (skillConditions == SkillConditionType.TownCenterTear2 && !IsHasUnitWithTear("townCenter", 2, team))
+            return false;
+        return true;
+    }
+
     public virtual List<string> GetStatistics()
     {
+        UnitStatistic statisic = GetStatisticsInfo();
+
         List<string> statistics = new List<string>();
         string attackTypeName = "";
-        if (attackType == AttackType.Biting)
+        if (statisic.attackType == AttackType.Biting)
             attackTypeName = "Biting";
-        if (attackType == AttackType.Cutting)
+        if (statisic.attackType == AttackType.Cutting)
             attackTypeName = "Cutting";
-        if (attackType == AttackType.Magic)
+        if (statisic.attackType == AttackType.Magic)
             attackTypeName = "Magic";
-        if (attackType == AttackType.Stabbing)
+        if (statisic.attackType == AttackType.Stabbing)
             attackTypeName = "Stabbing";
 
-        if (attackType != AttackType.None)
+        if (statisic.attackType != AttackType.None)
         {
             statistics.Add(String.Format("Att. type: {0}", attackTypeName));
-            statistics.Add(String.Format("Damage: {0:F0}", damage));
-            statistics.Add(String.Format("Attack speed: {0:F1} sec", attackTime));
+            statistics.Add(String.Format("Damage: {0:F0}", statisic.damage));
+            statistics.Add(String.Format("Attack speed: {0:F1} sec", statisic.attackTime));
         }
 
-        statistics.Add(String.Format("Stabbing resist: {0:F0}%", stabbingResist));
-        statistics.Add(String.Format("Cutting resist: {0:F0}%", cuttingResist));
-        statistics.Add(String.Format("Biting resist: {0:F0}%", bitingResist));
-        statistics.Add(String.Format("Magic resist: {0:F0}%", magicResist));
+        statistics.Add(String.Format("Stabbing resist: {0:F0}%", statisic.stabbingResist));
+        statistics.Add(String.Format("Cutting resist: {0:F0}%", statisic.cuttingResist));
+        statistics.Add(String.Format("Biting resist: {0:F0}%", statisic.bitingResist));
+        statistics.Add(String.Format("Magic resist: {0:F0}%", statisic.magicResist));
         return statistics;
     }
 }

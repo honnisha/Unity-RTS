@@ -2460,11 +2460,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: 1
+  tear: 0
   ownerId: 1
   maxHealth: 100
   health: 100
   live: 1
   pointToInteract: {fileID: 0}
+  tearDisplay: []
   debug: 0
   isWalkAround: 0
   timeToWalk: 0
@@ -2480,25 +2482,28 @@ MonoBehaviour:
     costGold: 0
     costWood: 0
     productionHotkey: 99
+    skillType: 1
+  _skillConditions: 0
   unitPosition: {x: 0, y: 0, z: 0}
-  damage: 10
-  rangeAttack: 1.5
   interactType: 0
-  attackTime: 1.5
-  attackDelay: 0
-  damageAfterTimer: 1
   attackTimer: 0
   attackDelayTimer: 0
   attacked: 0
-  attackType: 4
-  stabbingResist: 10
-  cuttingResist: 10
-  bitingResist: 10
-  magicResist: 10
-  behaviorType: 0
-  agrRange: 20
-  alertRange: 10
+  defaultStatistic:
+    damage: 10
+    rangeAttack: 2
+    attackTime: 2
+    attackDelay: 0.5
+    damageAfterTimer: 1
+    attackType: 4
+    stabbingResist: 0
+    cuttingResist: 0
+    bitingResist: 0
+    magicResist: 0
+    agrRange: 20
+    alertRange: 10
   actionEffect: {fileID: 0}
+  behaviorType: 0
   bloodEffect: {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc,
     type: 3}
   bloodOnBroundEffects: []
@@ -2521,6 +2526,12 @@ MonoBehaviour:
   curSpeed: 0
   cameraController: {fileID: 0}
   skillList: []
+  producedUnits: []
+  spawnPoint: {fileID: 0}
+  spawnTarget: {x: 0, y: 0, z: 0}
+  spawnTargetObject: {fileID: 0}
+  buildTimer: 0
+  productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
   InfoHTMLOffset: {x: 0, y: 2, z: 0}
   pointMarkerPrefab: {fileID: 1174494487606054, guid: 7723961c7b4a2cf4cbfa8e9a6c45ba62,
@@ -2529,6 +2540,7 @@ MonoBehaviour:
   visionToolPrefab: {fileID: 1311408724359970, guid: fc937d29efbc7d146a830e8e4d19ea62,
     type: 3}
   visionCount: 0
+  uqeryLimit: 5
   beenSeen: 0
   holderObject: {fileID: 0}
   timerToCreateHolder: 0
