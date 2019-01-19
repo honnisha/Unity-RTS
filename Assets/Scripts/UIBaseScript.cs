@@ -207,6 +207,9 @@ public class UIBaseScript : MonoBehaviour
         List<UIImage> newUIImages = new List<UIImage>();
         foreach (GameObject unit in selectegObjects)
         {
+            if (unit == null)
+                continue;
+            
             BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
             if (unitBaseBehaviorComponent.team != cameraController.team || unitBaseBehaviorComponent.ownerId != cameraController.userId)
                 continue;
@@ -501,13 +504,13 @@ public class UIBaseScript : MonoBehaviour
 
         Dom.Element createdImage = null;
         if (drawImage)
-        {
-            if (unitImageInfo.errorMessage != "")
-                parentElement.className += " error";
-            
+        {   
             var elementContent = UI.document.createElement("div");
             elementContent.className = "elementsContent";
             parentElement.appendChild(elementContent);
+            
+            if (unitImageInfo.errorMessage != "")
+                elementContent.className += " error";
 
             createdImage = UI.document.createElement("img");
             createdImage.className = "element clckable";

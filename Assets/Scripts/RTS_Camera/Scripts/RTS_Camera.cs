@@ -168,7 +168,6 @@ namespace RTS_Cam
         private void Start()
         {
             m_Transform = transform;
-            zoomPos = maxHeight;
         }
 
         private void Update()
@@ -254,9 +253,10 @@ namespace RTS_Cam
             }
         }
 
-        public void SetMaxHeight()
+        public void SetHeight(float multiplier = 1.5f)
         {
-            m_Transform.position = new Vector3(m_Transform.position.x, maxHeight * 2.0f, m_Transform.position.z);
+            zoomPos = multiplier - 1.0f;
+            m_Transform.position = new Vector3(m_Transform.position.x, maxHeight * multiplier, m_Transform.position.z);
         }
 
         /// <summary>

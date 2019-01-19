@@ -91,7 +91,7 @@ html {
 	margin: 0px;
 	width: 99%;
     font-size: 65%;
-	color: #FFC296;
+	color: red;
     text-shadow: 1px 1px 1px #000;
 	display: inline-block;
 	padding: 0px 0px 5px 0px;
@@ -241,20 +241,29 @@ padding-bottom: 5px;
 .skills > .elementsContent > img{
     background: darkorange;
 }
-.skills {
+.skills > .elementsContent {
     border: 1px solid darkorange;
 }
-.upgrades > .elementsContent > img{
+.skills > .elementsContent > .hotkey {
+    background: darkorange;
+}
+.upgrades > .elementsContent > img {
     background: darkblue;
 }
-.upgrades {
+.upgrades > .elementsContent {
     border: 1px solid darkblue;
 }
-.error > .elementsContent > img{
-    background: darkred;
+.upgrades > .elementsContent > .hotkey {
+    background: darkblue;
+}
+.error > img {
+    background: darkred!important;
 }
 .error {
-    border: 1px solid darkred;
+    border: 1px solid darkred!important;
+}
+.error > .hotkey {
+    background: darkred!important;
 }
 
 .mapBlock {

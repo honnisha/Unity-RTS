@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
@@ -154,7 +154,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
             PhotonNetwork.OfflineMode = true;
         }
-        GetComponent<RTS_Cam.RTS_Camera>().SetHeight();
+        GetComponent<RTS_Cam.RTS_Camera>().SetMaxHeight();
 
         UI.document.Run("UpdateLoadingDescription", "Create terrain");
         TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
@@ -684,7 +684,7 @@ public class CameraController : MonoBehaviourPunCallbacks
     
     public bool PlaceBuildingOnTerrainUpdate(Dom.Element activeOver = null)
     {
-        if (buildedObject != null && !(activeOver != null && activeOver.className.Contains("clckable")))
+        if (buildedObject != null && !(activeOver != null && activeOver.className.Contains("ess-r-modeclickale")))
         {
             RaycastHit hit;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition), out hit, 100, LayerMask.GetMask("Terrain")))
