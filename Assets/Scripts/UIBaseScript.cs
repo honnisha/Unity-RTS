@@ -502,6 +502,9 @@ public class UIBaseScript : MonoBehaviour
         Dom.Element createdImage = null;
         if (drawImage)
         {
+            if (unitImageInfo.errorMessage != "")
+                parentElement.className += " error";
+            
             var elementContent = UI.document.createElement("div");
             elementContent.className = "elementsContent";
             parentElement.appendChild(elementContent);
