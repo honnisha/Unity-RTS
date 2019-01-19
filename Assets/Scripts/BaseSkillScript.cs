@@ -22,12 +22,22 @@ namespace GangaGame
         public SkillType skillType = SkillType.Skill;
     }
 
-    public enum SkillConditionType { None, TownCenterTear1, TownCenterTear2 };
+    public enum SkillConditionType { None, TearCheck, OnlyOneAtAQueue, OnlyOne,  };
+    [System.Serializable]
+    public class SkillCondition
+    {
+        public SkillConditionType type = SkillConditionType.None;
+        public string name = "";
+        public int minValue = 0;
+        public int maxValue = 0;
+        public string readableName = "";
+        public bool notDisplayWhenFalse = false;
+    }
     interface ISkillInterface
     {
         SkillInfo skillInfo { get; set; }
 
-        SkillConditionType skillConditions { get; set; }
+        List<SkillCondition> skillConditions { get; set; }
 
         List<string> GetCostInformation();
         List<string> GetStatistics();
@@ -36,17 +46,108 @@ namespace GangaGame
         bool IsCanBeUsedAsSkill(GameObject sender);
     }
 
+    public class SkillErrorInfo {
+        public string errorMessage = "";
+        public bool isDisplayedAsSkill = true;
+        public bool isCanBeUsedAsSkill = true;
+    }
+
     public class BaseSkillScript : MonoBehaviour, ISkillInterface
     {
         public SkillInfo _skillInfo;
         public SkillInfo skillInfo { get { return _skillInfo; } set { _skillInfo = value; } }
-        public SkillConditionType _skillConditions;
-        public SkillConditionType skillConditions { get { return _skillConditions; } set { _skillConditions = value; } }
+        public List<SkillCondition> _skillConditions;
+        public List<SkillCondition> skillConditions { get { return _skillConditions; } set { _skillConditions = value; } }
 
         public virtual bool Activate(GameObject sender) { return true; }
-        public virtual bool IsDisplayedAsSkill(GameObject sender) { return true; }
-        public virtual bool IsCanBeUsedAsSkill(GameObject sender) { return true; }
-        public virtual string ErrorMessage(GameObject sender) { return ""; }
+
+        public static SkillErrorInfo GetSkillErrorInfo(GameObject sender, GameObject skillObject)
+        {
+            SkillErrorInfo skillErrorInfo = new SkillErrorInfo();
+            BaseBehavior baseBehaviorComponent = sender.GetComponent<BaseBehavior>();
+            object[] errorInfo = BaseSkillScript.GetSkillErrors(
+                condList: skillConditions, team: baseBehaviorComponent.team,
+                skillName: skillInfo.uniqueName, skillObject: skillObject, skillSender: sender);
+            SkillCondition  = (SkillCondition)errorInfo[0];
+            string errorMessage = (string)errorInfo[1];
+            
+            skillErrorInfo.errorMessage = errorMessage;
+
+            if (errorMessage != "")
+                skillErrorInfo.isCanBeUsedAsSkill = false;
+            
+            if (errorMessage != "" && skillCondition.notDisplayWhenFalse)
+                skillErrorInfo.isDisplayedAsSkill = false;
+            
+            return skillErrorInfo;
+        }
+
+        public static bool IsHasUnitWithTear(
+            string unitName, int minTear, int maxTear, int TCTeam, GameObject skillSender = null, GameObject skillObject = null)
+        {
+            BaseBehavior baseBehaviorComponent = skillSender.GetComponent<BaseBehavior>();
+            if (baseBehaviorComponent.tear >= minTear && (baseBehaviorComponent.tear <= maxTear || maxTear == 0))
+                return true;
+            return false;
+        }
+        
+        public static bool IsQueueContain(GameObject skillSender, int team, string skillName)
+        {
+            BaseBehavior baseBehaviorComponent = skillSender.GetComponent<BaseBehavior>();
+            if (baseBehaviorComponent != null)
+                return baseBehaviorComponent.IsQueueContain(skillName);
+            return false;
+        }
+
+        public static bool IsAnyQueueContain(int team, string skillName)
+        {
+            foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Building"))
+            {
+                BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                if (baseBehaviorComponent != null)
+                    return baseBehaviorComponent.IsQueueContain(skillName);   
+            }
+            return false;
+        }
+
+        public static object[] GetSkillErrors(
+            List<SkillCondition> condList, GameObject skillObject = null, int team = -1, string skillName = "", GameObject skillSender = null)
+        {
+            object[] errorInfo = new object[] {null, ""};
+            foreach (SkillCondition cond in condList)
+            {
+                if(cond.type == SkillConditionType.TearCheck)
+                {
+                    bool hasUnitWithTear = false;
+                    if (skillObject.GetComponent<BaseBehavior>() != null)
+                        hasUnitWithTear = BaseBehavior.IsHasUnitWithTear(cond.name, cond.minValue, cond.maxValue, team, skillSender);
+                    if (skillObject.GetComponent<BaseSkillScript>() != null)
+                        hasUnitWithTear = BaseSkillScript.IsHasUnitWithTear(cond.name, cond.minValue, cond.maxValue, team, skillSender, skillObject);
+
+                    if (!hasUnitWithTear)
+                    {
+                        string[] TCErrors = new string[] { "first", "second", "third", "fourth" };
+                        condList[0] = cond;
+                        condList[1] = String.Format("You need to have at least one {1} with {0} upgrade", TCErrors[cond.maxValue], cond.readableName);;
+                        return condList;
+                    }
+                }
+                
+                if(cond.type == SkillConditionType.OnlyOneAtAQueue && IsQueueContain(skillSender, team, skillName))
+                {
+                    condList[0] = cond;
+                    condList[1] = "This upgrade can be done in a single copy in one building";
+                    return condList;
+                }
+                if(cond.type == SkillConditionType.OnlyOne && IsAnyQueueContain(team, skillName))
+                {
+                    condList[0] = cond;
+                    condList[1] = "This upgrade can be done in a single copy";
+                    return condList;
+                }
+            }
+            return condList;
+        }
 
         public List<string> GetCostInformation()
         {

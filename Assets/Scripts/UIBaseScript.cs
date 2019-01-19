@@ -68,6 +68,12 @@ public class UIBaseScript : MonoBehaviour
         cameraController = Camera.main.GetComponent<CameraController>();
     }
 
+    private bool updateUI = false;
+    public void UpdateUI()
+    {
+        updateUI = true;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -90,9 +96,10 @@ public class UIBaseScript : MonoBehaviour
 
         UnityEngine.Profiling.Profiler.BeginSample("p HandleUIEvents"); // Profiler
         bool description = HandleUIEvents(selectegObjects, skillUIImages);
-        if (!description)
+        if (!description || updateUI)
             DestroyDescription();
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+        updateUI = false;
     }
 
     public bool HandleUIEvents(List<GameObject> selectegObjects, List<UIImage> skillUIImages)
@@ -230,7 +237,8 @@ public class UIBaseScript : MonoBehaviour
                             ref newUIImages, skillComponent.skillInfo.uniqueName, skillComponent.skillInfo.imagePath,
                             skillComponent.skillInfo.readableName, skillComponent.skillInfo.readableDescription,
                             skillComponent.GetStatistics(), skillComponent.GetCostInformation(),
-                            skillComponent.skillInfo.productionHotkey, skillComponent.skillInfo.skillType, skillComponent.ErrorMessage(unit)
+                            skillComponent.skillInfo.productionHotkey, skillComponent.skillInfo.skillType,
+                            skillComponent.ErrorMessage(unit)
                             );
 
                     else if (baseBehavior != null && baseBehavior.IsDisplayedAsSkill(unit))
@@ -238,7 +246,8 @@ public class UIBaseScript : MonoBehaviour
                             ref newUIImages, baseBehavior.skillInfo.uniqueName, baseBehavior.skillInfo.imagePath,
                             baseBehavior.skillInfo.readableName, baseBehavior.skillInfo.readableDescription,
                             baseBehavior.GetStatistics(), baseBehavior.GetCostInformation(),
-                            baseBehavior.skillInfo.productionHotkey, baseBehavior.skillInfo.skillType, baseBehavior.ErrorMessage(unit)
+                            baseBehavior.skillInfo.productionHotkey, baseBehavior.skillInfo.skillType,
+                            baseBehavior.ErrorMessage(unit)
                             );
                 }
             }
@@ -400,7 +409,7 @@ public class UIBaseScript : MonoBehaviour
             if (!newImages.Exists(x => (x.name == unitImageInfo.name)))
                 recreate = true;
 
-        if (recreate)
+        if (recreate || updateUI)
         {
             foreach (var element in parentElement.childNodes)
                 if (element.className.Contains("proceduralContent"))

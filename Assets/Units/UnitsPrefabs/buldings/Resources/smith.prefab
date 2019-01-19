@@ -267,7 +267,12 @@ MonoBehaviour:
     costWood: 100
     productionHotkey: 103
     skillType: 1
-  _skillConditions: 1
+  _skillConditions:
+  - type: 1
+    name: townCenter
+    minValue: 1
+    maxValue: 0
+    readableName: town center
   unitPosition: {x: 0, y: 0, z: 0}
   interactType: 0
   attackTimer: 0

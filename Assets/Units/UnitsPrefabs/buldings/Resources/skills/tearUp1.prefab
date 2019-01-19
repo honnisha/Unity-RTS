@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2023189790452245054}
-  - component: {fileID: 8339753561731872467}
+  - component: {fileID: 140118547097248417}
   m_Layer: 0
   m_Name: tearUp1
   m_TagString: Untagged
@@ -31,7 +31,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8339753561731872467
+--- !u!114 &140118547097248417
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -40,19 +40,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 2023189790452245048}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3414b0aa3c9bf240a6d2a98846adaf4, type: 3}
+  m_Script: {fileID: 11500000, guid: 11d85cf3025edf5478ae756a5a2dc38c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _skillInfo:
-    uniqueName: Upgrade
+    uniqueName: upgradeTear
     readableName: Upgrade
     readableDescription: Upgrade
     imagePath: skills/upgrade
     timeToBuild: 30
     costFood: 200
-    costGold: 0
+    costGold: 100
     costWood: 0
     productionHotkey: 117
     skillType: 2
-  _skillConditions: 0
-  maxTear: 2
+  _skillConditions:
+  - type: 1
+    name: 
+    minValue: 0
+    maxValue: 1
+    readableName: town center
+  - type: 2
+    name: 
+    minValue: 0
+    maxValue: 0
+    readableName: 

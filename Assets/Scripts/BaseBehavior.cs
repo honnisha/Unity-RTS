@@ -37,8 +37,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
     public SkillInfo _skillInfo;
     public SkillInfo skillInfo { get { return _skillInfo; } set { _skillInfo = value; } }
-    public SkillConditionType _skillConditions;
-    public SkillConditionType skillConditions { get { return _skillConditions; } set { _skillConditions = value; } }
+    public List<SkillCondition> _skillConditions;
+    public List<SkillCondition> skillConditions { get { return _skillConditions; } set { _skillConditions = value; } }
 
     [HideInInspector]
     public Vector3 unitPosition = new Vector3();
@@ -798,6 +798,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                             if (productionQuery.Count <= 1)
                                 buildTimer = skillScript.skillInfo.timeToBuild;
                         }
+                        cameraUIBaseScript.UpdateUI();
                     }
                     result[0] = true;
                     return result;
@@ -835,6 +836,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             if (productionQuery[0].GetComponent<BaseSkillScript>() != null)
                 buildTimer = productionQuery[0].GetComponent<BaseSkillScript>().skillInfo.timeToBuild;
         }
+        UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+        cameraUIBaseScript.UpdateUI();
         return true;
     }
 
@@ -879,38 +882,44 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         return true;
     }
 
-    public static bool IsHasUnitWithTear(string unitName, int TCTear, int TCTeam)
+    public static bool IsHasUnitWithTear(string unitName, int minTear, int maxTear, int TCTeam, GameObject skillSender = null)
     {
         foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Building"))
         {
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-            if (unit.name.Contains(unitName) && baseBehaviorComponent.team == TCTeam && baseBehaviorComponent.tear == TCTear)
+            if (baseBehaviorComponent.skillInfo.uniqueName == unitName && baseBehaviorComponent.team == TCTeam &&
+                (baseBehaviorComponent.tear >= minTear && (baseBehaviorComponent.tear <= maxTear || maxTear == 0)))
                 return true;
-        }
+        }   
         return false;
     }
 
     public string ErrorMessage(GameObject sender)
     {
-        if(skillConditions == SkillConditionType.TownCenterTear1 && !IsHasUnitWithTear("townCenter", 1, team))
-            return "You need to have at least one town center with first upgrade";
-        if (skillConditions == SkillConditionType.TownCenterTear2 && !IsHasUnitWithTear("townCenter", 2, team))
-            return "You need to have at least one town center with second upgrade";
-        return "";
+        return BaseSkillScript.ErrorMessage(sender);
     }
 
     public bool IsDisplayedAsSkill(GameObject sender)
     {
-        return true;
+        return BaseSkillScript.IsDisplayedAsSkill(sender);
     }
 
     public bool IsCanBeUsedAsSkill(GameObject sender)
     {
-        if (skillConditions == SkillConditionType.TownCenterTear1 && !IsHasUnitWithTear("townCenter", 1, team))
-            return false;
-        if (skillConditions == SkillConditionType.TownCenterTear2 && !IsHasUnitWithTear("townCenter", 2, team))
-            return false;
-        return true;
+        return BaseSkillScript.IsCanBeUsedAsSkill(sender);
+    }
+
+    public bool IsQueueContain(string uniqueSkillName)
+    {
+        if (productionQuery.Count > 0)
+            foreach(GameObject objectInQueue in productionQuery)
+            {
+                if (objectInQueue.GetComponent<BaseBehavior>() != null && objectInQueue.GetComponent<BaseBehavior>().skillInfo.uniqueName == uniqueSkillName)
+                    return true;
+                if (objectInQueue.GetComponent<BaseSkillScript>() != null && objectInQueue.GetComponent<BaseSkillScript>().skillInfo.uniqueName == uniqueSkillName)
+                    return true;
+            }
+        return false;
     }
 
     public virtual List<string> GetStatistics()

@@ -87,7 +87,7 @@ public class CameraController : MonoBehaviourPunCallbacks
     List<GameObject> selectedObjects = new List<GameObject>();
 
     Dictionary<string, List<Vector3>> spawnData;
-    bool[,] chanksView;
+    bool[,] chanksView = new bool[0, 0];
     float chunkSize = 10.0f;
 
     public bool debugVisionGrid = false;
@@ -270,7 +270,8 @@ public class CameraController : MonoBehaviourPunCallbacks
             foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
             {
                 UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
-                if (unitUnitBehavior.resourceGatherInfo.Count > 0 && unitUnitBehavior.IsIdle())
+                if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId &&
+                    unitUnitBehavior.resourceGatherInfo.Count > 0 && unitUnitBehavior.IsIdle())
                     freeWorkers.Add(unit);
             }
             if (freeWorkers.Count > 0)
@@ -392,6 +393,9 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public Vector2 GetChunkByPosition(Vector3 position)
     {
+        if (position == null)
+            return new Vector2(0, 0);
+            
         int x = (int)(chanksView.GetLength(0) * (position.x / Terrain.activeTerrain.terrainData.size.x));
         int y = (int)(chanksView.GetLength(1) * (position.z / Terrain.activeTerrain.terrainData.size.z));
         if (x < 0)

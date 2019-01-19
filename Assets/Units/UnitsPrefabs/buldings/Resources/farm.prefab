@@ -91,7 +91,12 @@ MonoBehaviour:
     costWood: 80
     productionHotkey: 102
     skillType: 1
-  _skillConditions: 1
+  _skillConditions:
+  - type: 1
+    name: townCenter
+    minValue: 1
+    maxValue: 0
+    readableName: town center
   unitPosition: {x: 0, y: 0, z: 0}
   interactType: 0
   attackTimer: 0
@@ -208,7 +213,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3403}
-  viewIdField: 9
+  viewIdField: 0
   InstantiationId: 9
   isRuntimeInstantiated: 0
 --- !u!114 &3403
