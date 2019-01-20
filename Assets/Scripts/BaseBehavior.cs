@@ -739,33 +739,26 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                 UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
                 KeyCode hotkey = KeyCode.None;
                 string uniqueName = "";
-                bool isCanBeUsedAsSkill = true;
-                string error = "";
                 BuildingBehavior buildingBehavior = skillObject.GetComponent<BuildingBehavior>();
                 BaseSkillScript skillScript = skillObject.GetComponent<BaseSkillScript>();
+                SkillErrorInfo skillErrorInfo = BaseSkillScript.GetSkillErrorInfo(gameObject, skillObject);
                 if (buildingBehavior != null)
                 {
                     hotkey = buildingBehavior.skillInfo.productionHotkey;
                     uniqueName = buildingBehavior.skillInfo.uniqueName;
-
-                    isCanBeUsedAsSkill = buildingBehavior.IsCanBeUsedAsSkill(gameObject);
-                    error = buildingBehavior.ErrorMessage(gameObject);
                 }
                 else if (skillScript != null)
                 {
                     hotkey = skillScript.skillInfo.productionHotkey;
                     uniqueName = skillScript.skillInfo.uniqueName;
-
-                    isCanBeUsedAsSkill = skillScript.IsCanBeUsedAsSkill(gameObject);
-                    error = skillScript.ErrorMessage(gameObject);
                 }
 
                 if (uniqueName == commandName || UnityEngine.Input.GetKeyDown(hotkey))
                 {
-                    if (!isCanBeUsedAsSkill)
+                    if (!skillErrorInfo.isCanBeUsedAsSkill)
                     {
-                        if (error != "")
-                            cameraUIBaseScript.DisplayMessage(error, 3000, "isCanBeUsedAsSkill");
+                        if (skillErrorInfo.errorMessage != "")
+                            cameraUIBaseScript.DisplayMessage(skillErrorInfo.errorMessage, 3000, "isCanBeUsedAsSkill");
 
                         result[1] = true;
                         return result;
@@ -892,21 +885,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                 return true;
         }   
         return false;
-    }
-
-    public string ErrorMessage(GameObject sender)
-    {
-        return BaseSkillScript.ErrorMessage(sender);
-    }
-
-    public bool IsDisplayedAsSkill(GameObject sender)
-    {
-        return BaseSkillScript.IsDisplayedAsSkill(sender);
-    }
-
-    public bool IsCanBeUsedAsSkill(GameObject sender)
-    {
-        return BaseSkillScript.IsCanBeUsedAsSkill(sender);
     }
 
     public bool IsQueueContain(string uniqueSkillName)

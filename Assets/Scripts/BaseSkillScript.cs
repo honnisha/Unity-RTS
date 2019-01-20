@@ -41,9 +41,6 @@ namespace GangaGame
 
         List<string> GetCostInformation();
         List<string> GetStatistics();
-        string ErrorMessage(GameObject sender);
-        bool IsDisplayedAsSkill(GameObject sender);
-        bool IsCanBeUsedAsSkill(GameObject sender);
     }
 
     public class SkillErrorInfo {
@@ -65,10 +62,26 @@ namespace GangaGame
         {
             SkillErrorInfo skillErrorInfo = new SkillErrorInfo();
             BaseBehavior baseBehaviorComponent = sender.GetComponent<BaseBehavior>();
+
+            List<SkillCondition> skillConditions = null;
+            SkillInfo skillInfo = null;
+            BaseSkillScript baseSkillScript = skillObject.GetComponent<BaseSkillScript>();
+            if (baseSkillScript != null)
+            {
+                skillConditions = baseSkillScript.skillConditions;
+                skillInfo = baseSkillScript.skillInfo;
+            }
+            BaseBehavior senderBaseBehaviorComponent = skillObject.GetComponent<BaseBehavior>();
+            if (senderBaseBehaviorComponent != null)
+            {
+                skillConditions = senderBaseBehaviorComponent.skillConditions;
+                skillInfo = senderBaseBehaviorComponent.skillInfo;
+            }
+            
             object[] errorInfo = BaseSkillScript.GetSkillErrors(
                 condList: skillConditions, team: baseBehaviorComponent.team,
                 skillName: skillInfo.uniqueName, skillObject: skillObject, skillSender: sender);
-            SkillCondition  = (SkillCondition)errorInfo[0];
+            SkillCondition skillCondition = (SkillCondition)errorInfo[0];
             string errorMessage = (string)errorInfo[1];
             
             skillErrorInfo.errorMessage = errorMessage;
@@ -127,26 +140,26 @@ namespace GangaGame
                     if (!hasUnitWithTear)
                     {
                         string[] TCErrors = new string[] { "first", "second", "third", "fourth" };
-                        condList[0] = cond;
-                        condList[1] = String.Format("You need to have at least one {1} with {0} upgrade", TCErrors[cond.maxValue], cond.readableName);;
-                        return condList;
+                        errorInfo[0] = cond;
+                        errorInfo[1] = String.Format("You need to have at least one {1} with {0} upgrade", TCErrors[cond.maxValue], cond.readableName);
+                        return errorInfo;
                     }
                 }
                 
                 if(cond.type == SkillConditionType.OnlyOneAtAQueue && IsQueueContain(skillSender, team, skillName))
                 {
-                    condList[0] = cond;
-                    condList[1] = "This upgrade can be done in a single copy in one building";
-                    return condList;
+                    errorInfo[0] = cond;
+                    errorInfo[1] = "This upgrade can be done in a single copy in one building";
+                    return errorInfo;
                 }
                 if(cond.type == SkillConditionType.OnlyOne && IsAnyQueueContain(team, skillName))
                 {
-                    condList[0] = cond;
-                    condList[1] = "This upgrade can be done in a single copy";
-                    return condList;
+                    errorInfo[0] = cond;
+                    errorInfo[1] = "This upgrade can be done in a single copy";
+                    return errorInfo;
                 }
             }
-            return condList;
+            return errorInfo;
         }
 
         public List<string> GetCostInformation()

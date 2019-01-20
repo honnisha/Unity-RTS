@@ -60,8 +60,10 @@ MonoBehaviour:
     minValue: 0
     maxValue: 1
     readableName: town center
+    notDisplayWhenFalse: 0
   - type: 2
     name: 
     minValue: 0
     maxValue: 0
     readableName: 
+    notDisplayWhenFalse: 1

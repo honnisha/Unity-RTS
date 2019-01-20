@@ -232,23 +232,28 @@ public class UIBaseScript : MonoBehaviour
                 {
                     BaseSkillScript skillComponent = skillObject.GetComponent<BaseSkillScript>();
                     BaseBehavior baseBehavior = skillObject.GetComponent<BaseBehavior>();
-                    if (skillComponent != null && skillComponent.IsDisplayedAsSkill(unit))
+                    SkillErrorInfo skillErrorInfo = BaseSkillScript.GetSkillErrorInfo(unit, skillObject);
+                    if (skillComponent != null && skillErrorInfo.isDisplayedAsSkill)
+                    {
                         GetOrCreateUIImageToList(
                             ref newUIImages, skillComponent.skillInfo.uniqueName, skillComponent.skillInfo.imagePath,
                             skillComponent.skillInfo.readableName, skillComponent.skillInfo.readableDescription,
                             skillComponent.GetStatistics(), skillComponent.GetCostInformation(),
                             skillComponent.skillInfo.productionHotkey, skillComponent.skillInfo.skillType,
-                            skillComponent.ErrorMessage(unit)
-                            );
+                            skillErrorInfo.errorMessage
+                            );   
+                    }
 
-                    else if (baseBehavior != null && baseBehavior.IsDisplayedAsSkill(unit))
+                    else if (baseBehavior != null && skillErrorInfo.isDisplayedAsSkill)
+                    {
                         GetOrCreateUIImageToList(
                             ref newUIImages, baseBehavior.skillInfo.uniqueName, baseBehavior.skillInfo.imagePath,
                             baseBehavior.skillInfo.readableName, baseBehavior.skillInfo.readableDescription,
                             baseBehavior.GetStatistics(), baseBehavior.GetCostInformation(),
                             baseBehavior.skillInfo.productionHotkey, baseBehavior.skillInfo.skillType,
-                            baseBehavior.ErrorMessage(unit)
-                            );
+                            skillErrorInfo.errorMessage
+                            );   
+                    }
                 }
             }
 
@@ -256,13 +261,14 @@ public class UIBaseScript : MonoBehaviour
             if (buildingBehaviorComponent != null && buildingBehaviorComponent.live)
                 foreach (GameObject buildUnit in buildingBehaviorComponent.producedUnits)
                 {
+                    SkillErrorInfo skillErrorInfo = BaseSkillScript.GetSkillErrorInfo(unit, buildUnit);
                     BaseBehavior buildUnitBaseBehaviorComponent = buildUnit.GetComponent<BaseBehavior>();
-                    if (buildUnitBaseBehaviorComponent != null && buildUnitBaseBehaviorComponent.IsDisplayedAsSkill(unit))
+                    if (buildUnitBaseBehaviorComponent != null && skillErrorInfo.isDisplayedAsSkill)
                         GetOrCreateUIImageToList(
                             ref newUIImages, buildUnitBaseBehaviorComponent.skillInfo.uniqueName, buildUnitBaseBehaviorComponent.skillInfo.imagePath,
                             buildUnitBaseBehaviorComponent.skillInfo.readableName, buildUnitBaseBehaviorComponent.skillInfo.readableDescription,
                             buildUnitBaseBehaviorComponent.GetStatistics(), buildUnitBaseBehaviorComponent.GetCostInformation(),
-                            buildUnitBaseBehaviorComponent.skillInfo.productionHotkey, buildUnitBaseBehaviorComponent.skillInfo.skillType, buildUnitBaseBehaviorComponent.ErrorMessage(unit)
+                            buildUnitBaseBehaviorComponent.skillInfo.productionHotkey, buildUnitBaseBehaviorComponent.skillInfo.skillType, skillErrorInfo.errorMessage
                             );
                 }
         }
@@ -463,7 +469,7 @@ public class UIBaseScript : MonoBehaviour
                         proceduralContent.appendChild(healthDiv);
                     }
 
-                    string blockImagesName = "elementsBlock elementsObject";
+                    string blockImagesName = "clckable elementsBlock elementsObject";
                     if (!detailInfo)
                     {
                         if (unitImageInfo.skillType == SkillType.Skill)
