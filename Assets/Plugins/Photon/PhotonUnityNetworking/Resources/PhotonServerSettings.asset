@@ -48,4 +48,6 @@ MonoBehaviour:
   - InstantiateAllSpawns
   - InstantiateAllTrees
   - InstantiateSpawn
+  - _GiveOrder
+  - GiveOrderUniqueID
   DisableAutoOpenWizard: 1

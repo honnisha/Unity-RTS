@@ -16,7 +16,6 @@ public class UnitSelectionComponent : MonoBehaviour
     BuildingBehavior buildingBehavior;
     Color projectorColor = new Color(1, 1, 1, 1f);
     int projectorColorId = -1;
-    cakeslice.Outline[] allOutlines;
     Projector projectorComponent;
     bool outlineState = true;
     bool intersection = false;
@@ -31,7 +30,6 @@ public class UnitSelectionComponent : MonoBehaviour
         buildingBehavior = gameObject.GetComponent<BuildingBehavior>();
         canBeSelected = baseBehaviorComponent.canBeSelected;
         
-        allOutlines = gameObject.GetComponents<cakeslice.Outline>().Concat(gameObject.GetComponentsInChildren<cakeslice.Outline>()).ToArray();
         SetOutline(false);
 
         if (buildingBehavior != null && buildingBehavior.DisableUpdate())
@@ -64,7 +62,7 @@ public class UnitSelectionComponent : MonoBehaviour
             }
         }
 
-        foreach (cakeslice.Outline outline in allOutlines)
+        foreach (cakeslice.Outline outline in baseBehaviorComponent.allOutlines)
             outline.color = projectorColorId;
 
         projectorComponent.material.color = projectorColor;
@@ -116,7 +114,7 @@ public class UnitSelectionComponent : MonoBehaviour
         {
             UpdateColor();
 
-            foreach (cakeslice.Outline outline in allOutlines)
+            foreach (cakeslice.Outline outline in baseBehaviorComponent.allOutlines)
                 outline.enabled = newState;
 
             outlineState = newState;

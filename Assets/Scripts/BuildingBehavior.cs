@@ -367,7 +367,7 @@ public class BuildingBehavior : BaseBehavior
     }
 
     [PunRPC]
-    public override void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands)
+    public override void _GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
     {
         if (!live)
             return;
@@ -376,7 +376,7 @@ public class BuildingBehavior : BaseBehavior
         spawnTarget = point;
     }
     
-    public override void GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands)
+    public override void _GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
     {
         if (!live)
             return;

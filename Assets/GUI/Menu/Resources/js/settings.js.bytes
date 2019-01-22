@@ -1,0 +1,55 @@
+function CreateSettingText(settingsClass, className, title, value) {
+	var settingsElement = document.getElementsByClassName(settingsClass)[0];
+		
+    var divSetting = document.createElement("div");
+    divSetting.className = "settingBlock text";
+    settingsElement.appendChild(divSetting);
+
+    var setting = document.createElement("p");
+    setting.innerHTML = title + ":";
+    divSetting.appendChild(setting);
+		
+    var setting = document.createElement("input");
+    setting.innerHTML = value;
+    setting.className = className;
+    divSetting.appendChild(setting);
+}
+function CreateSettingFloat(settingsClass, className, title, value, minValue, maxValue) {
+	var settingsElement = document.getElementsByClassName(settingsClass)[0];
+		
+    var divSetting = document.createElement("div");
+    divSetting.className = "settingBlock float";
+    settingsElement.appendChild(divSetting);
+
+    var setting = document.createElement("p");
+    setting.innerHTML = title + ":";
+    divSetting.appendChild(setting);
+		
+    var setting = document.createElement("input");
+    setting.innerHTML = value;
+    setting.className = className;
+    divSetting.appendChild(setting);
+
+    var maxValueDiv = document.createElement("p");
+    maxValueDiv.className = "maxMalue";
+    maxValueDiv.innerHTML = "/ " + maxValue + "%";
+    divSetting.appendChild(maxValueDiv);
+}
+function CreateSettingCheckbox(settingsClass, className, title, value, minValue, maxValue) {
+	var settingsElement = document.getElementsByClassName(settingsClass)[0];
+		
+    var divSetting = document.createElement("div");
+    divSetting.className = "settingBlock checkbox";
+    settingsElement.appendChild(divSetting);
+
+    var setting = document.createElement("p");
+    setting.innerHTML = title + ":";
+    divSetting.appendChild(setting);
+		
+    var setting = document.createElement("input");
+	setting.type = "checkbox";
+    setting.className = className;
+    divSetting.appendChild(setting);
+	if (value)
+		setting.setAttribute('checked', 'checked');
+}

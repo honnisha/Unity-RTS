@@ -1342,6 +1342,7 @@ MonoBehaviour:
     skillType: 1
   _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
+  uniqueId: -1
   interactType: 0
   attackTimer: 0
   attackDelayTimer: 0
@@ -1363,7 +1364,14 @@ MonoBehaviour:
   behaviorType: 2
   bloodEffect: {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc,
     type: 3}
-  bloodOnBroundEffects: []
+  bloodOnBroundEffects:
+  - {fileID: 100000, guid: 358b75ea5451cf143ab19029a189097d, type: 3}
+  - {fileID: 100000, guid: cfc7596704bbd7f489156fcd4c05c7e9, type: 3}
+  - {fileID: 100000, guid: 18a11fd6df8ceb449b8785301026d639, type: 3}
+  - {fileID: 100000, guid: 6fe4d785744af2c40a2157f5b209d97f, type: 3}
+  - {fileID: 100000, guid: aec54d7a991d7b644b145d550a4b7831, type: 3}
+  - {fileID: 100000, guid: 14987c031123b98408a165a8bf1288d4, type: 3}
+  - {fileID: 100000, guid: 43dd1ba2a5dde844eb01240da13ab96b, type: 3}
   destroyEffectPrefab: {fileID: 0}
   destroyEffectHandler: {fileID: 0}
   timeToDestroy: 30
@@ -1408,11 +1416,13 @@ MonoBehaviour:
   canBeSelected: 1
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
+  allOutlines: []
   resourceCapacityType: 1
   resourceCapacity: 100
   resourceEndless: 0
   sourceType: 0
   storedResources: 
+  soundsInfo: []
   isInCameraView: 0
   buildHpPerSecond: 2.5
   buildingTool:

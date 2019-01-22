@@ -2,80 +2,97 @@
 <link rel="stylesheet" type="text/css" href="css/settings.css">
 <script type='text/javascript' src="js/settings.js"></script>
 <style type='text/css'>
+.content {
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	text-align: center;
+}
 .button {
+	width: 150px;
     background: url("button gray.png") no-repeat;
 	background-size: 100%;
+	display: inline-block;
 }
 .button-red {
     background: url("button red") no-repeat;
 	background-size: 100%;
+	display: inline-block;
+}
+.settingsContent {
+	position: relative;
+	height: 70%;
+	width: auto;
 }
 .settingsBlock {
+	margin-left: 100px;
 	padding-top: 20px;
-	height: 67%;
-	width: 100%;
+	height: 95%;
+	width: 500px;
     background-image: url("paper dark.png") no-repeat;
 	background-size: 100%;
+	display: inline-block;
+}
+.settingsTabBlock {
+	margin-left: 10px;
+	margin-bottom: 60%;
+	padding: 10px 20px;
+	height: 30%;
+	width: 160px;
+    background-image: url("paper dark.png") no-repeat;
+	background-size: 100%;
+	display: inline-block;
+	text-align: left;
+}
+.settingsTabBlock > h4 {
+    text-shadow: 1px 1px 1px #000;
+}
+.settingsTabBlock > p {
+    text-shadow: 1px 1px 1px #000;
+	margin: 4px 0 0 0;
+	color: grey;
+}
+.settingsTabBlock > p:hover {
+	color: white;
 }
 .title {
+    text-shadow: 1px 1px 1px #000;
     background: url("title.png") no-repeat;
 	background-size: 100%;
+	margin-top: 5%;
 	padding: 10px;
-	width: 40%;
+	width: 250px;
 	margin-bottom: 5px;
 	text-align: center;
-}
-.settingsBlock > div {
-	height: 25px;
-	width: 100%;
-	position: relative;
-}
-p {
-	margin: 3px;
-	width: 45%;
-	height: 10px;
-	text-align: right;
-}
-input {
-	margin: 1px;
-	position: absolute;
-	top: 0px;
-	left: 50%;
-	height: 20px;
-	width: 40%;
+	display: inline-block;
 }
 .settingsContainer {
 	height: 91%!important;
 	width: 100%;
+	display: inline-block;
 }
 .messageSettings {
 	width: 100%;
+	display: inline-block;
 }
 </style>
-<script>
-	function CreateSettings(settingsClass) {
-		var settingsElement = document.getElementsByClassName(settingsClass)[0];
-		
-        var divSetting = document.createElement("div");
-        settingsElement.appendChild(divSetting);
-
-        var setting = document.createElement("p");
-        setting.innerHTML = "Username:";
-        divSetting.appendChild(setting);
-		
-        var setting = document.createElement("input");
-        setting.innerHTML = "";
-        setting.className = "username";
-        divSetting.appendChild(setting);
-	}
-</script>
 
 <div class="content">
 	<div class="title">Settings</div>
-	<div class="settingsBlock">
-		<div class="settingsContainer"></div>
-		<div class="messageSettings"></div>
+	<div class="settingsContent">
+		<div class="settingsBlock">
+			<div class="settingsContainer"></div>
+			<div class="messageSettings"></div>
+		</div>
+	
+		<div class="settingsTabBlock">
+			<h4>Tabs settings:</h4>
+			<p class="tab gameTab">Game</p>
+			<p class="tab soundTab">Sound</p>
+		</div>
 	</div>
+
 	<div class="button backToMenu">Back</div>
 	<div class="button button-red saveSettings">Save</div>
 </div>

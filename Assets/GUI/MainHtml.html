@@ -1,3 +1,5 @@
+<link rel="stylesheet" type="text/css" href="css/settings.css">
+<script type='text/javascript' src="js/settings.js"></script>
 <link rel="stylesheet" type="text/css" href="css/loading.css">
 <script type='text/javascript' src="js/loading.js"></script>
 <style type='text/css'>
@@ -188,7 +190,7 @@ html {
 	height: auto;
 }
 .costs {
-padding-bottom: 5px;
+	padding-bottom: 5px;
 }
 .costs > p{
 	display: block;
@@ -452,6 +454,21 @@ padding-bottom: 5px;
 .loading > .loadingBlock {
     background-image: url("paper dark.png") no-repeat;
 }
+.SettingsWindow {
+	text-align: center;
+}
+.SettingsContent {
+	height: 85%;
+	margin: 5% 5% 0 5%;
+    border: 1px solid black;
+}
+.saveSettings {
+	padding: 4px 7px;
+	width: 100px;
+    background: url("button red.png") no-repeat;
+	background-size: 100%;
+	display: inline-block;
+}
 </style>
 <script>
 	function CreateMessage(message, timeout, uniqueMessage) {
@@ -497,6 +514,11 @@ padding-bottom: 5px;
         var menuElement = document.createElement("div");
         menuElement.className = "clckable CloseMenu";
         menuElement.innerText = "Return to game";
+        element.appendChild(menuElement);
+		
+        var menuElement = document.createElement("div");
+        menuElement.className = "clckable CreateSettings";
+        menuElement.innerText = "Settings";
         element.appendChild(menuElement);
 		
         var menuElement = document.createElement("div");
@@ -561,6 +583,27 @@ padding-bottom: 5px;
         element.className = "closeWindow buttonBigMap";
         element.innerText = "X";
         windowBlock.appendChild(element);
+	}
+	function DisplaySettingsWindow() {
+        var htmlBlock = document.getElementsByTagName("html")[0];
+
+        var windowBlock = document.createElement("div");
+        windowBlock.className = "window SettingsWindow clckable";
+        htmlBlock.appendChild(windowBlock);
+		
+        var element = document.createElement("div");
+        element.className = "closeWindow CreateSettings clckable";
+        element.innerText = "X";
+        windowBlock.appendChild(element);
+		
+        var contentBlock = document.createElement("div");
+        contentBlock.className = "SettingsContent clckable";
+        windowBlock.appendChild(contentBlock);
+
+        var saveButton = document.createElement("div");
+        saveButton.className = "saveSettings clckable";
+        saveButton.innerText = "Save settings";
+        windowBlock.appendChild(saveButton);
 	}
 </script>
 

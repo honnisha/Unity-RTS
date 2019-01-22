@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 151827927}
   - component: {fileID: 151827929}
-  - component: {fileID: 151827928}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -74,14 +73,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &151827928
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 151827926}
-  m_Enabled: 1
 --- !u!1 &1786807276630428
 GameObject:
   m_ObjectHideFlags: 0
@@ -218,6 +209,7 @@ MonoBehaviour:
     distance: 2
   mapTexture: {fileID: 8400000, guid: 56adb43fe41a4764c9143e58c71146e9, type: 2}
   selectedWindowType: 0
+  debugVisionGrid: 0
 --- !u!114 &114047147111761268
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -337,8 +329,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 0}
-  viewIdField: 0
-  InstantiationId: 1
+  viewIdField: 3
+  InstantiationId: 3
   isRuntimeInstantiated: 0
 --- !u!114 &4844609676478205319
 MonoBehaviour:

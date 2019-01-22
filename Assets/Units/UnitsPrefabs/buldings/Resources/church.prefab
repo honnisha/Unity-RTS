@@ -190,6 +190,7 @@ MonoBehaviour:
     minValue: 1
     maxValue: 0
     readableName: town center
+    notDisplayWhenFalse: 0
   unitPosition: {x: 0, y: 0, z: 0}
   interactType: 0
   attackTimer: 0
@@ -239,7 +240,7 @@ MonoBehaviour:
   productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
   InfoHTMLOffset: {x: 0, y: 6, z: 0}
-  pointMarkerPrefab: {fileID: 1174494487606054, guid: 7723961c7b4a2cf4cbfa8e9a6c45ba62,
+  pointMarkerPrefab: {fileID: 1174494487606054, guid: a3698f3e4f5fb734899fa95147e1baeb,
     type: 3}
   HTMLHealthSize: {x: 120, y: 120}
   visionToolPrefab: {fileID: 1311408724359970, guid: fc937d29efbc7d146a830e8e4d19ea62,

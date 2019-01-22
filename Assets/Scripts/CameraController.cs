@@ -80,7 +80,7 @@ public class CameraController : MonoBehaviourPunCallbacks
     private float keyTimer = 0.0f;
     private int keyPressed;
 
-    public enum WindowType { None, MainMenu, BigMap };
+    public enum WindowType { None, MainMenu, BigMap, Settings };
     public WindowType selectedWindowType = WindowType.None;
     public Dictionary<WindowType, List<object>> menuInfo = new Dictionary<WindowType, List<object>>();
 
@@ -91,6 +91,8 @@ public class CameraController : MonoBehaviourPunCallbacks
     float chunkSize = 11.0f;
 
     public bool debugVisionGrid = false;
+
+    private int uniqueIdIndex = 0;
 
     // Use this for initialization
     void Start()
@@ -104,6 +106,9 @@ public class CameraController : MonoBehaviourPunCallbacks
         menuInfo.Add(WindowType.BigMap, new List<object>());
         menuInfo[WindowType.BigMap].Add(KeyCode.M);
         menuInfo[WindowType.BigMap].Add("buttonBigMap");
+
+        menuInfo.Add(WindowType.Settings, new List<object>());
+        menuInfo[WindowType.Settings].Add("CreateSettings");
 
         for (int number = 1; number <= 9; number++)
             unitsBinds.Add(KeyCode.Alpha0 + number, new List<GameObject>());
@@ -209,6 +214,14 @@ public class CameraController : MonoBehaviourPunCallbacks
         }
     }
 
+    public void UpdateSettings()
+    {
+        var unitInfo = tagsToSelect.Find(x => x.name == "Unit");
+        unitInfo.healthVisibleOnlyWhenSelect = PlayerPrefs.GetInt("isUnitHealthAlwaysSeen") == 1 ? false : true;
+        var buildInfo = tagsToSelect.Find(x => x.name == "Building");
+        buildInfo.healthVisibleOnlyWhenSelect = PlayerPrefs.GetInt("isBuildingHealthAlwaysSeen") == 1 ? false : true;
+    }
+
     private int workedOnFood, workedOnGold, workedOnWood = 0;
     private float countWorkersTimer = 0.0f;
     // Update is called once per frame
@@ -247,12 +260,23 @@ public class CameraController : MonoBehaviourPunCallbacks
         
         SelectBinds();
 
+        UpdateWindow(activeOver);
+
+        bool objectPlaced = PlaceBuildingOnTerrainUpdate(activeOver);
+
+        if (!objectPlaced && buildedObject == null)
+            SelectUnitsUpdate(isClickGUI);
+    }
+
+    public void UpdateWindow(Dom.Element activeOver)
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateWindow"); // Profiler
         WindowType newWindowType = GetNewWindow(activeOver);
         if ((newWindowType != WindowType.None && selectedWindowType != WindowType.None) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
         {
             if (selectedWindowType == WindowType.MainMenu)
                 UI.document.getElementsByClassName("menu")[0].innerHTML = "";
-            else if (selectedWindowType == WindowType.BigMap)
+            else if (selectedWindowType == WindowType.BigMap || selectedWindowType == WindowType.Settings)
                 UI.document.getElementsByClassName("window")[0].remove();
 
             if (newWindowType == selectedWindowType || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
@@ -268,6 +292,11 @@ public class CameraController : MonoBehaviourPunCallbacks
             {
                 UI.document.Run("DisplayBigMapWindow");
                 UpdateMapsAndStatistic();
+            }
+            else if (newWindowType == WindowType.Settings)
+            {
+                UI.document.Run("DisplaySettingsWindow");
+                MenuBehavior.CreateSettings("SettingsContent");
             }
 
             selectedWindowType = newWindowType;
@@ -289,16 +318,12 @@ public class CameraController : MonoBehaviourPunCallbacks
             Application.Quit();
             return;
         }
-
-        bool objectPlaced = PlaceBuildingOnTerrainUpdate(activeOver);
-
-        if (!objectPlaced && buildedObject == null)
-            SelectUnitsUpdate(isClickGUI);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
-
+    
     public void UpdateSelectFreeWorkers()
     {
-        UnityEngine.Profiling.Profiler.BeginSample("p UpdateChat"); // Profiler
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateSelectFreeWorkers"); // Profiler
         if (UnityEngine.Input.GetKeyDown(KeyCode.F1))
         {
             List<GameObject> freeWorkers = new List<GameObject>();
@@ -499,11 +524,18 @@ public class CameraController : MonoBehaviourPunCallbacks
             newTree.transform.eulerAngles = new Vector3(0, UnityEngine.Random.Range(0.0f, 360.0f), 0);
             newTree.transform.SetParent(Terrain.activeTerrain.transform);
             index++;
+
+            BaseBehavior baseBehaviorComponent = newTree.GetComponent<BaseBehavior>();
+            baseBehaviorComponent.uniqueId = uniqueIdIndex++;
         }
         foreach (Vector3 objectPosition in newSpawnData["gold"])
         {
             GameObject prefab = goldPrefabs[UnityEngine.Random.Range(0, goldPrefabs.Count)];
             GameObject newGold = Instantiate(prefab, objectPosition, prefab.transform.rotation);
+
+            BaseBehavior baseBehaviorComponent = newGold.GetComponent<BaseBehavior>();
+            baseBehaviorComponent.uniqueId = uniqueIdIndex++;
+
             // newGold.transform.SetParent(Terrain.activeTerrain.transform);
         }
 
@@ -550,6 +582,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void StartGame()
     {
+        UpdateSettings();
         UI.document.Run("DeleteLoadingScreen");
     }
 

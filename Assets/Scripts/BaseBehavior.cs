@@ -43,6 +43,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     [HideInInspector]
     public Vector3 unitPosition = new Vector3();
 
+    [HideInInspector]
+    public int uniqueId = -1;
+
     #endregion
 
     #region Fight info
@@ -188,6 +191,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public GameObject visionTool;
     [HideInInspector]
     public UnitSelectionComponent unitSelectionComponent;
+    [HideInInspector]
+    public cakeslice.Outline[] allOutlines;
 
     [HideInInspector]
     public List<object> queueCommands = new List<object>();
@@ -223,6 +228,23 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
     #endregion
 
+    #region Sounds info
+
+    public enum SoundEventType { None, Hit, Attack, Build, Die, TakeOrderToPoint, TakeOrderToTarget };
+    [System.Serializable]
+    public class SoundInfo
+    {
+        public SoundEventType type = SoundEventType.None;
+        public List<AudioClip> soundList = new List<AudioClip>();
+        [HideInInspector]
+        public int lastSoundIndex = -1;
+    }
+    [Header("Sounds Info")]
+    public SoundInfo[] soundsInfo;
+    AudioSource audioSource;
+
+    #endregion
+
     [PunRPC]
     public void ChangeOwner(string newOwnerId, int newTeam)
     {
@@ -239,6 +261,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         obstacle = GetComponent<NavMeshObstacle>();
+        audioSource = GetComponent<AudioSource>();
+
         if (agent != null && obstacle != null)
             obstacle.enabled = false;
 
@@ -246,6 +270,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         UpdateTearDisplay(allTurnOn: true);
         renders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
+        allOutlines = gameObject.GetComponents<cakeslice.Outline>().Concat(gameObject.GetComponentsInChildren<cakeslice.Outline>()).ToArray();
         UpdateTearDisplay();
 
         if (spawnPoint != null)
@@ -274,6 +299,25 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         if (unitSelectionComponent.isSelected && UnityEngine.Input.anyKeyDown)
             UICommand(null);
+    }
+
+    public void SendSoundEvent(SoundEventType soundEventType)
+    {
+        if (audioSource == null)
+            return;
+
+        float volume = PlayerPrefs.GetFloat("soundsVolume");
+        foreach (var soundInfo in soundsInfo)
+            if (soundInfo.type == soundEventType && soundInfo.soundList.Count > 0 && !audioSource.isPlaying)
+            {
+                if (soundInfo.lastSoundIndex == -1)
+                    soundInfo.lastSoundIndex = UnityEngine.Random.Range(0, soundInfo.soundList.Count - 1);
+                if (soundInfo.lastSoundIndex >= soundInfo.soundList.Count - 1)
+                    soundInfo.lastSoundIndex = 0;
+
+                audioSource.PlayOneShot(soundInfo.soundList[soundInfo.lastSoundIndex], volume);
+                soundInfo.lastSoundIndex++;
+            }
     }
 
     public void UpdateTearDisplay(bool allTurnOn = false)
@@ -332,22 +376,11 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                 createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
             else
                 createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
-
-            //Send command to created object to spawn target
-            if (PhotonNetwork.InRoom)
-            {
-                if (spawnTargetObject != null)
-                    createdPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, spawnTargetObject.GetComponent<PhotonView>().ViewID, true, false);
-                else
-                    createdPhotonView.RPC("GiveOrder", PhotonTargets.All, BaseBehavior.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
-            }
+            
+            if (spawnTargetObject != null)
+                createdObjectBehaviorComponent.GiveOrder(spawnTargetObject, true, false);
             else
-            {
-                if (spawnTargetObject != null)
-                    createdObjectBehaviorComponent.GiveOrder(spawnTargetObject, true, false);
-                else
-                    createdObjectBehaviorComponent.GiveOrder(BaseBehavior.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
-            }
+                createdObjectBehaviorComponent.GiveOrder(BaseBehavior.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
             createdObjects.Add(createdObject);
         }
         return createdObjects;
@@ -631,11 +664,14 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         foreach (Collider collider in Physics.OverlapSphere(position, radius, mask))
         {
             GameObject unit = collider.gameObject;
-            BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
-            if (unitBaseBehavior.team != team && team != -1)
-                continue;
-            if (unitBaseBehavior.live != live)
-                continue;
+            if(team != -1)
+            {
+                BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
+                if (unitBaseBehavior.team != team)
+                    continue;
+                if (unitBaseBehavior.live != live)
+                    continue;
+            }
             objects.Add(unit);
         }
         return objects;
@@ -647,37 +683,36 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         if (statisic.attackType == AttackType.None && interactType != InteractigType.Attacking)
             return false;
 
-        var allObjects = GetObjectsInRange(transform.position, range, team: attackTeam);
-        if (allObjects.Count <= 0)
-            return false;
+        if(behaviorType == BehaviorType.Counterattack || behaviorType == BehaviorType.Aggressive)
+        {
+            var allObjects = GetObjectsInRange(transform.position, range, team: attackTeam);
+            if (allObjects.Count <= 0)
+                return false;
 
-        GameObject targetUnit = null;
-        // Find colsest target
-        float distance = range;
-        foreach (GameObject unit in allObjects)
-        {
-            float distanceToUnit = Vector3.Distance(centerOfSearch, unit.transform.position);
-            if (distanceToUnit < distance)
+            GameObject targetUnit = null;
+            // Find colsest target
+            float distance = range;
+            foreach (GameObject unit in allObjects)
             {
-                targetUnit = unit;
-                distance = distanceToUnit;
+                float distanceToUnit = Vector3.Distance(centerOfSearch, unit.transform.position);
+                if (distanceToUnit < distance)
+                {
+                    targetUnit = unit;
+                    distance = distanceToUnit;
+                }
             }
-        }
-        if (randomRange != 0.0f)
-        {
-            // Get random target
-            var targetObjects = GetObjectsInRange(targetUnit.transform.position, randomRange, team: attackTeam);
-            if (targetObjects.Count > 0)
-                targetUnit = targetObjects[UnityEngine.Random.Range(0, targetObjects.Count - 1)];
-        }
-        if (targetUnit != null)
-        {
-            PhotonView createdPhotonView = GetComponent<PhotonView>();
-            if (PhotonNetwork.InRoom)
-                createdPhotonView.RPC("GiveOrder", PhotonTargets.All, targetUnit, true);
-            else
+            if (randomRange != 0.0f)
+            {
+                // Get random target
+                var targetObjects = GetObjectsInRange(targetUnit.transform.position, randomRange, team: attackTeam);
+                if (targetObjects.Count > 0)
+                    targetUnit = targetObjects[UnityEngine.Random.Range(0, targetObjects.Count - 1)];
+            }
+            if (targetUnit != null)
+            {
                 GiveOrder(targetUnit, true, false);
-            return true;
+                return true;
+            }
         }
         return false;
     }
@@ -689,8 +724,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         foreach (GameObject unit in allUnits)
         {
             UnitBehavior unitBehaviorComponent = unit.GetComponent<UnitBehavior>();
-            if (unitBehaviorComponent != null && unitBehaviorComponent.behaviorType == BehaviorType.Counterattack
-                || unitBehaviorComponent.behaviorType == BehaviorType.Aggressive)
+            if (unitBehaviorComponent != null)
             {
                 float dist = Vector3.Distance(gameObject.transform.position, unit.transform.position);
                 UnitStatistic statisic = GetStatisticsInfo();
@@ -718,17 +752,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public virtual void AddCommandToQueue(object newTarget)
     {
         queueCommands.Add(newTarget);
-    }
-
-    [PunRPC]
-    public virtual void StartInteractViewID(int targetViewId)
-    {
-        StartInteract(PhotonNetwork.GetPhotonView(targetViewId).gameObject);
-    }
-    [PunRPC]
-    public virtual void GiveOrderViewID(int targetViewId, bool displayMarker, bool overrideQueueCommands)
-    {
-        GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker, overrideQueueCommands);
     }
 
     public bool[] ActivateSkills(string commandName)
@@ -839,8 +862,61 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public virtual void StartVisible(BaseBehavior senderBaseBehaviorComponent){ }
     public virtual void StopVisible(BaseBehavior senderBaseBehaviorComponent) { }
 
-    public virtual void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands) { }
-    public virtual void GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands) { }
+    public virtual void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
+    {
+        if (PhotonNetwork.InRoom)
+            photonView.RPC("_GiveOrder", PhotonTargets.All, point, displayMarker, overrideQueueCommands, speed);
+        else
+            _GiveOrder(point, displayMarker, overrideQueueCommands, speed);
+    }
+    [PunRPC]
+    public virtual void StartInteractViewID(int targetViewId)
+    {
+        StartInteract(PhotonNetwork.GetPhotonView(targetViewId).gameObject);
+    }
+
+    public virtual void GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonView targetObjectPhotonView = GetComponent<PhotonView>();
+            if (targetObjectPhotonView != null)
+                photonView.RPC("GiveOrderViewID", PhotonTargets.All, spawnTargetObject.GetComponent<PhotonView>().ViewID, true, false);
+            else
+            {
+                BaseBehavior unitBaseBehavior = targetObject.GetComponent<BaseBehavior>();
+                photonView.RPC("GiveOrderUniqueID", PhotonTargets.All, unitBaseBehavior.uniqueId, true, false);
+            }
+        }
+        else
+            _GiveOrder(targetObject, displayMarker, overrideQueueCommands, speed);
+    }
+    [PunRPC]
+    public virtual void GiveOrderViewID(int targetViewId, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
+    {
+        _GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker, overrideQueueCommands, speed);
+    }
+    [PunRPC]
+    public virtual void GiveOrderUniqueID(int targetUniqueId, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
+    {
+        GameObject unit = GetObjectByUniqueId(targetUniqueId);
+        if (unit != null)
+            _GiveOrder(unit, displayMarker, overrideQueueCommands, speed);
+    }
+    public GameObject GetObjectByUniqueId(int targetUniqueId)
+    {
+        var allObjects = GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Ambient")).Concat(GameObject.FindGameObjectsWithTag("Unit")).ToArray();
+        foreach (GameObject unit in allObjects)
+        {
+            BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
+            if (unitBaseBehavior.uniqueId == targetUniqueId)
+                return unit;
+        }
+        return null;
+    }
+
+    public virtual void _GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
+    public virtual void _GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
     public virtual bool IsIdle() { return true; }
     public virtual void TakeDamage(float damage, GameObject attacker) { }
     public virtual void BecomeDead() { }

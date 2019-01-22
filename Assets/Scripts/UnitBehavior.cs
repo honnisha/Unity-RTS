@@ -256,11 +256,7 @@ public class UnitBehavior : BaseBehavior
         timerToWalk += Time.deltaTime;
         if (timerToWalk >= timeToWalk)
         {
-            PhotonView unitPhotonView = GetComponent<PhotonView>();
-            if (PhotonNetwork.InRoom)
-                unitPhotonView.RPC("GiveOrderWithSpeed", PhotonTargets.All, GetRandomPoint(unitPosition, 10.0f), false, false, UnityEngine.Random.Range(0.9f, 1.3f));
-            else
-                GiveOrderWithSpeed(GetRandomPoint(unitPosition, 10.0f), false, false, UnityEngine.Random.Range(0.9f, 1.3f));
+            GiveOrder(GetRandomPoint(unitPosition, 10.0f), false, false, UnityEngine.Random.Range(0.9f, 1.3f));
             timerToWalk = 0.0f;
             timeToWalk = 0.0f;
         }
@@ -442,11 +438,7 @@ public class UnitBehavior : BaseBehavior
                 BuildingBehavior interactObjectBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
                 if (interactObjectBuildingBehavior != null && interactObjectBuildingBehavior.sourceType == SourceType.Farm)
                 {
-                    PhotonView unitPhotonView = GetComponent<PhotonView>();
-                    if (PhotonNetwork.InRoom)
-                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false, false);
-                    else
-                        GiveOrder(interactObject, false, false);
+                    GiveOrder(interactObject, false, false);
                     workingTimer = 0.0f;
                     return true;
                 }
@@ -533,6 +525,8 @@ public class UnitBehavior : BaseBehavior
                         workingTimer += Time.deltaTime;
                         if (interactTimer <= 0)
                         {
+                            SendSoundEvent(SoundEventType.Build);
+
                             interactTimer = 1.0f;
                             BuildingBehavior interactObjectBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
                             anim.SetBool(interactAnimation, true);
@@ -542,11 +536,7 @@ public class UnitBehavior : BaseBehavior
                             {
                                 if (interactObjectBuildingBehavior.sourceType == SourceType.Farm)
                                 {
-                                    PhotonView unitPhotonView = GetComponent<PhotonView>();
-                                    if (PhotonNetwork.InRoom)
-                                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false, false);
-                                    else
-                                        GiveOrder(interactObject, false, false);
+                                    GiveOrder(interactObject, false, false);
                                 }
                                 else
                                 {
@@ -562,11 +552,7 @@ public class UnitBehavior : BaseBehavior
                     GameObject tempTarget = interactObject;
                     StopAction(true);
 
-                    PhotonView unitPhotonView = GetComponent<PhotonView>();
-                    if (PhotonNetwork.InRoom)
-                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false, false);
-                    else
-                        GiveOrder(tempTarget, false, false);
+                    GiveOrder(tempTarget, false, false);
                 }
             }
             else
@@ -704,7 +690,7 @@ public class UnitBehavior : BaseBehavior
     public GameObject GetObjectToInteract(InteractigType type = InteractigType.None, ResourceType targetResource = ResourceType.None)
     {
         Dictionary<GameObject, float> objects = new Dictionary<GameObject, float>();
-        var allObjects = GetObjectsInRange(transform.position, 15.0f, team: team).Concat(GameObject.FindGameObjectsWithTag("Ambient")).ToArray();
+        var allObjects = GetObjectsInRange(transform.position, 15.0f, team: -1).Concat(GameObject.FindGameObjectsWithTag("Ambient")).ToArray();
         foreach (GameObject oneObject in allObjects)
         {
             BaseBehavior oneObjectBaseBehavior = oneObject.GetComponent<BaseBehavior>();
@@ -747,20 +733,13 @@ public class UnitBehavior : BaseBehavior
             return;
              
         // Find new target
-        if(stopActionType != InteractigType.None)
+        GameObject newTarget = GetObjectToInteract(type: stopActionType, targetResource: resourceType);
+        if (newTarget != null)
         {
-            PhotonView unitPhotonView = GetComponent<PhotonView>();
-            GameObject newTarget = GetObjectToInteract(type: stopActionType, targetResource: resourceType);
-            if (newTarget != null)
-            {
-                if (PhotonNetwork.InRoom)
-                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, newTarget.GetComponent<PhotonView>().ViewID, false, false);
-                else
-                    GiveOrder(newTarget, false, false);
+            GiveOrder(newTarget, false, false);
 
-                Destroy(pointMarker);
-                return;
-            }
+            Destroy(pointMarker);
+            return;
         }
 
         SendOrderFromQueue();
@@ -769,22 +748,15 @@ public class UnitBehavior : BaseBehavior
 
     public bool SendOrderFromQueue()
     {
-        PhotonView unitPhotonView = GetComponent<PhotonView>();
         if (queueCommands.Count > 0)
         {
             if (queueCommands[0] is Vector3)
             {
-                if (PhotonNetwork.InRoom)
-                    unitPhotonView.RPC("GiveOrder", PhotonTargets.All, (Vector3)queueCommands[0], false, false);
-                else
-                    GiveOrder((Vector3)queueCommands[0], false, false);
+                GiveOrder((Vector3)queueCommands[0], false, false);
             }
             else
             {
-                if (PhotonNetwork.InRoom)
-                    unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, ((GameObject)queueCommands[0]).GetComponent<PhotonView>().ViewID, false, false);
-                else
-                    GiveOrder((GameObject)queueCommands[0], false, false);
+                GiveOrder((GameObject)queueCommands[0], false, false);
             }
             queueCommands.RemoveAt(0);
             return true;
@@ -913,11 +885,7 @@ public class UnitBehavior : BaseBehavior
                 resourceHold = 0.0f;
                 if (interactObject != null)
                 {
-                    PhotonView unitPhotonView = GetComponent<PhotonView>();
-                    if (PhotonNetwork.InRoom)
-                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID, false, false);
-                    else
-                        GiveOrder(interactObject, false, false);
+                    GiveOrder(interactObject, false, false);
                     return;
 
                 }
@@ -951,11 +919,7 @@ public class UnitBehavior : BaseBehavior
             buildingsList.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
             GameObject building = buildingsList.First().Key;
 
-            PhotonView unitPhotonView = GetComponent<PhotonView>();
-            if (PhotonNetwork.InRoom)
-                unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, building.GetComponent<PhotonView>().ViewID, false, false);
-            else
-                GiveOrder(building, false, false);
+            GiveOrder(building, false, false);
         }
     }
 
@@ -979,6 +943,8 @@ public class UnitBehavior : BaseBehavior
         if (!live)
             return;
 
+        SendSoundEvent(SoundEventType.Attack);
+
         SetAgentStopped(true);
         UnitStatistic statisic = GetStatisticsInfo();
 
@@ -1000,13 +966,8 @@ public class UnitBehavior : BaseBehavior
         {
             if (target == null)
             {
-                Vector3 dirToTarget = (transform.position - attacker.transform.position).normalized;
-
-                PhotonView unitPhotonView = GetComponent<PhotonView>();
-                if (PhotonNetwork.InRoom)
-                    unitPhotonView.RPC("GiveOrder", PhotonTargets.All, GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, true);
-                else
-                    GiveOrder(GetRandomPoint(transform.position + dirToTarget * 10, 3.0f), true, true);
+                // Vector3 dirToTarget = (transform.position - attacker.transform.position).normalized;
+                GiveOrder(GetRandomPoint(unitPosition, 10.0f), true, true);
             }
         }
     }
@@ -1058,6 +1019,8 @@ public class UnitBehavior : BaseBehavior
         }
         else
         {
+            SendSoundEvent(SoundEventType.Hit);
+
             anim.Rebind();
             anim.SetTrigger("Damaged");
         }
@@ -1072,6 +1035,8 @@ public class UnitBehavior : BaseBehavior
 
     public override void BecomeDead()
     {
+        SendSoundEvent(SoundEventType.Die);
+
         anim.Rebind();
         anim.SetTrigger("Die");
         live = false;
@@ -1115,16 +1080,16 @@ public class UnitBehavior : BaseBehavior
     }
 
     [PunRPC]
-    public void GiveOrderWithSpeed(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed)
+    public override void _GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
     {
-        agent.speed = speed;
-        SendToPoint(point, displayMarker, overrideQueueCommands);
-    }
+        if (speed != 0.0f)
+            agent.speed = speed;
+        else
+            agent.speed = tempSpeed;
 
-    [PunRPC]
-    public override void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands)
-    {
-        agent.speed = tempSpeed;
+        if (overrideQueueCommands)
+            SendSoundEvent(SoundEventType.TakeOrderToPoint);
+
         SendToPoint(point, displayMarker, overrideQueueCommands);
     }
 
@@ -1146,10 +1111,14 @@ public class UnitBehavior : BaseBehavior
             CreateOrUpdatePointMarker(Color.green, point, 1.5f, true);
     }
 
-    public override void GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands)
+    public override void _GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
     {
         if (overrideQueueCommands)
+        {
             queueCommands.Clear();
+            
+            SendSoundEvent(SoundEventType.TakeOrderToTarget);
+        }
 
         if (!live)
             return;

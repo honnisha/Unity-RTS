@@ -1,0 +1,47 @@
+.settingBlock {
+	height: 25px;
+	width: 100%;
+	position: relative;
+}
+.settingBlock > p {
+	
+	position: absolute;
+	bottom: 0;
+	width: 45%;
+	height: 10px;
+	text-align: right;
+}
+input {
+	margin: 1px;
+	position: absolute;
+	bottom: 5px;
+	left: 50%;
+	height: 20px;
+	width: 40%;
+}
+.settingBlock > .slider {
+	width: 45%;
+}
+
+.float > p{
+	width: 47%;
+}
+.float > input{
+	left: 50%;
+	width: 8%;
+}
+.float > .maxMalue {
+	position: absolute;
+	left: 58%;
+	text-align: left;
+}
+
+.checkbox > p{
+	width: 75%;
+}
+.checkbox > input{
+	background: #595757;
+	left: 77%;
+	height: 15px;
+	width: 15px;
+}
