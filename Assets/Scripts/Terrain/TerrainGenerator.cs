@@ -209,7 +209,7 @@ public class TerrainGenerator : MonoBehaviour
         Dictionary<string, List<Vector3>> newData = new Dictionary<string, List<Vector3>>();
         
         // Spawn coordinates
-        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.25f, offsetPos: 0.15f);
+        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.25f, offsetPos: 0.2f);
         
         newData["spawn"] = new List<Vector3>();
         for (int i = 1; i <= spawnCount; i++)

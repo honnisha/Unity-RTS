@@ -88,7 +88,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     Dictionary<string, List<Vector3>> spawnData;
     bool[,] chanksView = new bool[0, 0];
-    float chunkSize = 10.0f;
+    float chunkSize = 11.0f;
 
     public bool debugVisionGrid = false;
 
@@ -168,7 +168,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                 animalsCountOnRow: 5 * mapSize, animalsRows: mapSize);
 
             InstantiateObjects(
-                spawnData, maxTrees: 1000 * mapSize + 100, 
+                spawnData, maxTrees: 750 * mapSize + 100, 
                 treePrefabs: terrainGenerator.treePrefabs, goldPrefabs: terrainGenerator.goldPrefabs, animalPrefabs: terrainGenerator.animalsPrefabs);
 
             // Create bots
@@ -235,58 +235,11 @@ public class CameraController : MonoBehaviourPunCallbacks
         // Chat
         if (PhotonNetwork.InRoom)
         {
-            if ((activeOver != null && activeOver.className.Contains("chatSend") && UnityEngine.Input.GetMouseButtonDown(0) ||
-                UnityEngine.Input.GetKeyDown(KeyCode.Return) || UnityEngine.Input.GetKeyDown(KeyCode.Escape)))
-            {
-                if (chatInput && !UnityEngine.Input.GetKeyDown(KeyCode.Escape))
-                {
-                    var chatElement = UI.document.getElementsByClassName("chatBox")[0];
-                    var inputElement = UI.document.getElementsByClassName("chatInput")[0];
-                    var buttonElement = UI.document.getElementsByClassName("chatSend")[0];
-                    string message = inputElement.innerText;
-                    inputElement.remove();
-                    buttonElement.remove();
-                    if (message.Length > 0)
-                    {
-                        if (PhotonNetwork.InRoom)
-                            GetComponent<PhotonView>().RPC("SendChatMessage", PhotonTargets.All, String.Format("<b>{0}</b>: {1}", PhotonNetwork.LocalPlayer.NickName, message));
-                        else
-                            SendChatMessage(String.Format("<b>{0}</b>: {1}", PhotonNetwork.LocalPlayer.NickName, message));
-                    }
-                    chatInput = false;
-                }
-                else
-                {
-                    UI.document.Run("CreateInput");
-                    chatInput = true;
-                }
-            }
+            UpdateChat(activeOver);
         }
 
         // Select free workers
-        if (UnityEngine.Input.GetKeyDown(KeyCode.F1))
-        {
-            List<GameObject> freeWorkers = new List<GameObject>();
-            foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
-            {
-                UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
-                if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId &&
-                    unitUnitBehavior.resourceGatherInfo.Count > 0 && unitUnitBehavior.IsIdle())
-                    freeWorkers.Add(unit);
-            }
-            if (freeWorkers.Count > 0)
-            {
-                if (freeWorkers.Count <= workersIterate)
-                    workersIterate = 0;
-                DeselectAllUnits();
-                selectedObjects.Add(freeWorkers[workersIterate]);
-
-                UnitSelectionComponent selection = freeWorkers[workersIterate].GetComponent<UnitSelectionComponent>();
-                selection.SetSelect(true);
-                MoveCaeraToUnit(freeWorkers[workersIterate]);
-                workersIterate++;
-            }
-        }
+        UpdateSelectFreeWorkers();
 
         bool isClickGUI = false;
         if (activeOver != null && activeOver.className.Contains("clckable"))
@@ -343,6 +296,67 @@ public class CameraController : MonoBehaviourPunCallbacks
             SelectUnitsUpdate(isClickGUI);
     }
 
+    public void UpdateSelectFreeWorkers()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateChat"); // Profiler
+        if (UnityEngine.Input.GetKeyDown(KeyCode.F1))
+        {
+            List<GameObject> freeWorkers = new List<GameObject>();
+            foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
+            {
+                UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
+                if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId &&
+                    unitUnitBehavior.resourceGatherInfo.Count > 0 && unitUnitBehavior.IsIdle())
+                    freeWorkers.Add(unit);
+            }
+            if (freeWorkers.Count > 0)
+            {
+                if (freeWorkers.Count <= workersIterate)
+                    workersIterate = 0;
+                DeselectAllUnits();
+                selectedObjects.Add(freeWorkers[workersIterate]);
+
+                UnitSelectionComponent selection = freeWorkers[workersIterate].GetComponent<UnitSelectionComponent>();
+                selection.SetSelect(true);
+                MoveCaeraToUnit(freeWorkers[workersIterate]);
+                workersIterate++;
+            }
+        }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
+
+    public void UpdateChat(Dom.Element activeOver)
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateChat"); // Profiler
+        if ((activeOver != null && activeOver.className.Contains("chatSend") && UnityEngine.Input.GetMouseButtonDown(0) ||
+            UnityEngine.Input.GetKeyDown(KeyCode.Return) || (UnityEngine.Input.GetKeyDown(KeyCode.Escape) && chatInput)))
+        {
+            if (chatInput && !UnityEngine.Input.GetKeyDown(KeyCode.Escape))
+            {
+                var chatElement = UI.document.getElementsByClassName("chatBox")[0];
+                var inputElement = UI.document.getElementsByClassName("chatInput")[0];
+                var buttonElement = UI.document.getElementsByClassName("chatSend")[0];
+                string message = inputElement.innerText;
+                inputElement.remove();
+                buttonElement.remove();
+                if (message.Length > 0)
+                {
+                    if (PhotonNetwork.InRoom)
+                        GetComponent<PhotonView>().RPC("SendChatMessage", PhotonTargets.All, String.Format("<b>{0}</b>: {1}", PhotonNetwork.LocalPlayer.NickName, message));
+                    else
+                        SendChatMessage(String.Format("<b>{0}</b>: {1}", PhotonNetwork.LocalPlayer.NickName, message));
+                }
+                chatInput = false;
+            }
+            else
+            {
+                UI.document.Run("CreateInput");
+                chatInput = true;
+            }
+        }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
+
     public void UpdateViewChunks()
     {
         int chanksSizeX = (int)(Terrain.activeTerrain.terrainData.size.x / chunkSize);
@@ -362,6 +376,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void UpdateVisionChunks()
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateVisionChunks"); // Profiler
         Vector3 centerCamera = transform.position;
         centerCamera += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset() * -1.0f;
         Vector2 viewCameraPosition = GetChunkByPosition(centerCamera);
@@ -384,6 +399,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
                 chanksView[x, y] = newState;
             }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public Vector3 GetPositionByChunk(int x, int y)
@@ -562,6 +578,7 @@ public class CameraController : MonoBehaviourPunCallbacks
     GameObject objectUnderMouse;
     public void SelectUnitsUpdate(bool isClickGUI)
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p SelectUnitsUpdate"); // Profiler
         clickTimer -= Time.deltaTime;
         bool selectObject = false;
         RaycastHit hit;
@@ -684,10 +701,12 @@ public class CameraController : MonoBehaviourPunCallbacks
                 }
             }
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
     
     public bool PlaceBuildingOnTerrainUpdate(Dom.Element activeOver = null)
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p PlaceBuildingOnTerrainUpdate"); // Profiler
         if (buildedObject != null && !(activeOver != null && activeOver.className.Contains("clckable")))
         {
             RaycastHit hit;
@@ -787,11 +806,13 @@ public class CameraController : MonoBehaviourPunCallbacks
                 }
             }
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         return false;
     }
 
     public void SelectBinds()
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p SelectBinds"); // Profiler
         if (keyTimer > 0)
             keyTimer -= Time.fixedDeltaTime;
         for (int number = 1; number <= 9; number++)
@@ -840,6 +861,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                 }
             }
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public float GetCameraOffset()
@@ -872,29 +894,48 @@ public class CameraController : MonoBehaviourPunCallbacks
         return new Vector2(positionOnTerrain.x / terrain.terrainData.size.x, positionOnTerrain.z / terrain.terrainData.size.z);
     }
 
+    private static bool IsInTerrainRange(Vector3 target)
+    {
+        if(target.x > 0.0f && target.x <= Terrain.activeTerrain.terrainData.size.x)
+            if (target.z > 0.0f && target.z <= Terrain.activeTerrain.terrainData.size.z)
+                return true;
+
+        return false;
+    }
+
     public void CreateOrUpdateCameraOnMap(Dom.Element mapBlock, Dom.Element mapImage)
     {
+        Vector3 vameraLookAt = transform.position - new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset();
+        bool isCameraInTerrain = IsInTerrainRange(vameraLookAt);
         float cameraScale = 20.0f / (Terrain.activeTerrain.terrainData.size.x / 50.0f / 4.0f);
         float cameraHeight = cameraScale / 1.2f;
         float cameraWidtht = cameraScale;
-        Vector2 positionCameraOnMap = GetPositionOnMap(Camera.main.transform.position);
-        Dom.Element cameraDiv;
-        if (mapBlock.getElementsByClassName("mapCamera").length <= 0)
+        Vector2 positionCameraOnMap = GetPositionOnMap(vameraLookAt);
+        Dom.Element cameraDiv = null;
+        if(isCameraInTerrain)
         {
-            cameraDiv = UI.document.createElement("div");
-            cameraDiv.className = "mapCamera";
-            cameraDiv.style.height = String.Format("{0}%", cameraHeight);
-            cameraDiv.style.width = String.Format("{0}%", cameraWidtht);
-            mapImage.appendChild(cameraDiv);
+            if (mapBlock.getElementsByClassName("mapCamera").length <= 0)
+            {
+                cameraDiv = UI.document.createElement("div");
+                cameraDiv.className = "mapCamera clckable";
+                cameraDiv.style.height = String.Format("{0}%", cameraHeight);
+                cameraDiv.style.width = String.Format("{0}%", cameraWidtht);
+                mapBlock.appendChild(cameraDiv);
+            }
+            else
+                cameraDiv = mapBlock.getElementsByClassName("mapCamera")[0];
+
+            if (cameraDiv != null)
+            {
+                cameraDiv.style.left = String.Format("{0}%", positionCameraOnMap.x * 100.0f);
+                cameraDiv.style.bottom = String.Format("{0}%", positionCameraOnMap.y * 100.0f);
+                cameraDiv.style.transform = String.Format("rotate({0}deg) translate(-50%,-50%)", transform.rotation.eulerAngles.y);
+            }
         }
-        else
+        else if (mapBlock.getElementsByClassName("mapCamera").length <= 0)
         {
             cameraDiv = mapBlock.getElementsByClassName("mapCamera")[0];
-        }
-        if (cameraDiv != null)
-        {
-            cameraDiv.style.left = String.Format("{0}%", positionCameraOnMap.x * 100.0f - cameraHeight / 2);
-            cameraDiv.style.bottom = String.Format("{0}%", positionCameraOnMap.y * 100.0f);
+            cameraDiv.remove();
         }
     }
 
@@ -909,6 +950,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void UpdateMapsAndStatistic()
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateMapsAndStatistic"); // Profiler
         bool workersCalculated = false;
         List<GameObject> freeWorkers = new List<GameObject>();
         foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
@@ -965,7 +1007,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                     if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId && unitUnitBehavior.resourceGatherInfo.Count > 0 && unitBaseBehavior.IsIdle())
                         freeWorkers.Add(unit);
                 }
-                if (unitBaseBehavior.IsDisplayOnMap())
+                if (unitBaseBehavior.IsDisplayOnMap() && IsInTerrainRange(unit.transform.position))
                 {
                     Dom.Element unitDiv = UI.document.createElement("div");
                     unitDiv.className = "unit clckable";
@@ -1007,6 +1049,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             }
         }
         countWorkersTimer = 1.0f;
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public override void OnDisconnected(DisconnectCause cause)
@@ -1341,13 +1384,16 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void SelectOnly(string uniqueName)
     {
-        foreach (GameObject unit in GetSelectedObjects())
+        List<GameObject> _selectedObjects = new List<GameObject>();
+        _selectedObjects.AddRange(GetSelectedObjects());
+        foreach (GameObject unit in _selectedObjects)
         {
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
             if(baseBehaviorComponent.skillInfo.uniqueName != uniqueName)
             {
                 UnitSelectionComponent unitSelectionComponent = baseBehaviorComponent.GetComponent<UnitSelectionComponent>();
-                unitSelectionComponent.isSelected = false;
+                unitSelectionComponent.SetSelect(false);
+                selectedObjects.Remove(unit);
             }
         }
     }

@@ -25,7 +25,9 @@ namespace GangaGame
         public static int playerTeam = 1;
         public static bool playerSpectate = false;
         public static List<int> NPCList = new List<int>();
-        public static int mapSize = 2;
+
+        public const int defaultMapSize = 3;
+        public static int mapSize = defaultMapSize;
 
         public static bool IsMasterClient()
         {
@@ -162,7 +164,7 @@ namespace GangaGame
 
         private string loadedLevel = "";
         private bool singleplayer = true;
-        private float timerToLoad = 0.2f;
+        private float timerToLoad = 0.8f;
         private void Update()
         {
             if(loadedLevel != "")
@@ -219,7 +221,7 @@ namespace GangaGame
                     GameInfo.NPCList.Clear();
                     UI.document.innerHTML = RoomHTMLFile.text;
                     GameInfo.SetReady(false);
-                    GameInfo.mapSize = 2;
+                    GameInfo.mapSize = GameInfo.defaultMapSize;
                     UpdateRoomView();
                     return;
                 }
@@ -563,7 +565,7 @@ namespace GangaGame
 
             if (GameInfo.IsMasterClient())
             {
-                GameInfo.mapSize = 2;
+                GameInfo.mapSize = GameInfo.defaultMapSize;
                 ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() {
                     { GameInfo.MAP_SEED, UnityEngine.Random.Range(0, 1000) }, { GameInfo.MAP_SIZE, GameInfo.mapSize }
                 };

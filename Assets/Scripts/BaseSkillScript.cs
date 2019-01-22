@@ -55,8 +55,20 @@ namespace GangaGame
         public SkillInfo skillInfo { get { return _skillInfo; } set { _skillInfo = value; } }
         public List<SkillCondition> _skillConditions;
         public List<SkillCondition> skillConditions { get { return _skillConditions; } set { _skillConditions = value; } }
+        
+        public enum SkillActionType { None, UpgradeTear, };
+        public SkillActionType skillActionType = SkillActionType.None;
 
-        public virtual bool Activate(GameObject sender) { return true; }
+        public virtual bool Activate(GameObject sender)
+        {
+            if (skillActionType == SkillActionType.UpgradeTear)
+            {
+                BaseBehavior baseBehaviorComponent = sender.GetComponent<BaseBehavior>();
+                baseBehaviorComponent.tear += 1;
+                baseBehaviorComponent.UpdateTearDisplay();
+            }
+            return true;
+        }
 
         public static SkillErrorInfo GetSkillErrorInfo(GameObject sender, GameObject skillObject)
         {
@@ -99,7 +111,7 @@ namespace GangaGame
             string unitName, int minTear, int maxTear, int TCTeam, GameObject skillSender = null, GameObject skillObject = null)
         {
             BaseBehavior baseBehaviorComponent = skillSender.GetComponent<BaseBehavior>();
-            if (baseBehaviorComponent.tear >= minTear && (baseBehaviorComponent.tear <= maxTear || maxTear == 0))
+            if (baseBehaviorComponent.tear >= minTear && (baseBehaviorComponent.tear <= maxTear || maxTear == -1))
                 return true;
             return false;
         }

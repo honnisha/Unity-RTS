@@ -58,7 +58,7 @@ MonoBehaviour:
   - type: 1
     name: 
     minValue: 0
-    maxValue: 1
+    maxValue: 0
     readableName: town center
     notDisplayWhenFalse: 0
   - type: 2
@@ -67,3 +67,4 @@ MonoBehaviour:
     maxValue: 0
     readableName: 
     notDisplayWhenFalse: 1
+  skillActionType: 1

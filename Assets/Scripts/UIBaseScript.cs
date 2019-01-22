@@ -75,18 +75,22 @@ public class UIBaseScript : MonoBehaviour
     }
 
     // Update is called once per frame
+    List<GameObject> selectegObjects;
+    List <UIImage> selectedUnitUIImage;
+    List<UIImage> skillUIImages;
     void Update()
     {
-        List<GameObject> selectegObjects = cameraController.GetSelectedObjects();
-
-        UnityEngine.Profiling.Profiler.BeginSample("p Draw blocks"); // Profiler
-        List<UIImage> selectedUnitUIImage = GetSelectedObjectsToUIImage(selectegObjects);
+        UnityEngine.Profiling.Profiler.BeginSample("p Draw center block"); // Profiler
+        selectegObjects = cameraController.GetSelectedObjects();
+        selectedUnitUIImage = GetSelectedObjectsToUIImage(selectegObjects);
         DisplayUIImageObjects("center", selectedUnitUIImage, ref storageUIImages);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
+        UnityEngine.Profiling.Profiler.BeginSample("p Draw right block"); // Profiler
         if (selectegObjects.Count == 1)
             DisplayDetailInfo(selectegObjects[0]);
 
-        List<UIImage> skillUIImages = GetSelectedSkillsOfObjectsToUIImage(selectegObjects);
+        skillUIImages = GetSelectedSkillsOfObjectsToUIImage(selectegObjects);
         DisplayUIImageObjects("right", skillUIImages, ref storageSkillUIImages);
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
@@ -98,8 +102,8 @@ public class UIBaseScript : MonoBehaviour
         bool description = HandleUIEvents(selectegObjects, skillUIImages);
         if (!description || updateUI)
             DestroyDescription();
-        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         updateUI = false;
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public bool HandleUIEvents(List<GameObject> selectegObjects, List<UIImage> skillUIImages)
@@ -117,7 +121,7 @@ public class UIBaseScript : MonoBehaviour
                 if (selectegObjects.Count > 0)
                     cameraController.MoveCaeraToUnit(selectegObjects[0]);
             }
-            else if (activeElement.className.Contains("units"))
+            else if (activeElement.className.Contains("units") && !UnityEngine.Input.GetKey(KeyCode.LeftAlt))
             {
                 var element = (HtmlDivElement)activeElement;
                 var elementPos = new Vector2(element.getBoundingClientRect().X, element.getBoundingClientRect().Y);
@@ -305,9 +309,12 @@ public class UIBaseScript : MonoBehaviour
             list.Find(x => (x.name == name)).count += 1;
     }
 
+    List<UIImage> newCommands = new List<UIImage>();
+    BaseBehavior baseSelectedBehavior;
+    UnitBehavior unitSelectedBehavior;
     public void DisplayCommands(List<GameObject> selectegObjects)
     {
-        List<UIImage> newCommands = new List<UIImage>();
+        newCommands.Clear();
 
         var index = 0;
         bool recreate = false;
@@ -323,14 +330,14 @@ public class UIBaseScript : MonoBehaviour
         
         if (selectegObjects.Count > 0)
         {
-            BaseBehavior baseBehavior = selectegObjects[0].GetComponent<BaseBehavior>();
+            baseSelectedBehavior = selectegObjects[0].GetComponent<BaseBehavior>();
 
             bool inProject = false;
             BuildingBehavior buildingBehaviorComponent = selectegObjects[0].GetComponent<BuildingBehavior>();
             if (buildingBehaviorComponent != null && buildingBehaviorComponent.state == BuildingBehavior.BuildingState.Project)
                 inProject = true;
 
-            if (baseBehavior.team == cameraController.team && baseBehavior.ownerId == cameraController.userId && (baseBehavior.live || inProject))
+            if (baseSelectedBehavior.team == cameraController.team && baseSelectedBehavior.ownerId == cameraController.userId && (baseSelectedBehavior.live || inProject))
             {
                 // Building commands
                 if (buildingBehaviorComponent != null)
@@ -338,20 +345,20 @@ public class UIBaseScript : MonoBehaviour
                     newCommands.Add(new UIImage("stop", "Stop", "commands/stop-sign.png", "Stop command.", KeyCode.H));
                 }
 
-                UnitBehavior unitBehavior = selectegObjects[0].GetComponent<UnitBehavior>();
+                unitSelectedBehavior = selectegObjects[0].GetComponent<UnitBehavior>();
                 // Units commands
-                if (unitBehavior != null)
+                if (unitSelectedBehavior != null)
                 {
                     newCommands.Add(new UIImage("stop", "Stop", "commands/stop-sign.png", "Stop command.", KeyCode.H));
                     newCommands.Add(new UIImage("attack", "Go and attack", "commands/arrow-scope.png", "Move to target and attack enemies on the way.", KeyCode.A));
 
-                    if (unitBehavior.behaviorType == BaseBehavior.BehaviorType.Aggressive)
+                    if (unitSelectedBehavior.behaviorType == BaseBehavior.BehaviorType.Aggressive)
                         newCommands.Add(new UIImage("behaviorType1", "Aggressive behavior", "commands/caveman.png", "The unit will attack nearest enemy targets.", KeyCode.T));
-                    if (unitBehavior.behaviorType == BaseBehavior.BehaviorType.Counterattack)
+                    if (unitSelectedBehavior.behaviorType == BaseBehavior.BehaviorType.Counterattack)
                         newCommands.Add(new UIImage("behaviorType2", "Counterattack behavior", "commands/wide-arrow-dunk.png", "The unit will counterattack nearest enemy targets.", KeyCode.T));
-                    if (unitBehavior.behaviorType == BaseBehavior.BehaviorType.Hold)
+                    if (unitSelectedBehavior.behaviorType == BaseBehavior.BehaviorType.Hold)
                         newCommands.Add(new UIImage("behaviorType3", "Hold behavior", "commands/static-guard.png", "Unit will hold the position, and not attack back.", KeyCode.T));
-                    if (unitBehavior.behaviorType == BaseBehavior.BehaviorType.Run)
+                    if (unitSelectedBehavior.behaviorType == BaseBehavior.BehaviorType.Run)
                         newCommands.Add(new UIImage("behaviorType4", "Run behavior", "commands/run.png", "A unit will run away if attacked.", KeyCode.T));
                 }
             }

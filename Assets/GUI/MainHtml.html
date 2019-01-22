@@ -212,7 +212,8 @@ padding-bottom: 5px;
 	padding-bottom: 4%;
 }
 .elementsContent {
-	margin-right: 1.5%;
+	margin-right: 5px;
+	margin-bottom: 5px;
 	height: 100%;
 	width: auto;
 	display: inline-block;
@@ -227,17 +228,15 @@ padding-bottom: 5px;
 }
 .elementsContent > .hotkey {
 	margin: 5%;
-    font-size: 50%;
+    font-size: 7px;
 	background: grey;
-	height: 30%;
-	width: 25%;
-	display: inline-block;
+	height: 10px;
+	width: 10px;
 	text-align: center;
+    border: 1px solid black;
 }
 .skills > .elementsContent > img{
     background: darkorange;
-}
-.skills > .elementsContent {
     border: 1px solid darkorange;
 }
 .skills > .elementsContent > .hotkey {
@@ -245,8 +244,6 @@ padding-bottom: 5px;
 }
 .upgrades > .elementsContent > img {
     background: darkblue;
-}
-.upgrades > .elementsContent {
     border: 1px solid darkblue;
 }
 .upgrades > .elementsContent > .hotkey {
@@ -254,8 +251,6 @@ padding-bottom: 5px;
 }
 .error > img {
     background: darkred!important;
-}
-.error {
     border: 1px solid darkred!important;
 }
 .error > .hotkey {
@@ -268,11 +263,12 @@ padding-bottom: 5px;
 }
 .minimap {
 	margin-left: 50%;
-	margin-top: 5%;
+	margin-top: 4%;
 	height: 100%;
 	width: 45%;
 }
 .map {
+    text-align: center;
 	position: relative;
 	-spark-filter: opacity(40%), invert(100%);
 }
@@ -291,10 +287,9 @@ padding-bottom: 5px;
     border: 1px solid black;
 }
 .mapCamera {
-	position: absolute;
-	height: 6%;
-	width: 10%;
-    border: 1px solid black;
+	position: relative;
+    border: 1px solid #CDCCCC;
+	transform-origin: center center;
 }
 .chatBox {
     height: 20%;
@@ -555,6 +550,10 @@ padding-bottom: 5px;
         mapBlock.appendChild(element);
 		
         var element = document.createElement("div");
+        element.className = "mapHolder clckable";
+        mapBlock.appendChild(element);
+		
+        var element = document.createElement("div");
         element.className = "units clckable";
         mapBlock.appendChild(element);
 		
@@ -580,6 +579,8 @@ padding-bottom: 5px;
 			<div class="mapBlock">
 				<img class="map clckable">
 				</img>
+				<div class="mapHolder clckable">
+				</div>
 				<div class="units clckable">
 				</div>
 			</div>

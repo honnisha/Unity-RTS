@@ -243,12 +243,14 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             obstacle.enabled = false;
 
         unitPosition = transform.position;
+
+        UpdateTearDisplay(allTurnOn: true);
         renders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
+        UpdateTearDisplay();
 
         if (spawnPoint != null)
             spawnTarget = spawnPoint.transform.position;
 
-        UpdateTearDisplay();
     }
 
 
@@ -274,7 +276,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             UICommand(null);
     }
 
-    public void UpdateTearDisplay()
+    public void UpdateTearDisplay(bool allTurnOn = false)
     {
         int index = 0;
         foreach (GameObject tearObject in tearDisplay)
