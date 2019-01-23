@@ -184,6 +184,7 @@ namespace GangaGame
                 timerToLoad -= Time.fixedDeltaTime;
                 if(timerToLoad <= 0)
                 {
+                    musicSource.Stop();
                     if (singleplayer)
                         SceneManager.LoadScene(loadedLevel);
                     else

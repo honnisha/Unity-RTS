@@ -230,8 +230,10 @@ public class CameraController : MonoBehaviourPunCallbacks
         }
     }
 
-    public void PlayMusic(MusicType musicType, float delay = 0.0f, bool loop = true, bool dropCount = false)
+    private MusicType targetMusicType;
+    public void PlayMusic(MusicType musicType, float delay = 0.0f, bool loop = false, bool dropCount = false)
     {
+        targetMusicType = musicType;
         if (audioSource == null)
             return;
 
@@ -245,6 +247,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             {
                 if (soundInfo.lastSoundIndex == -1)
                     soundInfo.lastSoundIndex = UnityEngine.Random.Range(0, soundInfo.soundList.Count);
+
                 if (soundInfo.lastSoundIndex >= soundInfo.soundList.Count)
                     soundInfo.lastSoundIndex = 0;
 
@@ -309,6 +312,9 @@ public class CameraController : MonoBehaviourPunCallbacks
 
         if (!objectPlaced && buildedObject == null)
             SelectUnitsUpdate(isClickGUI);
+
+        if (!audioSource.isPlaying)
+            PlayMusic(targetMusicType, delay: 0.0f, loop: false, dropCount: false);
     }
 
     public void UpdateWindow(Dom.Element activeOver)
