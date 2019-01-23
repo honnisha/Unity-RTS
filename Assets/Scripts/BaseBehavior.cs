@@ -306,6 +306,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         if (audioSource == null)
             return;
 
+        if (!IsVisible())
+            return;
+
         float volume = PlayerPrefs.GetFloat("soundsVolume");
         foreach (var soundInfo in soundsInfo)
             if (soundInfo.type == soundEventType && soundInfo.soundList.Count > 0 && !audioSource.isPlaying)
@@ -869,23 +872,47 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         else
             _GiveOrder(point, displayMarker, overrideQueueCommands, speed);
     }
+
+    public void StartInteract(GameObject targetObject)
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonView targetObjectPhotonView = targetObject.GetComponent<PhotonView>();
+            if (targetObjectPhotonView != null)
+                photonView.RPC("StartInteractViewID", PhotonTargets.All, targetObject.GetComponent<PhotonView>().ViewID);
+            else
+            {
+                BaseBehavior unitBaseBehavior = targetObject.GetComponent<BaseBehavior>();
+                photonView.RPC("StartInteractUniqueID", PhotonTargets.All, unitBaseBehavior.uniqueId);
+            }
+        }
+        else
+            _StartInteract(target);
+    }
     [PunRPC]
     public virtual void StartInteractViewID(int targetViewId)
     {
-        StartInteract(PhotonNetwork.GetPhotonView(targetViewId).gameObject);
+        _StartInteract(PhotonNetwork.GetPhotonView(targetViewId).gameObject);
+    }
+    [PunRPC]
+    public virtual void StartInteractUniqueID(int targetUniqueId)
+    {
+        GameObject unit = GetObjectByUniqueId(targetUniqueId);
+        if (unit != null)
+            _StartInteract(unit);
     }
 
     public virtual void GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
     {
         if (PhotonNetwork.InRoom)
         {
-            PhotonView targetObjectPhotonView = GetComponent<PhotonView>();
+            PhotonView targetObjectPhotonView = targetObject.GetComponent<PhotonView>();
             if (targetObjectPhotonView != null)
-                photonView.RPC("GiveOrderViewID", PhotonTargets.All, spawnTargetObject.GetComponent<PhotonView>().ViewID, true, false);
+                photonView.RPC("GiveOrderViewID", PhotonTargets.All, targetObject.GetComponent<PhotonView>().ViewID, displayMarker, overrideQueueCommands, speed);
             else
             {
                 BaseBehavior unitBaseBehavior = targetObject.GetComponent<BaseBehavior>();
-                photonView.RPC("GiveOrderUniqueID", PhotonTargets.All, unitBaseBehavior.uniqueId, true, false);
+                photonView.RPC("GiveOrderUniqueID", PhotonTargets.All, unitBaseBehavior.uniqueId, displayMarker, overrideQueueCommands, speed);
             }
         }
         else
@@ -914,13 +941,13 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         }
         return null;
     }
-
+    
     public virtual void _GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
     public virtual void _GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
     public virtual bool IsIdle() { return true; }
     public virtual void TakeDamage(float damage, GameObject attacker) { }
     public virtual void BecomeDead() { }
-    public virtual void StartInteract(GameObject targetObject) { }
+    public virtual void _StartInteract(GameObject targetObject) { }
     public virtual bool[] UICommand(string commandName) { return new bool[2] { false, false }; }
     public virtual bool IsHealthVisible() { return true; }
     public virtual List<string> GetCostInformation() { return new List<string>(); }

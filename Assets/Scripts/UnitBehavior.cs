@@ -63,7 +63,7 @@ public class UnitBehavior : BaseBehavior
 
     override public void Update()
     {
-        UnityEngine.Profiling.Profiler.BeginSample("UserUpdate"); // Profiler
+        UnityEngine.Profiling.Profiler.BeginSample("p UserUpdate"); // Profiler
 
         UpdateIsInCameraView(cameraController.IsInCameraView(transform.position));
 
@@ -131,16 +131,12 @@ public class UnitBehavior : BaseBehavior
                 }
             }
         }
-        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
-        UnityEngine.Profiling.Profiler.BeginSample("DoInteract"); // Profiler
         // Interact with something
         bool interrupt = DoInteract();
         if (interrupt)
             return;
-        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
-        UnityEngine.Profiling.Profiler.BeginSample("End Update"); // Profiler
 
         MoveToTarget();
 
@@ -152,7 +148,6 @@ public class UnitBehavior : BaseBehavior
         if (pointMarkerPrefab != null)
             if (!unitSelectionComponent.isSelected || !live)
                 DestroyPointMarker();
-        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
         if ((obstacle == null || !obstacle.enabled) && newAgentDestination != new Vector3())
         {
@@ -294,10 +289,7 @@ public class UnitBehavior : BaseBehavior
                     {
                         ActionIsDone();
 
-                        if (PhotonNetwork.InRoom)
-                            GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
-                        else
-                            StartInteract(target);
+                        StartInteract(target);
                     }
                     else
                     {
@@ -310,6 +302,7 @@ public class UnitBehavior : BaseBehavior
 
     public void MoveToTarget()
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p MoveToTarget"); // Profiler
         if (interactType == InteractigType.None && target != null)
         {
             UnitStatistic statisic = GetStatisticsInfo();
@@ -399,10 +392,7 @@ public class UnitBehavior : BaseBehavior
                 }
                 else
                 {
-                    if (PhotonNetwork.InRoom)
-                        GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
-                    else
-                        StartInteract(target);
+                    StartInteract(target);
                 }
             }
         }
@@ -410,10 +400,7 @@ public class UnitBehavior : BaseBehavior
         {
             if (interactObject != null)
             {
-                if (PhotonNetwork.InRoom)
-                    GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, interactObject.GetComponent<PhotonView>().ViewID);
-                else
-                    StartInteract(interactObject);
+                StartInteract(interactObject);
             }
             else
             {
@@ -427,10 +414,12 @@ public class UnitBehavior : BaseBehavior
             SetAgentDestination(tempDestinationPoint);
             tempDestinationPoint = Vector3.zero;
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public bool DoInteract()
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p DoInteract"); // Profiler
         if (workingTimer >= 5.0f)
         {
             if (interactObject != null)
@@ -525,11 +514,12 @@ public class UnitBehavior : BaseBehavior
                         workingTimer += Time.deltaTime;
                         if (interactTimer <= 0)
                         {
-                            SendSoundEvent(SoundEventType.Build);
-
                             interactTimer = 1.0f;
                             BuildingBehavior interactObjectBuildingBehavior = interactObject.GetComponent<BuildingBehavior>();
                             anim.SetBool(interactAnimation, true);
+
+                            if (interactObjectBuildingBehavior.sourceType != SourceType.Farm)
+                                SendSoundEvent(SoundEventType.Build);
 
                             bool builded = interactObjectBuildingBehavior.RepairOrBuild(buildHpPerSecond);
                             if (builded || !interactObjectBuildingBehavior.live)
@@ -561,10 +551,7 @@ public class UnitBehavior : BaseBehavior
                 ActionIsDone();
                 if (target != null)
                 {
-                    if (PhotonNetwork.InRoom)
-                        GetComponent<PhotonView>().RPC("StartInteractViewID", PhotonTargets.All, target.GetComponent<PhotonView>().ViewID);
-                    else
-                        StartInteract(target);
+                    StartInteract(target);
                 }
                 else
                 {
@@ -572,11 +559,13 @@ public class UnitBehavior : BaseBehavior
                 }
             }
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         return false;
     }
 
     public void UpdateToolInHand()
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateToolInHand"); // Profiler
         toolInHandTimer = 0.0f;
         ToolInfo toolInfo = GetToolInfo();
         // Create tool in hand
@@ -604,6 +593,7 @@ public class UnitBehavior : BaseBehavior
             }
             else
                 anim.SetBool("Carry", true);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public bool IsCanWorkOnFarm(GameObject farm, bool displayErrorMessage = true)
@@ -651,6 +641,7 @@ public class UnitBehavior : BaseBehavior
 
     public ToolInfo GetToolInfo()
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p GetToolInfo"); // Profiler
         ToolInfo toolInfo = null;
         if(resourceType != ResourceType.None || interactType == InteractigType.Bulding)
         {
@@ -684,11 +675,13 @@ public class UnitBehavior : BaseBehavior
                     toolInfo = weapon;
             }
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         return toolInfo;
     }
 
     public GameObject GetObjectToInteract(InteractigType type = InteractigType.None, ResourceType targetResource = ResourceType.None)
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p GetObjectToInteract"); // Profiler
         Dictionary<GameObject, float> objects = new Dictionary<GameObject, float>();
         var allObjects = GetObjectsInRange(transform.position, 15.0f, team: -1).Concat(GameObject.FindGameObjectsWithTag("Ambient")).ToArray();
         foreach (GameObject oneObject in allObjects)
@@ -719,6 +712,7 @@ public class UnitBehavior : BaseBehavior
             buildingsList.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
             return buildingsList.First().Key;
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         return null;
     }
 
@@ -733,7 +727,7 @@ public class UnitBehavior : BaseBehavior
             return;
              
         // Find new target
-        GameObject newTarget = GetObjectToInteract(type: stopActionType, targetResource: resourceType);
+        GameObject newTarget = GetObjectToInteract(type: stopActionType);
         if (newTarget != null)
         {
             GiveOrder(newTarget, false, false);
@@ -764,8 +758,9 @@ public class UnitBehavior : BaseBehavior
         return false;
     }
 
-    public override void StartInteract(GameObject targetObject)
+    public override void _StartInteract(GameObject targetObject)
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p _StartInteract"); // Profiler
         SetAgentStopped(true);
 
         stucked = false;
@@ -782,9 +777,9 @@ public class UnitBehavior : BaseBehavior
                 if (canBuild)
                 {
                     if (PhotonNetwork.InRoom)
-                        targetObject.GetComponent<PhotonView>().RPC("SetAsBuilding", PhotonTargets.All);
+                        targetObject.GetComponent<PhotonView>().RPC("SetAsBuilding", PhotonTargets.All, targetObject.transform.position);
                     else
-                        targetBuildingBehavior.SetAsBuilding();
+                        targetBuildingBehavior.SetAsBuilding(newPosition: targetObject.transform.position);
 
                     interactTimer = 1.0f;
                     transform.LookAt(targetObject.transform.position);
@@ -892,7 +887,8 @@ public class UnitBehavior : BaseBehavior
             }
         }
         target = null;
-        ActionIsDone();
+        ActionIsDone(interactType);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public void GoToStoreResources()

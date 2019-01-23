@@ -259,8 +259,10 @@ public class BuildingBehavior : BaseBehavior
     
 
     [PunRPC]
-    public void SetAsBuilding()
+    public void SetAsBuilding(Vector3 newPosition)
     {
+        transform.position = newPosition;
+
         gameObject.layer = LayerMask.NameToLayer("Building");
         live = true;
         UnityEngine.AI.NavMeshObstacle navMesh = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();

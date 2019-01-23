@@ -343,6 +343,13 @@ MonoBehaviour:
     - {fileID: 8300000, guid: ad8c4fb98721c2d49bb69ca0a3a7785c, type: 3}
     - {fileID: 8300000, guid: 16a8781d367cd99458c4824b67453195, type: 3}
     lastSoundIndex: 0
+  - type: 3
+    soundList:
+    - {fileID: 8300000, guid: cb1c90a4b0c0d1445873ce2cf76616db, type: 3}
+    - {fileID: 8300000, guid: b90211eb04c83064d9ccd436f1d13b0a, type: 3}
+    - {fileID: 8300000, guid: 5f599050da8d2384bbf7a0a4c87bffb5, type: 3}
+    - {fileID: 8300000, guid: 328de492f65e8504e8dfec84b5c7063d, type: 3}
+    lastSoundIndex: 0
   isInCameraView: 0
   buildHpPerSecond: 10
   buildingTool:

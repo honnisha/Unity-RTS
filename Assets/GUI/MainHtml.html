@@ -448,6 +448,25 @@ html {
     background: url("button gray.png") no-repeat;
 	background-size: 100%;
 }
+.secondWindow {
+	margin-left: 360px;
+	padding: 15px;
+	top: 6%;
+	left: 50%;
+	position: absolute;
+	height: 150px;
+	width: 200px;
+    background: url("paper dark") no-repeat;
+	background-size: 100%;
+}
+.secondWindow > p {
+	margin: 4px 0;
+	color: grey;
+    text-shadow: 1px 1px 1px #000;
+}
+.secondWindow > p:hover {
+	color: white;
+}
 .closeWindow:hover {
 	color: red;
 }
@@ -455,19 +474,37 @@ html {
     background-image: url("paper dark.png") no-repeat;
 }
 .SettingsWindow {
+	left: 50%;
+	margin-left: -350px;
+	width: 700px;
 	text-align: center;
 }
 .SettingsContent {
-	height: 85%;
+	height: 82%;
 	margin: 5% 5% 0 5%;
-    border: 1px solid black;
 }
-.saveSettings {
+.settingsMessage {
+	width: 100%;
+	text-align: center;
+	padding-bottom: 5px;
+    text-shadow: 1px 1px 1px #000;
+}
+.settingsButton {
+	margin-left: 10px;
 	padding: 4px 7px;
 	width: 100px;
-    background: url("button red.png") no-repeat;
 	background-size: 100%;
 	display: inline-block;
+	color: gray;
+}
+.settingsButton:hover {
+	color: white;
+}
+.closeSettings {
+    background: url("button gray.png") no-repeat;
+}
+.saveSettings {
+    background: url("button red.png") no-repeat;
 }
 </style>
 <script>
@@ -600,10 +637,38 @@ html {
         contentBlock.className = "SettingsContent clckable";
         windowBlock.appendChild(contentBlock);
 
+        var settingsMessage = document.createElement("div");
+        settingsMessage.className = "settingsMessage clckable";
+        settingsMessage.innerText = " ";
+        windowBlock.appendChild(settingsMessage);
+
         var saveButton = document.createElement("div");
-        saveButton.className = "saveSettings clckable";
+        saveButton.className = "settingsButton closeSettings CreateSettings clckable";
+        saveButton.innerText = "Cancel";
+        windowBlock.appendChild(saveButton);
+
+        var saveButton = document.createElement("div");
+        saveButton.className = "settingsButton saveSettings clckable";
         saveButton.innerText = "Save settings";
         windowBlock.appendChild(saveButton);
+
+        var secondWindow = document.createElement("div");
+        secondWindow.className = "secondWindow clckable";
+        htmlBlock.appendChild(secondWindow);
+		
+        var text = document.createElement("h4");
+        text.innerText = "Tabs settings:";
+        secondWindow.appendChild(text);
+		
+        var text = document.createElement("p");
+        text.className = "tab gameTab clckable";
+        text.innerText = "Game";
+        secondWindow.appendChild(text);
+		
+        var text = document.createElement("p");
+        text.className = "tab soundTab clckable";
+        text.innerText = "Sound";
+        secondWindow.appendChild(text);
 	}
 </script>
 

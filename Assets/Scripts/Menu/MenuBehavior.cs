@@ -139,7 +139,7 @@ namespace GangaGame
 
     public class MenuBehavior : MonoBehaviourPunCallbacks
     {
-        string gameVersion = "0.1";
+        string gameVersion = "0.2";
 
         private Dictionary<string, RoomInfo> cachedRoomList = new Dictionary<string, RoomInfo>();
         private List<Player> playerListEntries = new List<Player>();
@@ -165,143 +165,6 @@ namespace GangaGame
         private string loadedLevel = "";
         private bool singleplayer = true;
         private float timerToLoad = 1.0f;
-
-        [HideInInspector]
-        public static string[] settingsTabs = new string[2] { "gameTab", "soundTab" };
-        
-        public class SettingsFild
-        {
-            public SettingsFild(Type _type, string _name, string _title, int _tab = 0, bool _isMainMenu = false, float _minRange = 0.0f, float _maxRange = 1.0f, float _factor = 1.0f, object _defaultValue = null)
-            {
-                type = _type;
-                name = _name;
-                title = _title;
-                tab = _tab;
-                isMainMenu = _isMainMenu;
-                minRange = _minRange;
-                maxRange = _maxRange;
-                factor = _factor;
-                defaultValue = _defaultValue;
-            }
-            public Type type;
-            public string name;
-            public string title;
-            public int tab = 0;
-            public bool isMainMenu = false;
-            public float minRange = 0.0f;
-            public float maxRange = 1.0f;
-            public float factor = 1.0f;
-            public object defaultValue;
-        }
-
-        public static void SetDefaultSettingsIfNotSetted()
-        {
-            if (PlayerPrefs.GetInt("settingsSetted") != 1)
-            {
-                SettingsFild[] settings = GetSettingsFields();
-                foreach (var setting in settings)
-                {
-                    if (setting.type == typeof(string))
-                        PlayerPrefs.SetString(setting.name, (string)setting.defaultValue);
-                    if (setting.type == typeof(float))
-                        PlayerPrefs.SetFloat(setting.name, (float)setting.defaultValue);
-                    if (setting.type == typeof(bool))
-                        PlayerPrefs.SetInt(setting.name, (int)setting.defaultValue);
-                }
-                PlayerPrefs.SetInt("settingsSetted", 1);
-                PlayerPrefs.Save();
-            }
-        }
-
-        public static SettingsFild[] GetSettingsFields()
-        {
-            List<SettingsFild> settings = new List<SettingsFild>();
-            settings.Add(new SettingsFild(typeof(string), "username", "Username", _tab: 0, _isMainMenu: true, _defaultValue: "Player"));
-            settings.Add(new SettingsFild(typeof(bool), "isUnitHealthAlwaysSeen", "Is unit health always displayed", _tab: 0, _defaultValue: 1));
-            settings.Add(new SettingsFild(typeof(bool), "isBuildingHealthAlwaysSeen", "Is building health always displayed", _tab: 0, _defaultValue: 0));
-
-            settings.Add(new SettingsFild(typeof(float), "musicVolume", "Music volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
-            settings.Add(new SettingsFild(typeof(float), "soundsVolume", "Sounds volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
-            settings.Add(new SettingsFild(typeof(float), "interfaceVolume", "Interface sounds volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
-            return settings.ToArray();
-        }
-
-        public static bool CreateSettings(string window, bool mainMenu = false, int tab = 0)
-        {
-            UI.document.getElementsByClassName(window)[0].innerHTML = "";
-
-            SettingsFild[] settings = GetSettingsFields();
-            foreach (var setting in settings)
-            {
-                if (setting.tab == tab)
-                {
-                    if (setting.isMainMenu && !mainMenu)
-                        continue;
-
-                    if(setting.type == typeof(string))
-                        UI.document.Run("CreateSettingText", window, setting.name, setting.title, String.Format("{0:0F}", PlayerPrefs.GetString(setting.name)));
-                    if (setting.type == typeof(float))
-                        UI.document.Run("CreateSettingFloat", window, setting.name, setting.title, PlayerPrefs.GetFloat(setting.name) * setting.factor, setting.minRange * setting.factor, setting.maxRange * setting.factor);
-                    if (setting.type == typeof(bool))
-                        UI.document.Run("CreateSettingCheckbox", window, setting.name, setting.title, PlayerPrefs.GetInt(setting.name) == 1 ? true : false);
-                }
-            }
-            return true;
-        }
-
-        public static bool UpdateTab(string window, string className, bool mainMenu = false)
-        {
-            int tabIndex = 0;
-            foreach (string tabName in settingsTabs)
-            {
-                if (className.Contains(tabName))
-                {
-                    CreateSettings(window, mainMenu, tabIndex);
-                    return true;
-                }
-                tabIndex++;
-            }
-            return false;
-        }
-
-        public static string SaveSettings()
-        {
-            SettingsFild[] settings = GetSettingsFields();
-            foreach (var setting in settings)
-            {
-                if (UI.document.getElementsByClassName(setting.name).length > 0)
-                {
-                    string newValue = UI.document.getElementsByClassName(setting.name)[0].innerText;
-                    if (setting.type == typeof(string))
-                    {
-                        if (newValue.Length <= 0)
-                            return String.Format("Wrong \"{0}\" value", setting.title);
-
-                        PlayerPrefs.SetString(setting.name, newValue);
-                    }
-                    if (setting.type == typeof(float))
-                    {
-                        var floatRegex = new Regex(@"^[0-9]*(?:\.[0-9]*)?$");
-                        if (!floatRegex.IsMatch(newValue))
-                            return String.Format("Wrong \"{0}\" value", setting.title);
-                        float floatValue = float.Parse(newValue) / setting.factor;
-                        if (floatValue < setting.minRange)
-                            return String.Format("\"{0}\" less than {1}", setting.title, setting.minRange);
-                        if (floatValue > setting.maxRange)
-                            return String.Format("\"{0}\" more than {1}", setting.title, setting.maxRange);
-
-                        PlayerPrefs.SetFloat(setting.name, floatValue);
-                    }
-                    if (setting.type == typeof(bool))
-                    {
-                        var checkbox = (HtmlInputElement)UI.document.getElementsByClassName(setting.name)[0];
-                        PlayerPrefs.SetInt(setting.name, checkbox.Checked ? 1 : 0);
-                    }
-                }
-            }
-            PlayerPrefs.Save();
-            return "";
-        }
 
         private void Update()
         {
@@ -351,8 +214,8 @@ namespace GangaGame
 
             if (UnityEngine.Input.GetMouseButtonUp(0) || UnityEngine.Input.GetKeyDown(KeyCode.Return))
             {
-                bool tabUpdated = UpdateTab("settingsContainer", className, mainMenu: true);
-                if (tabUpdated)
+                bool changed = SettingsScript.ChangeTabOrSaveSettings(className, windowSettings: "settingsContainer", saveClassName: "saveSettings", errorClassName: "messageSettings", mainMenu: true);
+                if (changed)
                     return;
 
                 if (className.Contains("singleplayer"))
@@ -380,7 +243,7 @@ namespace GangaGame
                 {
                     audioSource.Play(0);
                     UI.document.innerHTML = SettingsHTMLFile.text;
-                    CreateSettings("settingsContainer", true);
+                    SettingsScript.CreateSettings("settingsContainer", true);
                     return;
                 }
                 if (className.Contains("exit"))
@@ -391,7 +254,7 @@ namespace GangaGame
                 }
                 else if (className.Contains("ConnectDialog") || UI.document.getElementsByClassName("ConnectDialog").length > 0 && UnityEngine.Input.GetKeyDown(KeyCode.Return))
                 {
-                    string error = SaveSettings();
+                    string error = SettingsScript.SaveSettings();
                     if (error != "")
                         UI.document.getElementsByClassName("error")[0].innerText = error;
                     else
@@ -403,15 +266,6 @@ namespace GangaGame
                 else if (className.Contains("backToMenu") && UI.document.getElementsByClassName("settingsBlock").length > 0)
                 {
                     UI.document.innerHTML = MenuHTMLFile.text;
-                    return;
-                }
-                else if (className.Contains("saveSettings") && UI.document.getElementsByClassName("saveSettings").length > 0)
-                {
-                    string error = SaveSettings();
-                    if (error != "")
-                        UI.document.getElementsByClassName("messageSettings")[0].innerHTML = error;
-                    else
-                        UI.document.getElementsByClassName("messageSettings")[0].innerHTML = "Settings saved!";
                     return;
                 }
 
@@ -469,7 +323,7 @@ namespace GangaGame
 
                 else if ((PhotonNetwork.InRoom || singleplayer) && className.Contains("backToMenu"))
                 {
-                    gameStarted = false;
+                    timerActive = false;
                     PhotonNetwork.LeaveRoom();
                     CreateMessage("Leaving...");
                 }
@@ -637,7 +491,7 @@ namespace GangaGame
                 roomBlock.innerText = info.Name;
                 menuBlock.appendChild(roomBlock);
             }
-
+            Debug.Log("UpdateLobbyListView: " + cachedRoomList.Count);
         }
 
         public override void OnConnectedToMaster()
@@ -790,6 +644,10 @@ namespace GangaGame
             string masterClientNickname = "";
             if (PhotonNetwork.InRoom)
             {
+                object mapSizeObd;
+                if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(GameInfo.MAP_SIZE, out mapSizeObd))
+                    GameInfo.mapSize = (int)mapSizeObd;
+
                 foreach (Player user in playerListEntries)
                 {
                     object userReadyObd;
@@ -885,7 +743,7 @@ namespace GangaGame
 
         void Awake()
         {
-            SetDefaultSettingsIfNotSetted();
+            SettingsScript.SetDefaultSettingsIfNotSetted();
             PhotonNetwork.AutomaticallySyncScene = true;
         }
         

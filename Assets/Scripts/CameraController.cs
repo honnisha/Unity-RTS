@@ -270,14 +270,32 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void UpdateWindow(Dom.Element activeOver)
     {
+        if (selectedWindowType == WindowType.Settings && activeOver != null && UnityEngine.Input.GetMouseButtonUp(0))
+        {
+            bool changed = SettingsScript.ChangeTabOrSaveSettings(activeOver.className, windowSettings: "SettingsContent", saveClassName: "saveSettings", errorClassName: "settingsMessage", mainMenu: false);
+            if (changed)
+            {
+                UpdateSettings();
+                return;
+            }
+        }
+
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateWindow"); // Profiler
         WindowType newWindowType = GetNewWindow(activeOver);
         if ((newWindowType != WindowType.None && selectedWindowType != WindowType.None) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
         {
             if (selectedWindowType == WindowType.MainMenu)
-                UI.document.getElementsByClassName("menu")[0].innerHTML = "";
+            {
+                if (UI.document.getElementsByClassName("menu").length > 0)
+                    UI.document.getElementsByClassName("menu")[0].innerHTML = "";
+            }
             else if (selectedWindowType == WindowType.BigMap || selectedWindowType == WindowType.Settings)
-                UI.document.getElementsByClassName("window")[0].remove();
+                if (UI.document.getElementsByClassName("window").length > 0)
+                    UI.document.getElementsByClassName("window")[0].remove();
+
+            if(selectedWindowType == WindowType.Settings)
+                if (UI.document.getElementsByClassName("secondWindow").length > 0)
+                    UI.document.getElementsByClassName("secondWindow")[0].remove();
 
             if (newWindowType == selectedWindowType || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
                 newWindowType = WindowType.None;
@@ -296,9 +314,8 @@ public class CameraController : MonoBehaviourPunCallbacks
             else if (newWindowType == WindowType.Settings)
             {
                 UI.document.Run("DisplaySettingsWindow");
-                MenuBehavior.CreateSettings("SettingsContent");
+                SettingsScript.CreateSettings("SettingsContent");
             }
-
             selectedWindowType = newWindowType;
         }
 
@@ -690,13 +707,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                                     baseBehaviorComponent.AddCommandToQueue(hit.transform.gameObject);
                                 else
                                 {
-                                    PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
-                                    if (PhotonNetwork.InRoom)
-                                    {
-                                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, hit.transform.gameObject.GetComponent<PhotonView>().ViewID, true, true);
-                                    }
-                                    else
-                                        baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true, true);
+                                    baseBehaviorComponent.GiveOrder(hit.transform.gameObject, true, true);
                                 }
                             }
                             else
@@ -795,10 +806,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                                 }
                                 else
                                 {
-                                    if (PhotonNetwork.InRoom)
-                                        unitPhotonView.RPC("GiveOrderViewID", PhotonTargets.All, selectedObject.GetComponent<PhotonView>().ViewID, true, true);
-                                    else
-                                        baseBehaviorComponent.GiveOrder(selectedObject, true, true);
+                                    baseBehaviorComponent.GiveOrder(selectedObject, true, true);
                                     buildedObject = null;
                                 }
                             }
@@ -1265,10 +1273,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             }
             else
             {
-                if (PhotonNetwork.InRoom)
-                    unitPhotonView.RPC("GiveOrder", PhotonTargets.All, new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true, true);
-                else
-                    baseBehaviorComponent.GiveOrder(new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true, true);
+                baseBehaviorComponent.GiveOrder(new Vector3(rotatedPoint.x, newPoint.y, rotatedPoint.y), true, true);
             }
 
             indexCount += 1;

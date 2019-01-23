@@ -18,6 +18,12 @@ input {
 	left: 50%;
 	height: 20px;
 	width: 40%;
+
+	background: #2B2B2B;
+	color: white;
+    border: 1px solid #424242;
+}
+input:hover {
 }
 .settingBlock > .slider {
 	width: 45%;
