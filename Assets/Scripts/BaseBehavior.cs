@@ -301,7 +301,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             UICommand(null);
     }
 
-    public void SendSoundEvent(SoundEventType soundEventType)
+    public void SendSoundEvent(SoundEventType soundEventType, bool dropCount = false)
     {
         if (audioSource == null)
             return;
@@ -311,16 +311,21 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         float volume = PlayerPrefs.GetFloat("soundsVolume");
         foreach (var soundInfo in soundsInfo)
+        {
+            if (dropCount)
+                soundInfo.lastSoundIndex = -1;
+
             if (soundInfo.type == soundEventType && soundInfo.soundList.Count > 0 && !audioSource.isPlaying)
             {
                 if (soundInfo.lastSoundIndex == -1)
                     soundInfo.lastSoundIndex = UnityEngine.Random.Range(0, soundInfo.soundList.Count - 1);
-                if (soundInfo.lastSoundIndex >= soundInfo.soundList.Count - 1)
+                if (soundInfo.lastSoundIndex >= soundInfo.soundList.Count)
                     soundInfo.lastSoundIndex = 0;
 
                 audioSource.PlayOneShot(soundInfo.soundList[soundInfo.lastSoundIndex], volume);
                 soundInfo.lastSoundIndex++;
             }
+        }
     }
 
     public void UpdateTearDisplay(bool allTurnOn = false)

@@ -62,7 +62,8 @@ namespace GangaGame
             settings.Add(new SettingsFild(typeof(bool), "isUnitHealthAlwaysSeen", "Is unit health always displayed", _tab: 0, _defaultValue: 1));
             settings.Add(new SettingsFild(typeof(bool), "isBuildingHealthAlwaysSeen", "Is building health always displayed", _tab: 0, _defaultValue: 0));
 
-            settings.Add(new SettingsFild(typeof(float), "musicVolume", "Music volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
+            settings.Add(new SettingsFild(typeof(float), "musicVolume", "Music in game volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
+            settings.Add(new SettingsFild(typeof(float), "musicMenuVolume", "Music in menu volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
             settings.Add(new SettingsFild(typeof(float), "soundsVolume", "Sounds volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
             settings.Add(new SettingsFild(typeof(float), "interfaceVolume", "Interface sounds volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
             return settings.ToArray();

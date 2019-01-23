@@ -2,10 +2,29 @@
 <link rel="stylesheet" type="text/css" href="css/loading.css">
 <script type='text/javascript' src="js/loading.js"></script>
 <style type='text/css'>
+html {
+    background: url("background-cloud-dark.png") no-repeat;
+	background-size: 100%;
+}
+.mainMenu {
+    background-image: url("paper background.png") no-repeat;
+	background-size: 100%;
+}
 .mainMenu > .menuElement {
 	margin-left: 10px;
     background: url("button red") no-repeat;
 	background-size: 100%;
+}
+.mainContent > .title {
+	left: 50%;
+	top: 23%;
+	margin-left: -400px;
+	position: absolute;
+    font-size: 45pt;
+	font-weight: bold;
+	width: 800px;
+    text-shadow: 2px 2px 2px #000;
+	text-align: center;
 }
 .menu > .menuElement:hover {
 	color: #2B2B2B;
@@ -76,6 +95,7 @@
 </script>
 
 <div class="mainContent">
+	<div class="title">Ganga Game</div>
 	<div class="mainMenu">
 		<div class="menuElement singleplayer">Single game</div>
 		<div class="menuElement multiplayer">Multiplayer game</div>

@@ -224,15 +224,16 @@ MonoBehaviour:
     uniqueName: Food storage
     readableName: Food storage
     readableDescription: Food storage
-    imagePath: buildings/wooden-crate.png
+    imagePath: buildings/barrel
     timeToBuild: 30
     costFood: 0
     costGold: 0
     costWood: 50
     productionHotkey: 100
     skillType: 1
-  _skillConditions: 0
+  _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
+  uniqueId: -1
   interactType: 0
   attackTimer: 0
   attackDelayTimer: 0
@@ -299,11 +300,13 @@ MonoBehaviour:
   canBeSelected: 1
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
+  allOutlines: []
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
   sourceType: 0
   storedResources: 01000000
+  soundsInfo: []
   isInCameraView: 0
   state: 3
   magnitDistance: 4

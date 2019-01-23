@@ -149,6 +149,11 @@ namespace GangaGame
         public TextAsset RoomHTMLFile;
         public TextAsset SettingsHTMLFile;
 
+        public AudioClip menuMusic;
+        public float musicDelay = 0.0f;
+
+        public AudioClip clickSound;
+
         private float timeToStart = 10.0f;
         private float timerToStart = 0.0f;
         private float sendMessageTimer = 0.0f;
@@ -156,10 +161,16 @@ namespace GangaGame
 
         private bool gameStarted = false;
 
-        AudioSource audioSource;
+        AudioSource musicSource;
+        AudioSource soundsSource;
         private void Start()
         {
-            audioSource = GetComponent<AudioSource>();
+            musicSource = GetComponent<AudioSource>();
+            soundsSource = GetComponentInChildren<AudioSource>();
+
+            musicSource.clip = menuMusic;
+            musicSource.volume = PlayerPrefs.GetFloat("musicMenuVolume");
+            musicSource.PlayDelayed(musicDelay);
         }
 
         private string loadedLevel = "";
@@ -216,12 +227,15 @@ namespace GangaGame
             {
                 bool changed = SettingsScript.ChangeTabOrSaveSettings(className, windowSettings: "settingsContainer", saveClassName: "saveSettings", errorClassName: "messageSettings", mainMenu: true);
                 if (changed)
+                {
+                    musicSource.volume = PlayerPrefs.GetFloat("musicMenuVolume");
                     return;
+                }
 
                 if (className.Contains("singleplayer"))
                 {
                     singleplayer = true;
-                    audioSource.Play(0);
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     GameInfo.playerSpectate = false;
                     GameInfo.NPCList.Clear();
                     UI.document.innerHTML = RoomHTMLFile.text;
@@ -233,7 +247,7 @@ namespace GangaGame
                 if (className.Contains("multiplayer"))
                 {
                     singleplayer = false;
-                    audioSource.Play(0);
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     if (PlayerPrefs.GetString("username") == "")
                         CreateConnectDialog();
                     else
@@ -241,14 +255,14 @@ namespace GangaGame
                 }
                 if (className.Contains("menuElement settings"))
                 {
-                    audioSource.Play(0);
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     UI.document.innerHTML = SettingsHTMLFile.text;
                     SettingsScript.CreateSettings("settingsContainer", true);
                     return;
                 }
                 if (className.Contains("exit"))
                 {
-                    audioSource.Play(0);
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     Application.Quit();
                     return;
                 }

@@ -19,6 +19,18 @@ public class CameraController : MonoBehaviourPunCallbacks
     public float gold = 0;
     public float wood = 0;
 
+    public enum MusicType { None, Normal };
+    [System.Serializable]
+    public class SoundInfo
+    {
+        public MusicType type = MusicType.None;
+        public List<AudioClip> soundList = new List<AudioClip>();
+        public int lastSoundIndex = -1;
+    }
+    [Header("Sounds Info")]
+    public SoundInfo[] soundsInfo;
+    AudioSource audioSource;
+
     [Header("Select info")]
     public bool isSelecting = false;
     private Vector3 mousePosition1;
@@ -68,35 +80,39 @@ public class CameraController : MonoBehaviourPunCallbacks
         public int number;
         public float distance = 3.0f;
     }
+    [Header("Spawn info")]
     public string createSpawnBuildingName;
     public List<SpawnUnitInfo> startUnitsInfo = new List<SpawnUnitInfo>();
 
     private float clickTimer = 0.0f;
 
+    [Header("Map info")]
     public Texture mapTexture;
+
+    Dictionary<string, List<Vector3>> spawnData;
+    bool[,] chanksView = new bool[0, 0];
+    float chunkSize = 11.0f;
+    public bool debugVisionGrid = false;
+    private int uniqueIdIndex = 0;
+
+    // Stuff
+    List<GameObject> selectedObjects = new List<GameObject>();
+
+    public enum WindowType { None, MainMenu, BigMap, Settings };
+    [HideInInspector]
+    public WindowType selectedWindowType = WindowType.None;
+    public Dictionary<WindowType, List<object>> menuInfo = new Dictionary<WindowType, List<object>>();
 
     private Dictionary<KeyCode, List<GameObject>> unitsBinds = new Dictionary<KeyCode, List<GameObject>>();
     private KeyCode tempKey;
     private float keyTimer = 0.0f;
     private int keyPressed;
 
-    public enum WindowType { None, MainMenu, BigMap, Settings };
-    public WindowType selectedWindowType = WindowType.None;
-    public Dictionary<WindowType, List<object>> menuInfo = new Dictionary<WindowType, List<object>>();
-
-    List<GameObject> selectedObjects = new List<GameObject>();
-
-    Dictionary<string, List<Vector3>> spawnData;
-    bool[,] chanksView = new bool[0, 0];
-    float chunkSize = 11.0f;
-
-    public bool debugVisionGrid = false;
-
-    private int uniqueIdIndex = 0;
-
     // Use this for initialization
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+
         UI.document.Run("CreateLoadingScreen", "Retrieving data");
 
         menuInfo.Add(WindowType.MainMenu, new List<object>());
@@ -214,12 +230,39 @@ public class CameraController : MonoBehaviourPunCallbacks
         }
     }
 
+    public void PlayMusic(MusicType musicType, float delay = 0.0f, bool loop = true, bool dropCount = false)
+    {
+        if (audioSource == null)
+            return;
+
+        float volume = PlayerPrefs.GetFloat("musicVolume");
+        foreach (var soundInfo in soundsInfo)
+        {
+            if (dropCount)
+                soundInfo.lastSoundIndex = -1;
+
+            if (soundInfo.type == musicType && soundInfo.soundList.Count > 0 && !audioSource.isPlaying)
+            {
+                if (soundInfo.lastSoundIndex == -1)
+                    soundInfo.lastSoundIndex = UnityEngine.Random.Range(0, soundInfo.soundList.Count);
+                if (soundInfo.lastSoundIndex >= soundInfo.soundList.Count)
+                    soundInfo.lastSoundIndex = 0;
+
+                audioSource.clip = soundInfo.soundList[soundInfo.lastSoundIndex];
+                audioSource.loop = loop;
+                audioSource.PlayDelayed(delay);
+                soundInfo.lastSoundIndex++;
+            }
+        }
+    }
+
     public void UpdateSettings()
     {
         var unitInfo = tagsToSelect.Find(x => x.name == "Unit");
         unitInfo.healthVisibleOnlyWhenSelect = PlayerPrefs.GetInt("isUnitHealthAlwaysSeen") == 1 ? false : true;
         var buildInfo = tagsToSelect.Find(x => x.name == "Building");
         buildInfo.healthVisibleOnlyWhenSelect = PlayerPrefs.GetInt("isBuildingHealthAlwaysSeen") == 1 ? false : true;
+        audioSource.volume = PlayerPrefs.GetFloat("musicVolume");
     }
 
     private int workedOnFood, workedOnGold, workedOnWood = 0;
@@ -601,6 +644,7 @@ public class CameraController : MonoBehaviourPunCallbacks
     {
         UpdateSettings();
         UI.document.Run("DeleteLoadingScreen");
+        PlayMusic(MusicType.Normal, delay: 1.0f, dropCount: true);
     }
 
     public WindowType GetNewWindow(Dom.Element activeOver)

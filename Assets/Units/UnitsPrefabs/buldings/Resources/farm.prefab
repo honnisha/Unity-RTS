@@ -97,7 +97,9 @@ MonoBehaviour:
     minValue: 1
     maxValue: 0
     readableName: town center
+    notDisplayWhenFalse: 0
   unitPosition: {x: 0, y: 0, z: 0}
+  uniqueId: -1
   interactType: 0
   attackTimer: 0
   attackDelayTimer: 0
@@ -163,11 +165,13 @@ MonoBehaviour:
   canBeSelected: 1
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
+  allOutlines: []
   resourceCapacityType: 1
   resourceCapacity: 0
   resourceEndless: 1
   sourceType: 1
   storedResources: 
+  soundsInfo: []
   isInCameraView: 0
   state: 3
   magnitDistance: 2
@@ -213,8 +217,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3403}
-  viewIdField: 0
-  InstantiationId: 9
+  viewIdField: 3
+  InstantiationId: 3
   isRuntimeInstantiated: 0
 --- !u!114 &3403
 MonoBehaviour:

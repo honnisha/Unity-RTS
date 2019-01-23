@@ -50,4 +50,5 @@ MonoBehaviour:
   - InstantiateSpawn
   - _GiveOrder
   - GiveOrderUniqueID
+  - StartInteractUniqueID
   DisableAutoOpenWizard: 1
