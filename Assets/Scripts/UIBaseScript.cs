@@ -59,13 +59,26 @@ public class UIBaseScript : MonoBehaviour
     public List<UIImage> storageOrdersUIImages = new List<UIImage>();
     public List<UIImage> storageSkillUIImages = new List<UIImage>();
 
-    private List<UIImage> commands = new List<UIImage>();
-
     CameraController cameraController;
+    Dictionary<BaseBehavior.BehaviorType, UIImage> behaviorUIImages = new Dictionary<BaseBehavior.BehaviorType, UIImage>();
+    Dictionary<UIImage, int> commandsUIImages = new Dictionary<UIImage, int>();
     // Use this for initialization
     void Start()
     {
         cameraController = Camera.main.GetComponent<CameraController>();
+
+        // Buildings
+        commandsUIImages.Add(new UIImage("stop", "Stop", "commands/stop-sign.png", "Stop command.", KeyCode.H), 1);
+
+        // Units
+        commandsUIImages.Add(new UIImage("stop", "Stop", "commands/stop-sign.png", "Stop command.", KeyCode.H), 2);
+        commandsUIImages.Add(new UIImage("attack", "Go and attack", "commands/arrow-scope.png", "Move to target and attack enemies on the way.", KeyCode.A), 2);
+
+        // Behavior commands
+        behaviorUIImages.Add(BaseBehavior.BehaviorType.Aggressive, new UIImage("behaviorType1", "Aggressive behavior", "commands/caveman.png", "The unit will attack nearest enemy targets.", KeyCode.T));
+        behaviorUIImages.Add(BaseBehavior.BehaviorType.Counterattack, new UIImage("behaviorType2", "Counterattack behavior", "commands/wide-arrow-dunk.png", "The unit will counterattack nearest enemy targets.", KeyCode.T));
+        behaviorUIImages.Add(BaseBehavior.BehaviorType.Hold, new UIImage("behaviorType3", "Hold behavior", "commands/static-guard.png", "Unit will hold the position, and not attack back.", KeyCode.T));
+        behaviorUIImages.Add(BaseBehavior.BehaviorType.Run, new UIImage("behaviorType4", "Run behavior", "commands/run.png", "A unit will run away if attacked.", KeyCode.T));
     }
 
     private bool updateUI = false;
@@ -73,33 +86,32 @@ public class UIBaseScript : MonoBehaviour
     {
         updateUI = true;
     }
-
+    
+    private List<UIImage> skillUIImages = new List<UIImage>();
     // Update is called once per frame
-    List<GameObject> selectegObjects;
-    List <UIImage> selectedUnitUIImage;
-    List<UIImage> skillUIImages;
     void Update()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p Draw center block"); // Profiler
-        selectegObjects = cameraController.GetSelectedObjects();
-        selectedUnitUIImage = GetSelectedObjectsToUIImage(selectegObjects);
-        DisplayUIImageObjects("center", selectedUnitUIImage, ref storageUIImages);
+
+        DisplayUIImageObjects("center", GetSelectedObjectsToUIImage(cameraController.selectedObjects), ref storageUIImages);
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
         UnityEngine.Profiling.Profiler.BeginSample("p Draw right block"); // Profiler
-        if (selectegObjects.Count == 1)
-            DisplayDetailInfo(selectegObjects[0]);
+        if (cameraController.selectedObjects.Count == 1)
+            DisplayDetailInfo(cameraController.selectedObjects[0], force: updateUI);
 
-        skillUIImages = GetSelectedSkillsOfObjectsToUIImage(selectegObjects);
+        skillUIImages.Clear();
+        skillUIImages.AddRange(GetSelectedSkillsOfObjectsToUIImage(cameraController.selectedObjects));
+
         DisplayUIImageObjects("right", skillUIImages, ref storageSkillUIImages);
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
         UnityEngine.Profiling.Profiler.BeginSample("p DisplayCommands"); // Profiler
-        DisplayCommands(selectegObjects);
+        DisplayCommands(cameraController.selectedObjects);
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
         UnityEngine.Profiling.Profiler.BeginSample("p HandleUIEvents"); // Profiler
-        bool description = HandleUIEvents(selectegObjects, skillUIImages);
+        bool description = HandleUIEvents(cameraController.selectedObjects, skillUIImages);
         if (!description || updateUI)
             DestroyDescription();
         updateUI = false;
@@ -115,7 +127,7 @@ public class UIBaseScript : MonoBehaviour
             if (activeElement.className.Contains("discriptable"))
                 description = DisplayDescription(activeElement.className, skillUIImages);
             else if (activeElement.className.Contains("descrCommand"))
-                description = DisplayDescription(activeElement.className, commands);
+                description = DisplayDescription(activeElement.className, commands: true);
             else if (UnityEngine.Input.GetMouseButtonUp(0) && activeElement.className.Contains("detailInfo"))
             {
                 if (selectegObjects.Count > 0)
@@ -135,7 +147,7 @@ public class UIBaseScript : MonoBehaviour
                 {
                     foreach (var unit in cameraController.GetSelectedObjects())
                     {
-                        BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                        unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
                         PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
                         if (PhotonNetwork.InRoom)
                             unitPhotonView.RPC("GiveOrder", PhotonTargets.All, cameraController.mapPointToPosition(mapPoint), true);
@@ -158,46 +170,55 @@ public class UIBaseScript : MonoBehaviour
         return description;
     }
 
-    public void DisplayDetailInfo(GameObject unit)
+    BaseBehavior unitBaseBehaviorComponent = null;
+    UnitBehavior unitBehaviorComponent = null;
+    BuildingBehavior buildingBehaviorComponent = null;
+    GameObject cachedDetailInfoObject = null;
+    public void DisplayDetailInfo(GameObject unit, bool force = false)
     {
         if (unit == null)
             return;
 
+        if (cachedDetailInfoObject == unit && !force)
+            return;
+
+        cachedDetailInfoObject = unit;
+
         //Display query to build
-        BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-        BuildingBehavior buildingBehaviorComponent = unit.GetComponent<BuildingBehavior>();
+        unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+
         if (buildingBehaviorComponent != null && buildingBehaviorComponent.team == cameraController.team && buildingBehaviorComponent.ownerId == cameraController.userId)
             updateQueue(buildingBehaviorComponent.productionQuery, buildingBehaviorComponent.uqeryLimit, buildingBehaviorComponent.buildTimer);
 
         // Set health
         foreach (var element in UI.document.getElementsByClassName("unitHealth"))
-            element.style.width = String.Format("{0:F0}%", unitBaseBehaviorComponent.health / unitBaseBehaviorComponent.maxHealth * 100);
-
-        UnitBehavior unitBehaviorComponent = unit.GetComponent<UnitBehavior>();
+            element.style.width = new StringBuilder(16).AppendFormat("{0:F0}%", unitBaseBehaviorComponent.health / unitBaseBehaviorComponent.maxHealth * 100).ToString();
+        
         foreach (var element in UI.document.getElementsByClassName("dinamicInfo"))
         {
             element.innerHTML = "";
 
-            if (unitBehaviorComponent != null && unitBehaviorComponent.resourceHold > 0)
+            BaseBehavior.ResourceType resourseDisplayType = BaseBehavior.ResourceType.None;
+            float resources = 0.0f;
+            if (unitBaseBehaviorComponent != null && unitBaseBehaviorComponent.resourceHold > 0)
             {
-                Dom.Element statusticDiv = UI.document.createElement("p");
-                if (unitBehaviorComponent.resourceType == BaseBehavior.ResourceType.Food)
-                    statusticDiv.innerHTML = String.Format("Food: {0:F0}", unitBehaviorComponent.resourceHold);
-                if (unitBehaviorComponent.resourceType == BaseBehavior.ResourceType.Gold)
-                    statusticDiv.innerHTML = String.Format("Gold: {0:F0}", unitBehaviorComponent.resourceHold);
-                if (unitBehaviorComponent.resourceType == BaseBehavior.ResourceType.Wood)
-                    statusticDiv.innerHTML = String.Format("Wood: {0:F0}", unitBehaviorComponent.resourceHold);
-                element.appendChild(statusticDiv);
+                resources = unitBaseBehaviorComponent.resourceHold;
+                resourseDisplayType = unitBaseBehaviorComponent.resourceType;
             }
-            if (unitBaseBehaviorComponent.resourceCapacity > 0)
+            else if (unitBaseBehaviorComponent.resourceCapacity > 0)
+            {
+                resources = unitBaseBehaviorComponent.resourceCapacity;
+                resourseDisplayType = unitBaseBehaviorComponent.resourceCapacityType;
+            }
+            if (resourseDisplayType != BaseBehavior.ResourceType.None)
             {
                 Dom.Element statusticDiv = UI.document.createElement("p");
-                if (unitBaseBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Food)
-                    statusticDiv.innerHTML = String.Format("Food: {0:F0}", unitBaseBehaviorComponent.resourceCapacity);
-                if (unitBaseBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Gold)
-                    statusticDiv.innerHTML = String.Format("Gold: {0:F0}", unitBaseBehaviorComponent.resourceCapacity);
-                if (unitBaseBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Wood)
-                    statusticDiv.innerHTML = String.Format("Wood: {0:F0}", unitBaseBehaviorComponent.resourceCapacity);
+                if (resourseDisplayType == BaseBehavior.ResourceType.Food)
+                    statusticDiv.innerHTML = new StringBuilder(16).AppendFormat("Food: {0:F0}", resources).ToString();
+                if (resourseDisplayType == BaseBehavior.ResourceType.Gold)
+                    statusticDiv.innerHTML = new StringBuilder(16).AppendFormat("Gold: {0:F0}", resources).ToString();
+                if (resourseDisplayType == BaseBehavior.ResourceType.Wood)
+                    statusticDiv.innerHTML = new StringBuilder(16).AppendFormat("Wood: {0:F0}", resources).ToString();
                 element.appendChild(statusticDiv);
             }
         }
@@ -213,15 +234,16 @@ public class UIBaseScript : MonoBehaviour
         UI.document.Run("CreateMessage", args);
     }
 
+    List<UIImage> newUIImages = new List<UIImage>();
     public List<UIImage> GetSelectedSkillsOfObjectsToUIImage(List<GameObject> selectegObjects)
     {
-        List<UIImage> newUIImages = new List<UIImage>();
+        newUIImages.Clear();
         foreach (GameObject unit in selectegObjects)
         {
             if (unit == null)
                 continue;
             
-            BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+            unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
             if (unitBaseBehaviorComponent.team != cameraController.team || unitBaseBehaviorComponent.ownerId != cameraController.userId)
                 continue;
 
@@ -266,13 +288,13 @@ public class UIBaseScript : MonoBehaviour
                 foreach (GameObject buildUnit in buildingBehaviorComponent.producedUnits)
                 {
                     SkillErrorInfo skillErrorInfo = BaseSkillScript.GetSkillErrorInfo(unit, buildUnit);
-                    BaseBehavior buildUnitBaseBehaviorComponent = buildUnit.GetComponent<BaseBehavior>();
-                    if (buildUnitBaseBehaviorComponent != null && skillErrorInfo.isDisplayedAsSkill)
+                    unitBaseBehaviorComponent = buildUnit.GetComponent<BaseBehavior>();
+                    if (unitBaseBehaviorComponent != null && skillErrorInfo.isDisplayedAsSkill)
                         GetOrCreateUIImageToList(
-                            ref newUIImages, buildUnitBaseBehaviorComponent.skillInfo.uniqueName, buildUnitBaseBehaviorComponent.skillInfo.imagePath,
-                            buildUnitBaseBehaviorComponent.skillInfo.readableName, buildUnitBaseBehaviorComponent.skillInfo.readableDescription,
-                            buildUnitBaseBehaviorComponent.GetStatistics(), buildUnitBaseBehaviorComponent.GetCostInformation(),
-                            buildUnitBaseBehaviorComponent.skillInfo.productionHotkey, buildUnitBaseBehaviorComponent.skillInfo.skillType, skillErrorInfo.errorMessage
+                            ref newUIImages, unitBaseBehaviorComponent.skillInfo.uniqueName, unitBaseBehaviorComponent.skillInfo.imagePath,
+                            unitBaseBehaviorComponent.skillInfo.readableName, unitBaseBehaviorComponent.skillInfo.readableDescription,
+                            unitBaseBehaviorComponent.GetStatistics(), unitBaseBehaviorComponent.GetCostInformation(),
+                            unitBaseBehaviorComponent.skillInfo.productionHotkey, unitBaseBehaviorComponent.skillInfo.skillType, skillErrorInfo.errorMessage
                             );
                 }
         }
@@ -308,32 +330,24 @@ public class UIBaseScript : MonoBehaviour
         else
             list.Find(x => (x.name == name)).count += 1;
     }
-
-    List<UIImage> newCommands = new List<UIImage>();
+    
     BaseBehavior baseSelectedBehavior;
     UnitBehavior unitSelectedBehavior;
+    int cacheCommandsType = 0;
     public void DisplayCommands(List<GameObject> selectegObjects)
     {
-        newCommands.Clear();
-
-        var index = 0;
-        bool recreate = false;
-        if (commands.Count != newCommands.Count)
-            recreate = true;
-        else
-            foreach (UIImage newCommand in newCommands)
-            {
-                if (commands[index].name != newCommand.name)
-                    recreate = true;
-                index++;
-            }
+        if (UI.document.getElementsByClassName("commands").length <= 0)
+            return;
         
+        int newCommandsType = 0;
+        BaseBehavior.BehaviorType unitBehaviorType = BaseBehavior.BehaviorType.None;
+
         if (selectegObjects.Count > 0)
         {
             baseSelectedBehavior = selectegObjects[0].GetComponent<BaseBehavior>();
 
             bool inProject = false;
-            BuildingBehavior buildingBehaviorComponent = selectegObjects[0].GetComponent<BuildingBehavior>();
+            buildingBehaviorComponent = selectegObjects[0].GetComponent<BuildingBehavior>();
             if (buildingBehaviorComponent != null && buildingBehaviorComponent.state == BuildingBehavior.BuildingState.Project)
                 inProject = true;
 
@@ -341,65 +355,49 @@ public class UIBaseScript : MonoBehaviour
             {
                 // Building commands
                 if (buildingBehaviorComponent != null)
-                {
-                    newCommands.Add(new UIImage("stop", "Stop", "commands/stop-sign.png", "Stop command.", KeyCode.H));
-                }
+                    newCommandsType = 1;
 
                 unitSelectedBehavior = selectegObjects[0].GetComponent<UnitBehavior>();
                 // Units commands
                 if (unitSelectedBehavior != null)
                 {
-                    newCommands.Add(new UIImage("stop", "Stop", "commands/stop-sign.png", "Stop command.", KeyCode.H));
-                    newCommands.Add(new UIImage("attack", "Go and attack", "commands/arrow-scope.png", "Move to target and attack enemies on the way.", KeyCode.A));
-
-                    if (unitSelectedBehavior.behaviorType == BaseBehavior.BehaviorType.Aggressive)
-                        newCommands.Add(new UIImage("behaviorType1", "Aggressive behavior", "commands/caveman.png", "The unit will attack nearest enemy targets.", KeyCode.T));
-                    if (unitSelectedBehavior.behaviorType == BaseBehavior.BehaviorType.Counterattack)
-                        newCommands.Add(new UIImage("behaviorType2", "Counterattack behavior", "commands/wide-arrow-dunk.png", "The unit will counterattack nearest enemy targets.", KeyCode.T));
-                    if (unitSelectedBehavior.behaviorType == BaseBehavior.BehaviorType.Hold)
-                        newCommands.Add(new UIImage("behaviorType3", "Hold behavior", "commands/static-guard.png", "Unit will hold the position, and not attack back.", KeyCode.T));
-                    if (unitSelectedBehavior.behaviorType == BaseBehavior.BehaviorType.Run)
-                        newCommands.Add(new UIImage("behaviorType4", "Run behavior", "commands/run.png", "A unit will run away if attacked.", KeyCode.T));
+                    newCommandsType = 2;
+                    unitBehaviorType = unitSelectedBehavior.behaviorType;
                 }
             }
         }
-
-        if (UI.document.getElementsByClassName("commands").length <= 0)
-            return;
-
-        if (recreate || UI.document.getElementsByClassName("commands")[0].childCount < newCommands.Count)
+        if(newCommandsType != cacheCommandsType)
         {
-
             var commandsDiv = UI.document.getElementsByClassName("commands")[0];
             commandsDiv.innerHTML = "";
-            commands.Clear();
-            foreach (var newCommand in newCommands)
+            if (newCommandsType > 0)
             {
-                var commandContent = UI.document.createElement("div");
-                commandContent.className = "elementsContent";
-                commandsDiv.appendChild(commandContent);
-
-                commands.Add(newCommand);
-                var createdImage = UI.document.createElement("img");
-                createdImage.className = String.Format("element clckable descrCommand {0}", newCommand.name);
-                createdImage.setAttribute("src", newCommand.imagePath);
-                commandContent.appendChild(createdImage);
-
-                if (newCommand.hotkey != KeyCode.None)
+                foreach (var commandsUIImage in commandsUIImages)
                 {
-                    Dom.Element hotkeyDiv = UI.document.createElement("div");
-                    hotkeyDiv.className = "hotkey";
-                    hotkeyDiv.innerHTML = newCommand.hotkey.ToString();
-                    commandContent.appendChild(hotkeyDiv);
-                }
+                    if (commandsUIImage.Value != newCommandsType)
+                        continue;
 
-                createdImage.addEventListener("mousedown", delegate (MouseEvent e) {
-                    cameraController.SendCommandToAllSelected(newCommand.name);
-                });
+                    var createdImage = DrawInfo(parentElement: commandsDiv, unitImageInfo: commandsUIImage.Key, detailInfo: false, discriptable: true, drawImage: true, dinamicInfo: false);
+
+                    createdImage.addEventListener("mousedown", delegate (MouseEvent e) {
+                        cameraController.SendCommandToAllSelected(commandsUIImage.Key.name);
+                    });
+                }
+                Debug.Log(unitBehaviorType);
+                if(unitBehaviorType != BaseBehavior.BehaviorType.None)
+                {
+                    var createdImage = DrawInfo(parentElement: commandsDiv, unitImageInfo: behaviorUIImages[unitBehaviorType], detailInfo: false, discriptable: true, drawImage: true, dinamicInfo: false);
+
+                    createdImage.addEventListener("mousedown", delegate (MouseEvent e) {
+                        cameraController.SendCommandToAllSelected(behaviorUIImages[unitBehaviorType].name);
+                    });
+                }
             }
         }
+        cacheCommandsType = newCommandsType;
     }
 
+    private Dom.Element parentElement;
     public void DisplayUIImageObjects(
             string tableName,
             List<UIImage> newImages,
@@ -409,7 +407,7 @@ public class UIBaseScript : MonoBehaviour
         if (UI.document.getElementsByClassName(tableName).length <= 0)
             return;
 
-        var parentElement = UI.document.getElementsByClassName(tableName)[0];
+        parentElement = UI.document.getElementsByClassName(tableName)[0];
 
         bool recreate = false;
 
@@ -418,9 +416,23 @@ public class UIBaseScript : MonoBehaviour
             recreate = true;
 
         // Delete units which is selected no more
-        foreach (UIImage unitImageInfo in storageImages.ToArray())
-            if (!newImages.Exists(x => (x.name == unitImageInfo.name)))
-                recreate = true;
+        if(!recreate)
+        {
+            foreach (UIImage unitImageInfo in newImages)
+                if (!storageImages.Exists(x => (x.name == unitImageInfo.name)))
+                {
+                    recreate = true;
+                    break;
+                }
+
+            if (!recreate)
+                foreach (UIImage unitImageInfo in storageImages)
+                    if (!newImages.Exists(x => (x.name == unitImageInfo.name)))
+                    {
+                        recreate = true;
+                        break;
+                    }
+        }
 
         if (recreate || updateUI)
         {
@@ -432,6 +444,10 @@ public class UIBaseScript : MonoBehaviour
                 }
             storageImages.Clear();
         }
+
+        if (!recreate)
+            return;
+
         var detailInfo = false;
         if (newImages.Count == 1 && tableName == "center")
             detailInfo = true;
@@ -480,9 +496,9 @@ public class UIBaseScript : MonoBehaviour
                     if (!detailInfo)
                     {
                         if (unitImageInfo.skillType == SkillType.Skill)
-                            blockImagesName += " skills";
+                            blockImagesName = "clckable elementsBlock elementsObject skills";
                         if (unitImageInfo.skillType == SkillType.Upgrade)
-                            blockImagesName += " upgrades";
+                            blockImagesName = "clckable elementsBlock elementsObject upgrades";
                     }
 
                     Dom.Element elementsBlock = null;
@@ -628,7 +644,7 @@ public class UIBaseScript : MonoBehaviour
             var index = 0;
             foreach (var unit in unitsQuery)
             {
-                BaseBehavior unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                unitBaseBehaviorComponent = unit.GetComponent<BaseBehavior>();
                 BaseSkillScript skillScript = unit.GetComponent<BaseSkillScript>();
 
                 string imagePath = "";
@@ -650,14 +666,17 @@ public class UIBaseScript : MonoBehaviour
 
                 Dom.Element elementDiv = UI.document.createElement("img");
                 elementDiv.setAttribute("src", imagePath);
-                elementDiv.className = String.Format("clckable {0}", index);
+
+                string newClassName = new StringBuilder(20).AppendFormat("clckable {0}", index).ToString();
+                elementDiv.className = newClassName;
+
                 progressBaseDiv.appendChild(elementDiv);
                 
                 if (index == 0)
                 {
                     Dom.Element progressDiv = UI.document.createElement("div");
-                    progressDiv.className = String.Format("clckable {0}", index);
-                    progressDiv.style.width = String.Format("{0:F0}%", buildTimer / timeToBuild * 100);
+                    progressDiv.className = newClassName;
+                    progressDiv.style.width = new StringBuilder(20).AppendFormat("{0:F0}%", buildTimer / timeToBuild * 100).ToString();
                     progressBaseDiv.appendChild(progressDiv);
                     progressDiv.addEventListener("mousedown", delegate (MouseEvent e) {
                         cameraController.RemoveQueueElementFromSelected();
@@ -671,9 +690,19 @@ public class UIBaseScript : MonoBehaviour
         }
     }
 
-    public bool DisplayDescription(string className, List<UIImage> skillUIImages)
+    List<UIImage> checkedUIImages = new List<UIImage>();
+    public bool DisplayDescription(string className, List<UIImage> skillUIImages = null, bool commands = false)
     {
-        foreach (UIImage skillUIImage in skillUIImages)
+        checkedUIImages.Clear();
+        if (skillUIImages != null)
+            checkedUIImages.AddRange(skillUIImages);
+        if (commands)
+        {
+            checkedUIImages.AddRange(commandsUIImages.Keys);
+            checkedUIImages.AddRange(behaviorUIImages.Values);
+        }
+
+        foreach (UIImage skillUIImage in checkedUIImages)
         {
             if (className.Contains(skillUIImage.name))
             {
@@ -694,8 +723,6 @@ public class UIBaseScript : MonoBehaviour
                 }
                 else
                     altInfo = altInfos[0];
-                //altInfo.style.left = String.Format("{0}px", x);
-                //altInfo.style.top = String.Format("{0}px", y);
                 return true;
             }
         }

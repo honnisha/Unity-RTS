@@ -209,7 +209,7 @@ public class TerrainGenerator : MonoBehaviour
         Dictionary<string, List<Vector3>> newData = new Dictionary<string, List<Vector3>>();
         
         // Spawn coordinates
-        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.25f, offsetPos: 0.2f);
+        List<Vector3> avalibleSpawnPositions = GetCoordinatesInBorder(maxValue: 0.3f, offsetPos: 0.2f);
         
         newData["spawn"] = new List<Vector3>();
         for (int i = 1; i <= spawnCount; i++)
@@ -218,7 +218,7 @@ public class TerrainGenerator : MonoBehaviour
             newData["spawn"].Add(avalibleSpawnPositions[positionIndex]);
         }
 
-        newData["trees"] = GetCoordinates(minValue: 1.0f, destCount: maxTrees, randomOffset: 0.7f);
+        newData["trees"] = GetCoordinates(minValue: 1.3f, destCount: maxTrees, randomOffset: 0.7f);
 
         newData["gold"] = GetCoordinatesInBorderNested(goldRows, goldCountOnRow, (int)mainMapGenerateInfo.seed / 2, offsetPosDel: 0.8f);
 

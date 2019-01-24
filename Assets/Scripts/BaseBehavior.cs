@@ -61,7 +61,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public bool attacked;
 
     public enum AttackType { Stabbing, Cutting, Biting, Magic, None };
-    public enum BehaviorType { Run, Hold, Counterattack, Aggressive };
+    public enum BehaviorType { Run, Hold, Counterattack, Aggressive, None };
     [System.Serializable]
     public class UnitStatistic
     {
@@ -209,6 +209,10 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public enum SourceType { Default, Farm, GoldMine, Wood };
     public SourceType sourceType = SourceType.Default;
     public List<ResourceType> storedResources = new List<ResourceType>();
+    [HideInInspector]
+    public float resourceHold = 0.0f;
+    [HideInInspector]
+    public ResourceType resourceType = ResourceType.None;
 
     #endregion
 
@@ -277,8 +281,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             spawnTarget = spawnPoint.transform.position;
 
     }
-
-
+    
     [HideInInspector]
     public bool isInCameraView = false;
     public bool IsInCameraView() { return isInCameraView; }
@@ -399,11 +402,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateHealth"); // Profiler
         if (IsInCameraView() && HTMLHealthFile != null)
         {
-            bool healthVisible = false;
-            if (IsHealthVisible())
-                healthVisible = true;
-
-            if (healthVisible && live && IsVisible() && IsInCameraView())
+            if (IsHealthVisible() && live && IsVisible() && IsInCameraView())
             {
                 if (objectUIInfo == null && HTMLHealthFile != null)
                 {

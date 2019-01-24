@@ -168,7 +168,7 @@ public class BuildingBehavior : BaseBehavior
         SendAlertAttacking(attacker);
         AlertAttacking(attacker);
         health -= newDamage;
-        TextBubble(String.Format("-{0:F0}", newDamage), 1000);
+        TextBubble(new StringBuilder(30).AppendFormat("-{0:F0}", newDamage).ToString(), 1000);
         if (health <= 0)
         {
             BecomeDead();
@@ -455,11 +455,11 @@ public class BuildingBehavior : BaseBehavior
     {
         List<string> statistics = new List<string>();
         if (skillInfo.costFood > 0)
-            statistics.Add(String.Format("Food: {0:F0}", skillInfo.costFood));
+            statistics.Add(new StringBuilder(30).AppendFormat("Food: {0:F0}", skillInfo.costFood).ToString());
         if (skillInfo.costGold > 0)
-            statistics.Add(String.Format("Gold: {0:F0}", skillInfo.costGold));
+            statistics.Add(new StringBuilder(30).AppendFormat("Gold: {0:F0}", skillInfo.costGold).ToString());
         if (skillInfo.costWood > 0)
-            statistics.Add(String.Format("Wood: {0:F0}", skillInfo.costWood));
+            statistics.Add(new StringBuilder(30).AppendFormat("Wood: {0:F0}", skillInfo.costWood).ToString());
         return statistics;
     }
 

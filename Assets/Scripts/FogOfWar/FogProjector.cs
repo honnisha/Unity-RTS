@@ -21,6 +21,7 @@ public class FogProjector : MonoBehaviour
     public float blendSpeed = 1;
     float blend;
     int blendNameId;
+    Terrain terrain = null;
 
     void OnEnable()
     {
@@ -50,17 +51,18 @@ public class FogProjector : MonoBehaviour
 
     public void UpdateFog()
     {
-        Terrain t = Terrain.activeTerrain;
-        Vector3 newPosition = t.terrainData.size / 2;
+        if (terrain == null)
+            terrain = Terrain.activeTerrain;
+
+        Vector3 newPosition = terrain.terrainData.size / 2;
         transform.position = new Vector3(newPosition.x, 50.0f, newPosition.z);
 
-        float newSize = t.terrainData.size.x / 2;
+        float newSize = terrain.terrainData.size.x / 2;
         // projector.orthographicSize = newSize;
         Light fogLight = GetComponentInChildren<Light>();
-        fogLight.cookieSize = t.terrainData.size.x;
+        fogLight.cookieSize = terrain.terrainData.size.x;
 
-        Camera fogCamera = GetComponentInChildren<Camera>();
-        fogCamera.orthographicSize = newSize;
+        GetComponentInChildren<Camera>().orthographicSize = newSize;
     }
 
     public void Update()

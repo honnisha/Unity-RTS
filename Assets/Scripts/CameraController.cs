@@ -96,7 +96,8 @@ public class CameraController : MonoBehaviourPunCallbacks
     private int uniqueIdIndex = 0;
 
     // Stuff
-    List<GameObject> selectedObjects = new List<GameObject>();
+    [HideInInspector]
+    public List<GameObject> selectedObjects = new List<GameObject>();
 
     public enum WindowType { None, MainMenu, BigMap, Settings };
     [HideInInspector]
@@ -230,6 +231,72 @@ public class CameraController : MonoBehaviourPunCallbacks
         }
     }
 
+    // Cache
+    private Vector2 viewCameraPosition = new Vector2(0, 0);
+
+    private int workedOnFood, workedOnGold, workedOnWood = 0;
+    private float countWorkersTimer = 0.0f;
+    // Update is called once per frame
+    void Update()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("p Update vision and map"); // Profiler
+        Vector2 newViewCameraPosition = GetChunkByPosition(transform.position + new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset() * -1.0f);
+        if (viewCameraPosition.x != newViewCameraPosition.x && viewCameraPosition.y != newViewCameraPosition.y)
+        {
+            viewCameraPosition = newViewCameraPosition;
+            UpdateVisionChunks();
+        }
+
+        countWorkersTimer -= Time.deltaTime;
+        if (countWorkersTimer <= 0)
+        {
+            UpdateMapsAndStatistic();
+            countWorkersTimer = 1.0f;
+        }
+        UpdateMapsCamera();
+
+        if (Time.frameCount % 15 == 0)
+        {
+            UI.Variables["food"] = String.Format("{0:F0}", food);
+            if (workedOnFood > 0) UI.Variables["food"] += String.Format(" ({0})", workedOnFood);
+            UI.Variables["gold"] = String.Format("{0:F0}", gold);
+            if (workedOnGold > 0) UI.Variables["gold"] += String.Format(" ({0})", workedOnGold);
+            UI.Variables["wood"] = String.Format("{0:F0}", wood);
+            if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
+        }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
+        UnityEngine.Profiling.Profiler.BeginSample("p Update events"); // Profiler
+
+        var activeOver = PowerUI.CameraPointer.All[0].ActiveOver;
+
+        // Chat
+        if (PhotonNetwork.InRoom)
+        {
+            UpdateChat(activeOver);
+        }
+
+        // Select free workers
+        UpdateSelectFreeWorkers();
+
+        bool isClickGUI = false;
+        if (activeOver != null && activeOver.className.Contains("clckable"))
+            isClickGUI = true;
+        
+        SelectBinds();
+
+        UpdateWindow(activeOver);
+
+        bool objectPlaced = PlaceBuildingOnTerrainUpdate(activeOver);
+
+        if (!objectPlaced && buildedObject == null)
+            SelectUnitsUpdate(isClickGUI);
+
+        if (!audioSource.isPlaying)
+            PlayMusic(targetMusicType, delay: 0.0f, loop: false, dropCount: false);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
+
     private MusicType targetMusicType;
     public void PlayMusic(MusicType musicType, float delay = 0.0f, bool loop = false, bool dropCount = false)
     {
@@ -268,57 +335,9 @@ public class CameraController : MonoBehaviourPunCallbacks
         audioSource.volume = PlayerPrefs.GetFloat("musicVolume");
     }
 
-    private int workedOnFood, workedOnGold, workedOnWood = 0;
-    private float countWorkersTimer = 0.0f;
-    // Update is called once per frame
-    void Update()
-    {
-        UpdateVisionChunks();
-
-        countWorkersTimer -= Time.deltaTime;
-        if (countWorkersTimer <= 0)
-        {
-            UpdateMapsAndStatistic();
-        }
-        UpdateMapsCamera();
-
-        UI.Variables["food"] = String.Format("{0:F0}", food);
-        if (workedOnFood > 0) UI.Variables["food"] += String.Format(" ({0})", workedOnFood);
-        UI.Variables["gold"] = String.Format("{0:F0}", gold);
-        if (workedOnGold > 0) UI.Variables["gold"] += String.Format(" ({0})", workedOnGold);
-        UI.Variables["wood"] = String.Format("{0:F0}", wood);
-        if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
-
-        var activeOver = PowerUI.CameraPointer.All[0].ActiveOver;
-
-        // Chat
-        if (PhotonNetwork.InRoom)
-        {
-            UpdateChat(activeOver);
-        }
-
-        // Select free workers
-        UpdateSelectFreeWorkers();
-
-        bool isClickGUI = false;
-        if (activeOver != null && activeOver.className.Contains("clckable"))
-            isClickGUI = true;
-        
-        SelectBinds();
-
-        UpdateWindow(activeOver);
-
-        bool objectPlaced = PlaceBuildingOnTerrainUpdate(activeOver);
-
-        if (!objectPlaced && buildedObject == null)
-            SelectUnitsUpdate(isClickGUI);
-
-        if (!audioSource.isPlaying)
-            PlayMusic(targetMusicType, delay: 0.0f, loop: false, dropCount: false);
-    }
-
     public void UpdateWindow(Dom.Element activeOver)
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateWindow"); // Profiler
         if (selectedWindowType == WindowType.Settings && activeOver != null && UnityEngine.Input.GetMouseButtonUp(0))
         {
             bool changed = SettingsScript.ChangeTabOrSaveSettings(activeOver.className, windowSettings: "SettingsContent", saveClassName: "saveSettings", errorClassName: "settingsMessage", mainMenu: false);
@@ -329,7 +348,6 @@ public class CameraController : MonoBehaviourPunCallbacks
             }
         }
 
-        UnityEngine.Profiling.Profiler.BeginSample("p UpdateWindow"); // Profiler
         WindowType newWindowType = GetNewWindow(activeOver);
         if ((newWindowType != WindowType.None && selectedWindowType != WindowType.None) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
         {
@@ -463,15 +481,10 @@ public class CameraController : MonoBehaviourPunCallbacks
             BaseBehavior baseBehaviorComponent = objectinChunk.GetComponent<BaseBehavior>();
             baseBehaviorComponent.UpdateIsInCameraView(newState);
         }
-    } 
-
+    }
     public void UpdateVisionChunks()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateVisionChunks"); // Profiler
-        Vector3 centerCamera = transform.position;
-        centerCamera += new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset() * -1.0f;
-        Vector2 viewCameraPosition = GetChunkByPosition(centerCamera);
-
         for (int x = 0; x < chanksView.GetLength(0); x++)
             for (int y = 0; y < chanksView.GetLength(1); y++)
             {
@@ -526,35 +539,38 @@ public class CameraController : MonoBehaviourPunCallbacks
     {
         if (spawnData != null)
         {
-            Gizmos.color = Color.white;
-            foreach (Vector3 spawnPoint in spawnData["spawn"])
-                Gizmos.DrawSphere(spawnPoint, 0.4f);
+            if (Debug.isDebugBuild)
+            {
+                Gizmos.color = Color.white;
+                foreach (Vector3 spawnPoint in spawnData["spawn"])
+                    Gizmos.DrawSphere(spawnPoint, 0.4f);
 
-            // Gizmos.color = Color.green;
-            // foreach (Vector3 treePoint in spawnData["trees"])
-            //     Gizmos.DrawSphere(treePoint, 0.4f);
+                // Gizmos.color = Color.green;
+                // foreach (Vector3 treePoint in spawnData["trees"])
+                //     Gizmos.DrawSphere(treePoint, 0.4f);
 
-            Gizmos.color = Color.yellow;
-            foreach (Vector3 treePoint in spawnData["gold"])
-                Gizmos.DrawSphere(treePoint, 0.4f);
+                Gizmos.color = Color.yellow;
+                foreach (Vector3 treePoint in spawnData["gold"])
+                    Gizmos.DrawSphere(treePoint, 0.4f);
 
-            Gizmos.color = Color.blue;
-            foreach (Vector3 treePoint in spawnData["animals"])
-                Gizmos.DrawSphere(treePoint, 0.4f);
-        }
-        if (debugVisionGrid)
-        {
-            Vector2 cameraPos = GetChunkByPosition(transform.position);
-            for (int x = 0; x < chanksView.GetLength(0); x++)
-                for (int y = 0; y < chanksView.GetLength(1); y++)
-                {
-                    Gizmos.color = Color.gray;
-                    if (chanksView[x, y])
-                        Gizmos.color = Color.white;
-                    if (cameraPos.x == x && cameraPos.y == y)
-                        Gizmos.color = Color.yellow;
-                    Gizmos.DrawCube(GetPositionByChunk(x, y), new Vector3(chunkSize, 0.5f, chunkSize));
-                }
+                Gizmos.color = Color.blue;
+                foreach (Vector3 treePoint in spawnData["animals"])
+                    Gizmos.DrawSphere(treePoint, 0.4f);
+            }
+            if (debugVisionGrid)
+            {
+                Vector2 cameraPos = GetChunkByPosition(transform.position);
+                for (int x = 0; x < chanksView.GetLength(0); x++)
+                    for (int y = 0; y < chanksView.GetLength(1); y++)
+                    {
+                        Gizmos.color = Color.gray;
+                        if (chanksView[x, y])
+                            Gizmos.color = Color.white;
+                        if (cameraPos.x == x && cameraPos.y == y)
+                            Gizmos.color = Color.yellow;
+                        Gizmos.DrawCube(GetPositionByChunk(x, y), new Vector3(chunkSize, 0.5f, chunkSize));
+                    }
+            }
         }
     }
 
@@ -573,8 +589,7 @@ public class CameraController : MonoBehaviourPunCallbacks
         if (countLoadedPlayers >= PhotonNetwork.PlayerList.Length)
             StartGame();
     }
-
-    [PunRPC]
+    
     public void InstantiateObjects(Dictionary<string, List<Vector3>> newSpawnData, List<GameObject> treePrefabs, List<GameObject> goldPrefabs, List<GameObject> animalPrefabs, int maxTrees = 0)
     {
         int index = 0;
@@ -617,8 +632,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             }
         }
     }
-
-    [PunRPC]
+    
     public void InstantiateSpawn(Dictionary<string, List<Vector3>> newSpawnData, int newUserNumber, string newUserId, int NewTeam)
     {
         GameObject createdUnit = null;
@@ -996,6 +1010,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void CreateOrUpdateCameraOnMap(Dom.Element mapBlock, Dom.Element mapImage)
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p CreateOrUpdateCameraOnMap"); // Profiler
         Vector3 vameraLookAt = transform.position - new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset();
         bool isCameraInTerrain = IsInTerrainRange(vameraLookAt);
         float cameraScale = 20.0f / (Terrain.activeTerrain.terrainData.size.x / 50.0f / 4.0f);
@@ -1028,6 +1043,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             cameraDiv = mapBlock.getElementsByClassName("mapCamera")[0];
             cameraDiv.remove();
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public void UpdateMapsCamera()
@@ -1139,7 +1155,6 @@ public class CameraController : MonoBehaviourPunCallbacks
                 UI.document.Run("CreateInfoButton", "solders", units.Count, number, units[0].GetComponent<BaseBehavior>().skillInfo.imagePath);
             }
         }
-        countWorkersTimer = 1.0f;
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 

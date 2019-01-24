@@ -150,7 +150,7 @@ input {
 	text-align: left;
 	
 	margin-top: 7.5%;
-	padding: 10px 25px 15px 25px;
+	padding: 1.5% 25px 1.5% 25px;
 }
 .roomMenu {
 	height: 100%;

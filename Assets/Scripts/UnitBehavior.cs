@@ -31,9 +31,6 @@ public class UnitBehavior : BaseBehavior
 
     [Header("Gatering worker info")]
     public List<ResourceGatherInfo> resourceGatherInfo = new List<ResourceGatherInfo>();
-    [HideInInspector]
-    public float resourceHold = 0.0f;
-    public ResourceType resourceType = ResourceType.None;
     private string interactAnimation = "";
 
     public ResourceGatherInfo farmInfo;
@@ -989,7 +986,7 @@ public class UnitBehavior : BaseBehavior
         SendAlertAttacking(attacker);
         AlertAttacking(attacker);
         health -= newDamage;
-        TextBubble(String.Format("-{0:F0}", newDamage), 1000);
+        TextBubble(new StringBuilder(30).AppendFormat("-{0:F0}", newDamage).ToString(), 1000);
 
         if (bloodOnBroundEffects.Count > 0)
         {
@@ -1188,13 +1185,13 @@ public class UnitBehavior : BaseBehavior
     public override List<string> GetCostInformation()
     {
         List<string> statistics = new List<string>();
-        statistics.Add(String.Format("Time to build: {0:F0} sec", skillInfo.timeToBuild));
+        statistics.Add(new StringBuilder(30).AppendFormat("Time to build: {0:F0} sec", skillInfo.timeToBuild).ToString());
         if (skillInfo.costFood > 0)
-            statistics.Add(String.Format("Food: {0:F0}", skillInfo.costFood));
+            statistics.Add(new StringBuilder(30).AppendFormat("Food: {0:F0}", skillInfo.costFood).ToString());
         if (skillInfo.costGold > 0)
-            statistics.Add(String.Format("Gold: {0:F0}", skillInfo.costGold));
+            statistics.Add(new StringBuilder(30).AppendFormat("Gold: {0:F0}", skillInfo.costGold).ToString());
         if (skillInfo.costWood > 0)
-            statistics.Add(String.Format("Wood: {0:F0}", skillInfo.costWood));
+            statistics.Add(new StringBuilder(30).AppendFormat("Wood: {0:F0}", skillInfo.costWood).ToString());
         return statistics;
     }
 

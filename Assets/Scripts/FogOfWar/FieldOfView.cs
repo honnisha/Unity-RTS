@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
+using GangaGame;
 
 public delegate void TargetsVisibilityChange(List<Transform> newTargets);
 
@@ -63,25 +63,27 @@ public class FieldOfView : MonoBehaviour
         if (Vector3.Distance(transform.position, lastUpdatePos) > updateDistance || Time.time<.5f)
         {
             lastUpdatePos = transform.position;
-            fogProjector.UpdateFog();
         }
     }
 
+    List<Transform> oldVisibleTargets = new List<Transform>();
+    Collider[] targetsInViewRadius;
+    BaseBehavior baseBehaviorComponent;
+    Vector3 offset = new Vector3(0, 1, 0);
     public void FindVisibleTargets()
     {
-        List<Transform> oldVisibleTargets = new List<Transform>();
+        visibleTargets.Clear();
+        oldVisibleTargets.Clear();
         oldVisibleTargets.AddRange(visibleTargets);
 
-        visibleTargets.Clear();
-
-        BaseBehavior baseBehaviorComponent = gameObject.GetComponentInParent<BaseBehavior>();
+        baseBehaviorComponent = gameObject.GetComponentInParent<BaseBehavior>();
         if (baseBehaviorComponent.live)
         {
-            Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, viewRadius - 1.5f, targetMask);
+            targetsInViewRadius = Physics.OverlapSphere(transform.position, viewRadius - 1.5f, targetMask);
             for (int i = 0; i < targetsInViewRadius.Length; i++)
             {
                 Transform target = targetsInViewRadius[i].transform;
-                Vector3 dirToTarget = (target.position + new Vector3(0, 1, 0) - transform.position).normalized;
+                Vector3 dirToTarget = (target.position + offset - transform.position).normalized;
 
                 if (Vector3.Angle(transform.forward, dirToTarget) < viewAngle / 2)
                 {
@@ -92,11 +94,8 @@ public class FieldOfView : MonoBehaviour
                     }
                     else if(target.gameObject.layer == LayerMask.NameToLayer("Ambient") || target.gameObject.layer == LayerMask.NameToLayer("Building"))
                     {
-                        RaycastHit hit;
-                        if (Physics.Raycast(transform.position, dirToTarget, out hit))
-                        {
+                        if (Physics.Raycast(transform.position, dirToTarget))
                             visibleTargets.Add(target);
-                        }
                     }
                 }
             }
