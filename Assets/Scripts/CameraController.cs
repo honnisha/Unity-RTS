@@ -29,7 +29,9 @@ public class CameraController : MonoBehaviourPunCallbacks
     }
     [Header("Sounds Info")]
     public SoundInfo[] soundsInfo;
+    public AudioClip clickSound;
     AudioSource audioSource;
+    AudioSource interfaceSource;
 
     [Header("Select info")]
     public bool isSelecting = false;
@@ -38,9 +40,6 @@ public class CameraController : MonoBehaviourPunCallbacks
     public int team = 1;
     public string userId = "123";
     private int userNumber = 0;
-
-    [HideInInspector]
-    public bool chatInput = false;
     [HideInInspector]
     private int workersIterate = 0;
 
@@ -95,6 +94,9 @@ public class CameraController : MonoBehaviourPunCallbacks
     public bool debugVisionGrid = false;
     private int uniqueIdIndex = 0;
 
+    [Header("Effects")]
+    public GameObject rangeProjector;
+
     // Stuff
     [HideInInspector]
     public List<GameObject> selectedObjects = new List<GameObject>();
@@ -109,10 +111,17 @@ public class CameraController : MonoBehaviourPunCallbacks
     private float keyTimer = 0.0f;
     private int keyPressed;
 
+    UIBaseScript cameraUIBaseScript;
+
+    RTS_Cam.RTS_Camera RTS_Camera;
+
     // Use this for initialization
     void Start()
     {
+        RTS_Camera = GetComponent<RTS_Cam.RTS_Camera>();
+        cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
         audioSource = GetComponent<AudioSource>();
+        interfaceSource = GetComponentInChildren<AudioSource>();
 
         UI.document.Run("CreateLoadingScreen", "Retrieving data");
 
@@ -176,7 +185,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
             PhotonNetwork.OfflineMode = true;
         }
-        GetComponent<RTS_Cam.RTS_Camera>().SetHeight();
+        RTS_Camera.SetHeight();
 
         UI.document.Run("UpdateLoadingDescription", "Create terrain");
         TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
@@ -233,13 +242,22 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     // Cache
     private Vector2 viewCameraPosition = new Vector2(0, 0);
+    private float cameraPositionX = 0.0f;
+    private float cameraPositionZ = 0.0f;
+    public Dom.Element activeOver;
 
     private int workedOnFood, workedOnGold, workedOnWood = 0;
     private float countWorkersTimer = 0.0f;
+    bool selectedObjectsChanged = false;
     // Update is called once per frame
     void Update()
     {
+        activeOver = InputPointer.All[0].ActiveOver;
+
         UnityEngine.Profiling.Profiler.BeginSample("p Update vision and map"); // Profiler
+        cameraPositionX = transform.position.x;
+        cameraPositionZ = transform.position.z;
+
         Vector2 newViewCameraPosition = GetChunkByPosition(transform.position + new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset() * -1.0f);
         if (viewCameraPosition.x != newViewCameraPosition.x && viewCameraPosition.y != newViewCameraPosition.y)
         {
@@ -268,13 +286,9 @@ public class CameraController : MonoBehaviourPunCallbacks
 
         UnityEngine.Profiling.Profiler.BeginSample("p Update events"); // Profiler
 
-        var activeOver = PowerUI.CameraPointer.All[0].ActiveOver;
-
         // Chat
         if (PhotonNetwork.InRoom)
-        {
             UpdateChat(activeOver);
-        }
 
         // Select free workers
         UpdateSelectFreeWorkers();
@@ -294,7 +308,23 @@ public class CameraController : MonoBehaviourPunCallbacks
 
         if (!audioSource.isPlaying)
             PlayMusic(targetMusicType, delay: 0.0f, loop: false, dropCount: false);
+
+        if (selectedObjectsChanged)
+        {
+            cameraUIBaseScript.UpdateUI();
+            selectedObjectsChanged = false;
+        }
+
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+    }
+
+    public bool IsHotkeysBlocked()
+    {
+        if (UI.document.getElementsByClassName("chatInput").length > 0)
+            return true;
+        else if (selectedWindowType != WindowType.None)
+            return true;
+        return false;
     }
 
     private MusicType targetMusicType;
@@ -333,6 +363,18 @@ public class CameraController : MonoBehaviourPunCallbacks
         var buildInfo = tagsToSelect.Find(x => x.name == "Building");
         buildInfo.healthVisibleOnlyWhenSelect = PlayerPrefs.GetInt("isBuildingHealthAlwaysSeen") == 1 ? false : true;
         audioSource.volume = PlayerPrefs.GetFloat("musicVolume");
+
+        RTS_Camera.usePanning = PlayerPrefs.GetInt("usePanning") == 1 ? true : false;
+        RTS_Camera.useKeyboardInput = PlayerPrefs.GetInt("useKeyboardInput") == 1 ? true : false;
+
+        RTS_Camera.useKeyboardInput = PlayerPrefs.GetInt("useKeyboardInput") == 1 ? true : false; 
+        RTS_Camera.keyboardMovementSpeed = PlayerPrefs.GetFloat("keyboardMovementSpeed");
+
+        RTS_Camera.useScreenEdgeInput = PlayerPrefs.GetInt("useScreenEdgeInput") == 1 ? true : false;
+        RTS_Camera.screenEdgeMovementSpeed = PlayerPrefs.GetFloat("screenEdgeMovementSpeed");
+
+        RTS_Camera.useScrollwheelZooming = PlayerPrefs.GetInt("useScrollwheelZooming") == 1 ? true : false;
+        RTS_Camera.scrollWheelZoomingSensitivity = PlayerPrefs.GetFloat("scrollWheelZoomingSensitivity");
     }
 
     public void UpdateWindow(Dom.Element activeOver)
@@ -343,14 +385,19 @@ public class CameraController : MonoBehaviourPunCallbacks
             bool changed = SettingsScript.ChangeTabOrSaveSettings(activeOver.className, windowSettings: "SettingsContent", saveClassName: "saveSettings", errorClassName: "settingsMessage", mainMenu: false);
             if (changed)
             {
+                interfaceSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                 UpdateSettings();
                 return;
             }
         }
 
+        bool isChatOpen = UI.document.getElementsByClassName("chatInput").length > 0;
+
         WindowType newWindowType = GetNewWindow(activeOver);
         if ((newWindowType != WindowType.None && selectedWindowType != WindowType.None) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
         {
+            interfaceSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
+
             if (selectedWindowType == WindowType.MainMenu)
             {
                 if (UI.document.getElementsByClassName("menu").length > 0)
@@ -369,8 +416,9 @@ public class CameraController : MonoBehaviourPunCallbacks
             selectedWindowType = WindowType.None;
         }
 
-        if (newWindowType != WindowType.None)
+        if (newWindowType != WindowType.None && !isChatOpen)
         {
+            interfaceSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
             if (newWindowType == WindowType.MainMenu)
                 UI.document.Run("CreateMenu");
             else if (newWindowType == WindowType.BigMap)
@@ -424,6 +472,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                     workersIterate = 0;
                 DeselectAllUnits();
                 selectedObjects.Add(freeWorkers[workersIterate]);
+                selectedObjectsChanged = true;
 
                 UnitSelectionComponent selection = freeWorkers[workersIterate].GetComponent<UnitSelectionComponent>();
                 selection.SetSelect(true);
@@ -436,12 +485,16 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void UpdateChat(Dom.Element activeOver)
     {
+        bool chatInput = UI.document.getElementsByClassName("chatInput").length > 0;
+
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateChat"); // Profiler
         if ((activeOver != null && activeOver.className.Contains("chatSend") && UnityEngine.Input.GetMouseButtonDown(0) ||
             UnityEngine.Input.GetKeyDown(KeyCode.Return) || (UnityEngine.Input.GetKeyDown(KeyCode.Escape) && chatInput)))
         {
             if (chatInput && !UnityEngine.Input.GetKeyDown(KeyCode.Escape))
             {
+                interfaceSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
+
                 var chatElement = UI.document.getElementsByClassName("chatBox")[0];
                 var inputElement = UI.document.getElementsByClassName("chatInput")[0];
                 var buttonElement = UI.document.getElementsByClassName("chatSend")[0];
@@ -640,7 +693,6 @@ public class CameraController : MonoBehaviourPunCallbacks
         createdUnit = PhotonNetwork.Instantiate(createSpawnBuildingName, newSpawnData["spawn"][newUserNumber], new Quaternion(), 0);
         if (createdUnit == null)
         {
-            UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
             cameraUIBaseScript.DisplayMessage("Could not find free spawn place.", 3000);
         }
         else
@@ -738,6 +790,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                                         UnitSelectionComponent selection = selectedUnit.GetComponent<UnitSelectionComponent>();
                                         selection.SetSelect(true);
                                         selectedObjects.Add(selectedUnit);
+                                        selectedObjectsChanged = true;
                                     }
                                 }
                                 else
@@ -746,6 +799,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                                     UnitSelectionComponent selectionComponent = hit.transform.gameObject.GetComponent<UnitSelectionComponent>();
                                     selectionComponent.SetSelect(true);
                                     selectedObjects.Add(hit.transform.gameObject);
+                                    selectedObjectsChanged = true;
                                 }
                                 selectObject = true;
                                 isSelecting = false;
@@ -757,7 +811,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                     bool sendToQueue = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
                     Dictionary<GameObject, float> formationList = new Dictionary<GameObject, float>();
 
-                    foreach (GameObject unit in GetSelectedObjects())
+                    foreach (GameObject unit in selectedObjects)
                     {
                         BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
                         UnitSelectionComponent selectionComponent = unit.GetComponent<UnitSelectionComponent>();
@@ -806,6 +860,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                     UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
                     selection.SetSelect(true);
                     selectedObjects.Add(unit.transform.gameObject);
+                    selectedObjectsChanged = true;
                 }
             }
         }
@@ -845,21 +900,59 @@ public class CameraController : MonoBehaviourPunCallbacks
 
                     GameObject intersection = buildingBehavior.GetIntersection(null);
 
-                    Color newColor = new Color(0.1f, 1f, 0.1f, 0.45f);
-                    if (intersection != null)
-                        newColor = new Color(1f, 0.1f, 0.1f, 0.45f);
-
                     buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
                     GameObject projector = selectedObject.GetComponent<UnitSelectionComponent>().projector;
+
+                    // Block range conditions
+                    bool blocked = false;
+                    buildedObjectBuildingBehavior.GetBlockedBlockedBy();
+                    if (buildedObjectBuildingBehavior.returnObjects.Count > 0)
+                    {
+                        blocked = true;
+                        DrawRanges(buildedObjectBuildingBehavior.returnObjects, Color.red, storeDict: ref errorsProjectors);
+                    }
+                    else
+                        DestyoyRanges(storeDict: ref errorsProjectors);
+
+                    // In range conditions
+                    bool notInRange = false;
+                    string notEnough = "";
+                    buildedObjectBuildingBehavior.IfHasConditionInRange();
+                    if (buildedObjectBuildingBehavior.stringsConditionInRange.Count > 0)
+                    {
+                        buildedObjectBuildingBehavior.GetInRangeConditionError();
+                        if (buildedObjectBuildingBehavior.returnObjects.Count > 0)
+                            DrawRanges(buildedObjectBuildingBehavior.returnObjects, Color.green, storeDict: ref greenProjectors);
+                        else
+                        {
+                            notInRange = true;
+                            notEnough = string.Join(", ", buildedObjectBuildingBehavior.stringsConditionInRange.ToArray());
+                            DestyoyRanges(storeDict: ref greenProjectors);
+                        }
+                    }
+
+                    Color newColor = new Color(0.1f, 1f, 0.1f, 0.45f);
+                    if (intersection != null || blocked || notInRange)
+                        newColor = new Color(1f, 0.1f, 0.1f, 0.45f);
+
                     if (UnityEngine.Input.GetMouseButtonDown(0))
                     {
-                        if (intersection == null)
+                        if (notInRange)
                         {
+                            cameraUIBaseScript.DisplayMessage(new StringBuilder(30).AppendFormat("The building must be in the radius: {0}", notEnough).ToString(), 3000);
+                        }
+                        else if (blocked || intersection != null)
+                        {
+                            cameraUIBaseScript.DisplayMessage("Something is blocked", 3000);
+                        }
+                        else
+                        {
+                            DestyoyRanges(storeDict: ref greenProjectors);
+
                             // Create building in project state
                             buildedObjectBuildingBehavior.SetAsProject();
-
-                            List<GameObject> selectedUnits = GetSelectedObjects();
-                            foreach (GameObject unit in selectedUnits)
+                            
+                            foreach (GameObject unit in selectedObjects)
                             {
                                 BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
                                 PhotonView unitPhotonView = unit.GetComponent<PhotonView>();
@@ -877,17 +970,14 @@ public class CameraController : MonoBehaviourPunCallbacks
                             selectedObject = null;
                             return true;
                         }
-                        else
-                        {
-                            UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-                            cameraUIBaseScript.DisplayMessage("Something is blocked", 3000);
-                        }
                     }
                     if (UnityEngine.Input.GetMouseButtonDown(1) || UnityEngine.Input.GetKeyDown(KeyCode.Escape))
                     {
                         buildedObjectBuildingBehavior.StopAction();
                         buildedObject = null;
                         selectedObject = null;
+                        DestyoyRanges(storeDict: ref errorsProjectors);
+                        DestyoyRanges(storeDict: ref greenProjectors);
                         return true;
                     }
 
@@ -915,6 +1005,51 @@ public class CameraController : MonoBehaviourPunCallbacks
         return false;
     }
 
+    Dictionary<GameObject, GameObject> greenProjectors = new Dictionary<GameObject, GameObject>();
+    Dictionary<GameObject, GameObject> errorsProjectors = new Dictionary<GameObject, GameObject>();
+    List<GameObject> foreachList = new List<GameObject>();
+    public void DrawRanges(Dictionary<GameObject, float> blockedBuildings, Color projectorColor, ref Dictionary<GameObject, GameObject> storeDict)
+    {
+        if (rangeProjector == null)
+            return;
+
+        foreach (var blockedBuilding in blockedBuildings)
+        {
+            if(!storeDict.Keys.Any(item => item.GetHashCode() == blockedBuilding.Key.GetHashCode()))
+            {
+                GameObject newProjector = Instantiate(rangeProjector, blockedBuilding.Key.transform.position + new Vector3(0, 2, 1), new Quaternion(0, 0, 0, 0));
+                Projector projector = newProjector.GetComponentInChildren<Projector>();
+
+                projector.material = new Material(projector.material);
+                projector.material.color = projectorColor;
+
+                projector.orthographicSize = blockedBuilding.Value;
+                storeDict.Add(blockedBuilding.Key, newProjector);
+            }
+        }
+        foreachList.Clear();
+        foreachList.AddRange(errorsProjectors.Keys);
+        foreach (GameObject unit in foreachList)
+        {
+            if (!blockedBuildings.Keys.Any(item => item.GetHashCode() == unit.GetHashCode()))
+            {
+                Destroy(errorsProjectors[unit]);
+                errorsProjectors.Remove(unit);
+            }
+        }
+    }
+
+    public void DestyoyRanges(ref Dictionary<GameObject, GameObject> storeDict)
+    {
+        foreachList.Clear();
+        foreachList.AddRange(storeDict.Keys);
+        foreach (GameObject unit in foreachList)
+        {
+            Destroy(storeDict[unit]);
+            storeDict.Remove(unit);
+        }
+    }
+
     public void SelectBinds()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p SelectBinds"); // Profiler
@@ -928,14 +1063,13 @@ public class CameraController : MonoBehaviourPunCallbacks
                 bool recreate = UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl);
                 bool addNew = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
                 bool remove = UnityEngine.Input.GetKey(KeyCode.LeftAlt) || UnityEngine.Input.GetKey(KeyCode.RightAlt);
-
-                var selectedUnits = GetSelectedObjects();
+                
                 if (recreate || addNew || remove)
                 {
                     if (recreate)
                         unitsBinds[key].Clear();
 
-                    foreach (GameObject selectedUnit in selectedUnits)
+                    foreach (GameObject selectedUnit in selectedObjects)
                     {
                         if ((addNew || recreate) && !unitsBinds[key].Contains(selectedUnit))
                             unitsBinds[key].Add(selectedUnit);
@@ -956,6 +1090,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                             UnitSelectionComponent selection = unit.GetComponent<UnitSelectionComponent>();
                             selection.SetSelect(true);
                             selectedObjects.Add(unit);
+                            selectedObjectsChanged = true;
                         }
                         if (keyTimer > 0 && keyPressed == number)
                             MoveCameraToPoint(GetCenterOfObjects(units));
@@ -1008,7 +1143,9 @@ public class CameraController : MonoBehaviourPunCallbacks
         return false;
     }
 
-    public void CreateOrUpdateCameraOnMap(Dom.Element mapBlock, Dom.Element mapImage)
+    private float mapCameraPositionX = 0.0f;
+    private float mapCameraPositionZ = 0.0f;
+    public void CreateOrUpdateCameraOnMap(Dom.Element mapBlock, Dom.Element mapImage, int count = 0)
     {
         UnityEngine.Profiling.Profiler.BeginSample("p CreateOrUpdateCameraOnMap"); // Profiler
         Vector3 vameraLookAt = transform.position - new Vector3(transform.forward.normalized.x, 0, transform.forward.normalized.z) * GetCameraOffset();
@@ -1031,7 +1168,7 @@ public class CameraController : MonoBehaviourPunCallbacks
             else
                 cameraDiv = mapBlock.getElementsByClassName("mapCamera")[0];
 
-            if (cameraDiv != null)
+            if (cameraDiv != null && (cameraPositionX != mapCameraPositionX && cameraPositionZ != mapCameraPositionZ || count != cacheMapsCount))
             {
                 cameraDiv.style.left = String.Format("{0}%", positionCameraOnMap.x * 100.0f);
                 cameraDiv.style.bottom = String.Format("{0}%", positionCameraOnMap.y * 100.0f);
@@ -1046,13 +1183,18 @@ public class CameraController : MonoBehaviourPunCallbacks
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
-    public void UpdateMapsCamera()
+    private int cacheMapsCount = 0;
+    public void UpdateMapsCamera(bool force = false)
     {
+        int mapsCount = UI.document.getElementsByClassName("mapBlock").length;
         foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
         {
             var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
-            CreateOrUpdateCameraOnMap(mapBlock, mapImage);
+            CreateOrUpdateCameraOnMap(mapBlock, mapImage, count: mapsCount);
         }
+        mapCameraPositionX = transform.position.x;
+        mapCameraPositionZ = transform.position.z;
+        cacheMapsCount = mapsCount;
     }
 
     public void UpdateMapsAndStatistic()
@@ -1084,8 +1226,6 @@ public class CameraController : MonoBehaviourPunCallbacks
                 mapImage.style.height = "100%";
                 mapImage.style.width = "100%";
             }
-
-            CreateOrUpdateCameraOnMap(mapBlock, mapImage);
 
             var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
             unitsBlock.innerHTML = "";
@@ -1240,11 +1380,6 @@ public class CameraController : MonoBehaviourPunCallbacks
         return filteredObjects;
     }
 
-    public List<GameObject> GetSelectedObjects()
-    {
-        return selectedObjects;
-    }
-
     public List<GameObject> GetSelectingObjects()
     {
         List<GameObject> objects = new List<GameObject>();
@@ -1348,6 +1483,7 @@ public class CameraController : MonoBehaviourPunCallbacks
     public void DeselectAllUnits()
     {
         selectedObjects.Clear();
+        selectedObjectsChanged = true;
         foreach (TagToSelect tag in tagsToSelect)
         {
             var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
@@ -1364,14 +1500,13 @@ public class CameraController : MonoBehaviourPunCallbacks
     {
         return IsWithinSelectionBounds(gameObject, mousePosition1, UnityEngine.Input.mousePosition);
     }
-
+    
     public bool IsWithinSelectionBounds(GameObject gameObject, Vector3 pos1, Vector3 pos2)
     {
         // At a time selected can be: the same team units, or buildings, or enemy team units
         var is_team_selected = false;
         var is_unit_selected = false;
-        List<GameObject> selectegObjects = GetSelectedObjects();
-        foreach(GameObject unit in selectegObjects)
+        foreach(GameObject unit in selectedObjects)
         {
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
             if (baseBehaviorComponent.team == team)
@@ -1456,7 +1591,7 @@ public class CameraController : MonoBehaviourPunCallbacks
 
     public void SendCommandToAllSelected(string commandName)
     {
-        foreach(GameObject unit in GetSelectedObjects())
+        foreach(GameObject unit in selectedObjects)
         {
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
             bool[] infoCommand = baseBehaviorComponent.UICommand(commandName);
@@ -1477,7 +1612,7 @@ public class CameraController : MonoBehaviourPunCallbacks
         if (match.Success)
         {
             int index = int.Parse(match.Groups[1].Value);
-            foreach (GameObject unit in GetSelectedObjects())
+            foreach (GameObject unit in selectedObjects)
             {
                 BuildingBehavior buildingBehavior = unit.GetComponent<BuildingBehavior>();
                 buildingBehavior.DeleteFromProductionQuery(index);
@@ -1488,7 +1623,7 @@ public class CameraController : MonoBehaviourPunCallbacks
     public void SelectOnly(string uniqueName)
     {
         List<GameObject> _selectedObjects = new List<GameObject>();
-        _selectedObjects.AddRange(GetSelectedObjects());
+        _selectedObjects.AddRange(selectedObjects);
         foreach (GameObject unit in _selectedObjects)
         {
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
@@ -1497,6 +1632,7 @@ public class CameraController : MonoBehaviourPunCallbacks
                 UnitSelectionComponent unitSelectionComponent = baseBehaviorComponent.GetComponent<UnitSelectionComponent>();
                 unitSelectionComponent.SetSelect(false);
                 selectedObjects.Remove(unit);
+                selectedObjectsChanged = true;
             }
         }
     }

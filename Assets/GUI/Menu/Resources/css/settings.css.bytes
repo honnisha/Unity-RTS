@@ -30,24 +30,24 @@ input:hover {
 }
 
 .float > p{
-	width: 47%;
+	width: 65%;
 }
 .float > input{
-	left: 50%;
+	left: 67%;
 	width: 8%;
 }
 .float > .maxMalue {
 	position: absolute;
-	left: 58%;
+	left: 75%;
 	text-align: left;
 }
 
 .checkbox > p{
-	width: 75%;
+	width: 65%;
 }
 .checkbox > input{
 	background: #595757;
-	left: 77%;
+	left: 67%;
 	height: 15px;
 	width: 15px;
 }

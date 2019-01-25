@@ -215,7 +215,7 @@ namespace GangaGame
                     }
 
                     UI.document.Run("CreateLoadingScreen", "Level initialization");
-                    loadedLevel = "Levels/Map1/Map1";
+                    loadedLevel = "Levels/Map1";
                     return;
                 }
             }
@@ -230,6 +230,7 @@ namespace GangaGame
                 if (changed)
                 {
                     musicSource.volume = PlayerPrefs.GetFloat("musicMenuVolume");
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     return;
                 }
 
@@ -269,6 +270,7 @@ namespace GangaGame
                 }
                 else if (className.Contains("ConnectDialog") || UI.document.getElementsByClassName("ConnectDialog").length > 0 && UnityEngine.Input.GetKeyDown(KeyCode.Return))
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     string error = SettingsScript.SaveSettings();
                     if (error != "")
                         UI.document.getElementsByClassName("error")[0].innerText = error;
@@ -280,6 +282,7 @@ namespace GangaGame
                 }
                 else if (className.Contains("backToMenu") && UI.document.getElementsByClassName("settingsBlock").length > 0)
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     UI.document.innerHTML = MenuHTMLFile.text;
                     return;
                 }
@@ -287,37 +290,51 @@ namespace GangaGame
                 // Singleplayer
                 else if (singleplayer && className.Contains("backToMenu"))
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     gameStarted = false;
                     UI.document.innerHTML = MenuHTMLFile.text;
                 }
                 else if (singleplayer && className.Contains("setReady"))
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     GameInfo.SetReady(!GameInfo.isPlayerReady);
                     UpdateRoomView();
                 }
 
                 else if (className.Contains("backToMenu") && !PhotonNetwork.InRoom)
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     PhotonNetwork.Disconnect();
                     CreateMessage("Disconnecting...");
                 }
                 else if (className.Contains("refreshMenu"))
+                {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     UpdateLobbyListView();
+                }
 
                 else if (className.Contains("createRoomDialog"))
+                {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     CreateRoomMenu();
+                }
 
                 else if (className.Contains("roomInLobby"))
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     CreateMessage(String.Format("Connecting to \"{0}\"...", element.innerText));
                     PhotonNetwork.JoinRoom(element.innerText);
                 }
 
                 else if (className.Contains("deleteDialog"))
+                {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     DeleteDialog();
+                }
 
                 else if (className.Contains("RoomDialog") || UI.document.getElementsByClassName("inputMaxplayers").length > 0 && UnityEngine.Input.GetKeyDown(KeyCode.Return))
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     string roomName = UI.document.getElementsByClassName("inputName")[0].innerText;
                     string maxplayers = UI.document.getElementsByClassName("inputMaxplayers")[0].innerText;
                     if (!Regex.Match(maxplayers, @"^[2-9][0-9]*$", RegexOptions.IgnoreCase).Success)
@@ -355,28 +372,23 @@ namespace GangaGame
                 }
                 else if (PhotonNetwork.InRoom && className.Contains("setReady"))
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     GameInfo.SetReady(!GameInfo.isPlayerReady);
                 }
 
                 // Create NPC
                 else if (GameInfo.IsMasterClient() && className.Contains("CreateNPC"))
                 {
-                    if (GameInfo.NPCList.Count >= 9)
-                    {
-                        UI.document.Run("CreateChatMessage", "You can not create more bots than 9");
-                        return;
-                    }
-                    else
-                    {
-                        GameInfo.CreateNPC(GameInfo.NPCList.Count + 1);
-                        if (singleplayer)
-                            UpdateRoomView();
-                        return;
-                    }
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
+                    GameInfo.CreateNPC(GameInfo.NPCList.Count + 1 % 9);
+                    if (singleplayer)
+                        UpdateRoomView();
+                    return;
                 }
                 // Kick
                 else if (GameInfo.IsMasterClient() && className.Contains("kick"))
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     if (element.parentElement.className.Contains("NPC"))
                     {
                         int index = int.Parse(new Regex(@"NPCINDEX(\d+)").Match(element.className).Groups[1].Value);
@@ -395,6 +407,7 @@ namespace GangaGame
                 }
                 if (className.Contains("spectator") && element.parentElement.innerText.Contains(GameInfo.GetNickName()))
                 {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     GameInfo.SetSpectator(!GameInfo.playerSpectate);
                     if (singleplayer)
                         UpdateRoomView();

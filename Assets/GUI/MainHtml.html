@@ -8,6 +8,10 @@ html {
     width: 100%;
 	position: absolute; 
 }
+.loading {
+    background: url("background-mountans-dark.png") no-repeat;
+	background-size: 100%;
+}
 .container {
     height: 18%;
     width: 100%;
@@ -62,14 +66,15 @@ html {
 .resources {
     font-size: 90%;
 }
-.info {
+.infoBlock {
 	height: 30%;
 	width: 88%;
 	display: inline-block;
-	position: absolute; 
+	position: absolute;
 }
 .description {
-	position: absolute; 
+	position: absolute;
+	height: 50px;
     font-size: 75%;
 	display: inline-block;
 	overflow: ellipsis;
@@ -174,12 +179,12 @@ html {
 	left: 69.2%;
 	bottom: 0px;
 }
-.altInfo > .info {
+.altInfo > .infoBlock {
 	height: auto;
 	width: 100%;
 	position: relative;
 }
-.altInfo > .info > .description {
+.altInfo > .infoBlock > .description {
 	height: auto;
 	position: relative;
 	padding-bottom: 5px;
@@ -309,11 +314,12 @@ html {
 .chat > div {
 }
 .chatBox > input {
+	left: 1%;
 	top: 90%;
 	background: grey;
     height: 20px;
 	position: absolute;
-    width: 74%;
+    width: 73%;
 	display: block;
 }
 .chatBox > .button {
@@ -481,7 +487,7 @@ html {
 	text-align: center;
 }
 .SettingsContent {
-	height: 82%;
+	height: 80%;
 	margin: 5% 5% 0 5%;
 }
 .settingsMessage {
@@ -670,6 +676,103 @@ html {
         text.className = "tab soundTab clckable";
         text.innerText = "Sound";
         secondWindow.appendChild(text);
+	}
+
+	function ClearInfo()
+	{
+        document.getElementsByClassName("cblock")[0].innerHTML = "";
+        document.getElementsByClassName("rblock")[0].innerHTML = "";
+	}
+	
+	function DrawInfo(parentElementClass, detailInfo, drawImage, discriptable, dinamicInfo, uniqueName, readableName, readableDescription, errorMessage, imagePath, hotkey, costInfo, tableStatistics) 
+	{
+        var parentElement = document.getElementsByClassName(parentElementClass)[0];
+
+        if (detailInfo)
+        {
+            var elementDiv = document.createElement("div");
+            elementDiv.className = "title";
+            elementDiv.innerHTML = readableName;
+            parentElement.appendChild(elementDiv);
+        }
+        if (drawImage)
+        {   
+            var elementContent = document.createElement("div");
+            elementContent.className = "elementsContent";
+            parentElement.appendChild(elementContent);
+            
+            if (errorMessage != "")
+                elementContent.className += " error";
+
+            var createdImage = document.createElement("img");
+            createdImage.className = "element clckable";
+            createdImage.setAttribute("src", imagePath);
+            elementContent.appendChild(createdImage);
+            if(hotkey != "")
+            {
+                var hotkeyDiv = document.createElement("div");
+                hotkeyDiv.className = "hotkey";
+                hotkeyDiv.innerHTML = hotkey;
+                elementContent.appendChild(hotkeyDiv);
+            }
+        }
+        if (discriptable)
+        {
+            createdImage.className += " discriptable " + uniqueName;
+        }
+        if (detailInfo)
+        {
+            if (createdImage != null)
+                createdImage.className += " detailInfo";
+
+            var infoDiv = document.createElement("div");
+            infoDiv.className = "infoBlock";
+            parentElement.appendChild(infoDiv);
+
+            var statusticDiv = document.createElement("div");
+            statusticDiv.className = "description";
+            statusticDiv.innerHTML = readableDescription;
+            infoDiv.appendChild(statusticDiv);
+
+            if (dinamicInfo)
+            {
+                var dinamicInfoDiv = document.createElement("div");
+                dinamicInfoDiv.className = "dinamicInfo";
+                parentElement.appendChild(dinamicInfoDiv);
+            }
+
+            if (costInfo != null && costInfo.length > 0)
+            {
+                var detailCostsDiv = document.createElement("div");
+                detailCostsDiv.className = "stats costs";
+                parentElement.appendChild(detailCostsDiv);
+                for (var cost in costInfo)
+                {
+                    var statsDiv = document.createElement("p");
+                    statsDiv.innerHTML = cost;
+                    detailCostsDiv.appendChild(statsDiv);
+                }
+            }
+            if (errorMessage != "")
+            {
+                var errorMessageDiv = document.createElement("div");
+                errorMessageDiv.className = "errorMessage";
+                errorMessageDiv.innerHTML = unitImageInfo.errorMessage;
+                parentElement.appendChild(errorMessageDiv);
+            }
+            if (tableStatistics != null && tableStatistics.length > 0)
+            {
+                var detailStatusticsDiv = document.createElement("div");
+                detailStatusticsDiv.className = "stats";
+                parentElement.appendChild(detailStatusticsDiv);
+                for (var statistic in tableStatistics)
+                {
+                    var stats = document.createElement("p");
+                    stats.innerHTML = statistic;
+                    detailStatusticsDiv.appendChild(stats);
+                }
+            }
+        }
 	}
 </script>
 

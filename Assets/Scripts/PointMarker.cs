@@ -2,17 +2,43 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PointMarker : MonoBehaviour {
+namespace GangaGame
+{
+    public class PointMarker : MonoBehaviour {
 
-    public GameObject projector;
+        public enum MarkerType { Point, Flag, Arrow };
+        public GameObject flag;
+        public GameObject arrow;
     
-	// Use this for initialization
-	void Start () {
-		
-	}
+	    // Use this for initialization
 
-    // Update is called once per frame
-    void Update()
-    {
+        private void Update()
+        {
+            if (arrow.activeSelf)
+                arrow.transform.LookAt(new Vector3(Camera.main.transform.position.x, arrow.transform.position.y, Camera.main.transform.position.z));
+        }
+
+        public void SetMarker(Color color, MarkerType markerType, float timer = 0.0f)
+        {
+            GetComponentInChildren<Projector>().material.color = color;
+
+            if (markerType == MarkerType.Arrow)
+            {
+                arrow.GetComponentInChildren<Renderer>().material.color = color;
+                arrow.transform.LookAt(new Vector3(Camera.main.transform.position.x, arrow.transform.position.y, Camera.main.transform.position.z));
+                arrow.SetActive(true);
+            }
+            else
+                arrow.SetActive(false);
+
+            if (markerType == MarkerType.Flag)
+                flag.SetActive(true);
+            else
+                flag.SetActive(false);
+
+            if (timer > 0)
+                Destroy(gameObject, timer);
+        }
     }
 }
+

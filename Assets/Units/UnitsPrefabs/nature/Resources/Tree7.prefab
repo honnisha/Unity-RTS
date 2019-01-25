@@ -9,13 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4987177571926396}
-  - component: {fileID: 205559238332675686}
   - component: {fileID: 208044106627558328}
   - component: {fileID: 136126961747989630}
   - component: {fileID: 114471481107098178}
   - component: {fileID: 114178920209631086}
-  - component: {fileID: 1964251293179279170}
-  - component: {fileID: 2946452692753136818}
   m_Layer: 14
   m_Name: Tree7
   m_TagString: Ambient
@@ -39,25 +36,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &205559238332675686
-LODGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317083741807122}
-  serializedVersion: 2
-  m_LocalReferencePoint: {x: 0.029491663, y: 3.4068997, z: 0.02241373}
-  m_Size: 6.8137994
-  m_FadeMode: 0
-  m_AnimateCrossFading: 0
-  m_LastLODIsBillboard: 0
-  m_LODs:
-  - screenRelativeHeight: 0.121335745
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 23094936186051666}
-  m_Enabled: 1
 --- !u!208 &208044106627558328
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -101,44 +79,51 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: -1
+  tear: 0
   ownerId: 1
   maxHealth: 100
   health: 100
   live: 1
   pointToInteract: {fileID: 0}
+  tearDisplay: []
   debug: 0
   isWalkAround: 0
   timeToWalk: 0
   timerToWalk: 0
   visionDistanve: 10
-  uniqueName: Tree
-  readableName: Tree
-  readableDescription: Tree
-  imagePath: pine-tree.png
-  timeToBuild: 10
-  costFood: 10
-  costGold: 50
-  costWood: 50
-  productionHotkey: 0
+  _skillInfo:
+    uniqueName: Tree
+    readableName: Tree
+    readableDescription: Tree
+    imagePath: buildings/pine-tree.png
+    timeToBuild: 0
+    costFood: 0
+    costGold: 0
+    costWood: 0
+    productionHotkey: 0
+    skillType: 1
+  _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
-  damage: 50
-  rangeAttack: 2
+  uniqueId: -1
   interactType: 0
-  attackTime: 1.2
-  attackDelay: 0
-  damageAfterTimer: 1
   attackTimer: 0
   attackDelayTimer: 0
   attacked: 0
-  attackType: 4
-  stabbingResist: 0
-  cuttingResist: 0
-  bitingResist: 0
-  magicResist: 0
-  behaviorType: 1
-  agrRange: 20
-  alertRange: 10
+  defaultStatistic:
+    damage: 10
+    rangeAttack: 2
+    attackTime: 2
+    attackDelay: 0.5
+    damageAfterTimer: 1
+    attackType: 4
+    stabbingResist: 0
+    cuttingResist: 0
+    bitingResist: 0
+    magicResist: 0
+    agrRange: 20
+    alertRange: 10
   actionEffect: {fileID: 0}
+  behaviorType: 1
   bloodEffect: {fileID: 0}
   bloodOnBroundEffects: []
   destroyEffectPrefab: {fileID: 0}
@@ -160,12 +145,19 @@ MonoBehaviour:
   curSpeed: 0
   cameraController: {fileID: 0}
   skillList: []
+  producedUnits: []
+  spawnPoint: {fileID: 0}
+  spawnTarget: {x: 0, y: 0, z: 0}
+  spawnTargetObject: {fileID: 0}
+  buildTimer: 0
+  productionQuery: []
   HTMLHealthFile: {fileID: 0}
   InfoHTMLOffset: {x: 0, y: 4, z: 0}
   pointMarkerPrefab: {fileID: 0}
   HTMLHealthSize: {x: 0, y: 50}
   visionToolPrefab: {fileID: 0}
   visionCount: 0
+  uqeryLimit: 5
   beenSeen: 0
   holderObject: {fileID: 0}
   timerToCreateHolder: 0
@@ -178,18 +170,18 @@ MonoBehaviour:
   canBeSelected: 1
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
+  allOutlines: []
   resourceCapacityType: 3
   resourceCapacity: 150
   resourceEndless: 0
   sourceType: 0
   storedResources: 
+  resourceHold: 0
+  resourceType: 0
+  soundsInfo: []
+  isInCameraView: 0
   state: 3
   magnitDistance: 2
-  producedUnits: []
-  spawnPoint: {fileID: 0}
-  unitsQuery: []
-  uqeryLimit: 5
-  buildTimer: 0
   tempMaterialsMode: 
   terrainChangeInfo:
     offset: {x: 0, y: 0}
@@ -210,45 +202,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e11b0a92f7104e4f8c2693c0cf315ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeSelected: 1
   isSelected: 0
   projector: {fileID: 1354390515699072}
---- !u!114 &1964251293179279170
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317083741807122}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  ObservedComponents:
-  - {fileID: 2946452692753136818}
-  viewIdField: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
---- !u!114 &2946452692753136818
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317083741807122}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
 --- !u!1 &1354390515699072
 GameObject:
   m_ObjectHideFlags: 0

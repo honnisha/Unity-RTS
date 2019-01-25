@@ -111,10 +111,10 @@ MonoBehaviour:
     attackDelay: 0.5
     damageAfterTimer: 1
     attackType: 4
-    stabbingResist: 0
-    cuttingResist: 0
-    bitingResist: 0
-    magicResist: 0
+    stabbingResist: 90
+    cuttingResist: 90
+    bitingResist: 90
+    magicResist: 90
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
@@ -171,11 +171,18 @@ MonoBehaviour:
   resourceEndless: 1
   sourceType: 1
   storedResources: 
+  resourceHold: 0
+  resourceType: 0
   soundsInfo: []
   isInCameraView: 0
   state: 3
   magnitDistance: 2
   tempMaterialsMode: 
+  placeConditions:
+  - type: 0
+    buildingName: townCenter
+    readableName: Town Center
+    range: 20
   terrainChangeInfo:
     offset: {x: -1.8, y: -1}
     size: {x: 8, y: 7}
@@ -217,8 +224,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3403}
-  viewIdField: 3
-  InstantiationId: 3
+  viewIdField: 7
+  InstantiationId: 7
   isRuntimeInstantiated: 0
 --- !u!114 &3403
 MonoBehaviour:

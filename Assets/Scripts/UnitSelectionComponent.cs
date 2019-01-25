@@ -34,6 +34,8 @@ public class UnitSelectionComponent : MonoBehaviour
 
         if (buildingBehavior != null && buildingBehavior.DisableUpdate())
             enabled = false;
+
+        SetSelect(false);
     }
 
     private void UpdateColor()

@@ -51,4 +51,5 @@ MonoBehaviour:
   - _GiveOrder
   - GiveOrderUniqueID
   - StartInteractUniqueID
+  - _StopAction
   DisableAutoOpenWizard: 1

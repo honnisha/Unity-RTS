@@ -165,8 +165,8 @@ MonoBehaviour:
   team: 1
   tear: 0
   ownerId: 1
-  maxHealth: 100
-  health: 100
+  maxHealth: 500
+  health: 500
   live: 1
   pointToInteract: {fileID: 0}
   tearDisplay:
@@ -203,10 +203,10 @@ MonoBehaviour:
     attackDelay: 0.5
     damageAfterTimer: 1
     attackType: 4
-    stabbingResist: 0
-    cuttingResist: 0
-    bitingResist: 0
-    magicResist: 0
+    stabbingResist: 30
+    cuttingResist: 80
+    bitingResist: 30
+    magicResist: 30
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
@@ -243,7 +243,7 @@ MonoBehaviour:
   productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
   InfoHTMLOffset: {x: 0, y: 6, z: 0}
-  pointMarkerPrefab: {fileID: 1174494487606054, guid: a3698f3e4f5fb734899fa95147e1baeb,
+  pointMarkerPrefab: {fileID: 1174494487606054, guid: 7723961c7b4a2cf4cbfa8e9a6c45ba62,
     type: 3}
   HTMLHealthSize: {x: 120, y: 120}
   visionToolPrefab: {fileID: 1311408724359970, guid: fc937d29efbc7d146a830e8e4d19ea62,
@@ -268,11 +268,18 @@ MonoBehaviour:
   resourceEndless: 0
   sourceType: 0
   storedResources: 010000000200000003000000
+  resourceHold: 0
+  resourceType: 0
   soundsInfo: []
   isInCameraView: 0
   state: 3
   magnitDistance: 5
   tempMaterialsMode: 
+  placeConditions:
+  - type: 1
+    buildingName: townCenter
+    readableName: Town Center
+    range: 20
   terrainChangeInfo:
     offset: {x: -2.6, y: -2.6}
     size: {x: 10, y: 10}

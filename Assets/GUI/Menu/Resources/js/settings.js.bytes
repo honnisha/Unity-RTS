@@ -30,10 +30,13 @@ function CreateSettingFloat(settingsClass, className, title, value, minValue, ma
     setting.className = className;
     divSetting.appendChild(setting);
 
-    var maxValueDiv = document.createElement("p");
-    maxValueDiv.className = "maxMalue";
-    maxValueDiv.innerHTML = "/ " + maxValue + "%";
-    divSetting.appendChild(maxValueDiv);
+	if(maxValue > 0)
+	{
+		var maxValueDiv = document.createElement("p");
+		maxValueDiv.className = "maxMalue";
+		maxValueDiv.innerHTML = "/ " + maxValue + "%";
+		divSetting.appendChild(maxValueDiv);
+	}
 }
 function CreateSettingCheckbox(settingsClass, className, title, value, minValue, maxValue) {
 	var settingsElement = document.getElementsByClassName(settingsClass)[0];

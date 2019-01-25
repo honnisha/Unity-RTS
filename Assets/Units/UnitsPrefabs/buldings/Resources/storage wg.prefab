@@ -244,10 +244,10 @@ MonoBehaviour:
     attackDelay: 0.5
     damageAfterTimer: 1
     attackType: 4
-    stabbingResist: 0
-    cuttingResist: 0
-    bitingResist: 0
-    magicResist: 0
+    stabbingResist: 20
+    cuttingResist: 60
+    bitingResist: 20
+    magicResist: 20
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
@@ -305,11 +305,14 @@ MonoBehaviour:
   resourceEndless: 0
   sourceType: 0
   storedResources: 0200000003000000
+  resourceHold: 0
+  resourceType: 0
   soundsInfo: []
   isInCameraView: 0
   state: 3
   magnitDistance: 4
   tempMaterialsMode: 
+  placeConditions: []
   terrainChangeInfo:
     offset: {x: 0, y: 0}
     size: {x: 4, y: 4}
@@ -367,8 +370,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3521}
-  viewIdField: 16
-  InstantiationId: 16
+  viewIdField: 13
+  InstantiationId: 13
   isRuntimeInstantiated: 0
 --- !u!114 &3521
 MonoBehaviour:

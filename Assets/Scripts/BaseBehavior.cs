@@ -132,6 +132,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public float curSpeed;
     [HideInInspector]
     public CameraController cameraController;
+    UIBaseScript cameraUIBaseScript;
 
     #endregion
 
@@ -259,6 +260,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     Renderer[] renders;
     virtual public void Awake()
     {
+        cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
         cameraController = Camera.main.GetComponent<CameraController>();
         unitSelectionComponent = GetComponent<UnitSelectionComponent>();
         photonView = GetComponent<PhotonView>();
@@ -279,7 +281,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         if (spawnPoint != null)
             spawnTarget = spawnPoint.transform.position;
-
     }
     
     [HideInInspector]
@@ -607,7 +608,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         return true;
     }
 
-    public void CreateOrUpdatePointMarker(Color color, Vector3 target, float timer, bool saveMarker)
+    public void CreateOrUpdatePointMarker(Color color, Vector3 target, float timer, bool saveMarker, PointMarker.MarkerType markerType = PointMarker.MarkerType.Point)
     {
         if (pointMarker != null && saveMarker)
             DestroyPointMarker();
@@ -617,10 +618,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         {
             var createdMarker = (GameObject)Instantiate(pointMarkerPrefab, target, pointMarkerPrefab.transform.rotation);
             PointMarker pointMarkerScript = createdMarker.GetComponent<PointMarker>();
-            Projector projectorComponent = pointMarkerScript.projector.GetComponent<Projector>();
-            projectorComponent.material.color = color;
-            if (timer > 0)
-                Destroy(createdMarker, timer);
+            pointMarkerScript.SetMarker(color, markerType, timer);
             if (saveMarker)
                 pointMarker = createdMarker;
         }
@@ -692,7 +690,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         if(behaviorType == BehaviorType.Counterattack || behaviorType == BehaviorType.Aggressive)
         {
-            var allObjects = GetObjectsInRange(transform.position, range, team: attackTeam);
+            var allObjects = GetObjectsInRange(transform.position, range, team: attackTeam, buildings: false);
             if (allObjects.Count <= 0)
                 return false;
 
@@ -768,7 +766,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         {
             if (skillObject != null)
             {
-                UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
                 KeyCode hotkey = KeyCode.None;
                 string uniqueName = "";
                 BuildingBehavior buildingBehavior = skillObject.GetComponent<BuildingBehavior>();
@@ -861,7 +858,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             if (productionQuery[0].GetComponent<BaseSkillScript>() != null)
                 buildTimer = productionQuery[0].GetComponent<BaseSkillScript>().skillInfo.timeToBuild;
         }
-        UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
         cameraUIBaseScript.UpdateUI();
         return true;
     }
@@ -891,7 +887,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             }
         }
         else
-            _StartInteract(target);
+            _StartInteract(targetObject);
     }
     [PunRPC]
     public virtual void StartInteractViewID(int targetViewId)
@@ -945,7 +941,16 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         }
         return null;
     }
-    
+
+    public void StopAction(bool deleteObject = false)
+    {
+        if (PhotonNetwork.InRoom)
+            photonView.RPC("_StopAction", PhotonTargets.All, deleteObject);
+        else
+            _StopAction(deleteObject);
+    }
+
+    public virtual void _StopAction(bool deleteObject = false) { }
     public virtual void _GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
     public virtual void _GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
     public virtual bool IsIdle() { return true; }
@@ -973,8 +978,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                 notEnoughMessage = String.Format("{0} gold: {1:F0}", notEnoughMessage, gold - cameraController.gold);
             if (cameraController.wood < wood)
                 notEnoughMessage = String.Format("{0} wood: {1:F0}", notEnoughMessage, wood - cameraController.wood);
-
-            UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+            
             cameraUIBaseScript.DisplayMessage(notEnoughMessage, 3000, "notEnoughResources");
             return false;
         }

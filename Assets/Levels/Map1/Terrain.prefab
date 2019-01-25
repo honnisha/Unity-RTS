@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1963018128548033418}
   - component: {fileID: 7089063114470558530}
   - component: {fileID: 7089063114470558531}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Terrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,10 +46,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   treePrefabs:
-  - {fileID: 6468036793243662981, guid: 61a1f22d84531ce4a81edf9962cb0e8b, type: 3}
-  - {fileID: 7207943571960021215, guid: 1eb6237fb7b4e134589dd6850214fc5e, type: 3}
-  - {fileID: 7993852223387248859, guid: b67cb0bc41f5f83408bb90b5309828da, type: 3}
-  - {fileID: 5504205912774389098, guid: bdc71a60401a51d42b661605e6cac048, type: 3}
+  - {fileID: 5769405782021344495, guid: e99b4bd34838f4f4987726425754247e, type: 3}
+  - {fileID: 7050659203808364023, guid: ce53465692504a741885586237a4c683, type: 3}
   goldPrefabs:
   - {fileID: 156588864358899212, guid: a71994c5ee0ba014d853a4b5c52796ca, type: 3}
   animalsPrefabs:

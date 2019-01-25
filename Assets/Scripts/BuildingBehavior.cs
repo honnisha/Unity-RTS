@@ -21,6 +21,17 @@ public class BuildingBehavior : BaseBehavior
 
     #endregion
 
+    public enum PlaceConditionType { InRange, BlockedRange };
+    [System.Serializable]
+    public class PlaceConditionInfo
+    {
+        public PlaceConditionType type = PlaceConditionType.BlockedRange;
+        public string buildingName;
+        public string readableName;
+        public float range = 10.0f;
+    }
+    public List<PlaceConditionInfo> placeConditions = new List<PlaceConditionInfo>();
+
     [System.Serializable]
     public class TerrainChangeInfo
     {
@@ -118,9 +129,9 @@ public class BuildingBehavior : BaseBehavior
             if (unitSelectionComponent.isSelected && team == cameraController.team && ownerId == cameraController.userId)
             {
                 if (spawnTargetObject != null)
-                    CreateOrUpdatePointMarker(Color.green, spawnTargetObject.transform.position, 0.0f, true);
+                    CreateOrUpdatePointMarker(Color.green, spawnTargetObject.transform.position, 0.0f, true, PointMarker.MarkerType.Arrow);
                 else
-                    CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true);
+                    CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true, PointMarker.MarkerType.Flag);
             }
             if (!unitSelectionComponent.isSelected)
                 DestroyPointMarker();
@@ -354,6 +365,56 @@ public class BuildingBehavior : BaseBehavior
         return false;
     }
 
+    public Dictionary<GameObject, float> returnObjects = new Dictionary<GameObject, float>();
+    public void GetBlockedBlockedBy()
+    {
+        returnObjects.Clear();
+        foreach (PlaceConditionInfo placeCondition in placeConditions)
+        {
+            if (placeCondition.type == PlaceConditionType.BlockedRange)
+            {
+                var allBuildingsInRange = GetObjectsInRange(transform.position, placeCondition.range, team: -1, units: false);
+                foreach (GameObject building in allBuildingsInRange)
+                {
+                    BaseBehavior baseBehaviorComponent = building.GetComponent<BaseBehavior>();
+                    if (baseBehaviorComponent.team == team)
+                        if (baseBehaviorComponent.skillInfo.uniqueName == placeCondition.buildingName)
+                        {
+                            returnObjects.Add(building, placeCondition.range);
+                        }
+                }
+            }
+        }
+    }
+
+    public void GetInRangeConditionError()
+    {
+        returnObjects.Clear();
+        foreach (PlaceConditionInfo placeCondition in placeConditions)
+        {
+            if (placeCondition.type == PlaceConditionType.InRange)
+            {
+                var allBuildingsInRange = GetObjectsInRange(transform.position, placeCondition.range, team: -1, units: false);
+                foreach (GameObject building in allBuildingsInRange)
+                {
+                    BaseBehavior baseBehaviorComponent = building.GetComponent<BaseBehavior>();
+                    if (baseBehaviorComponent.team == team)
+                        if (baseBehaviorComponent.skillInfo.uniqueName == placeCondition.buildingName)
+                            returnObjects.Add(building, placeCondition.range);
+                }
+            }
+        }
+    }
+
+    public List<string> stringsConditionInRange = new List<string>();
+    public void IfHasConditionInRange()
+    {
+        stringsConditionInRange.Clear();
+        foreach (PlaceConditionInfo placeCondition in placeConditions)
+            if (placeCondition.type == PlaceConditionType.InRange)
+                stringsConditionInRange.Add(placeCondition.readableName);
+    }
+
     public bool RepairOrBuild(float giveHealth)
     {
         health += giveHealth;
@@ -387,25 +448,29 @@ public class BuildingBehavior : BaseBehavior
         spawnTargetObject = targetObject;
     }
 
-    public bool StopAction()
+    [PunRPC]
+    public override void _StopAction(bool deleteObject = false)
     {
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         if (state == BuildingState.Building || state == BuildingState.Project || state == BuildingState.Selected)
         {
-            cameraController.food += skillInfo.costFood;
-            cameraController.gold += skillInfo.costGold;
-            cameraController.wood += skillInfo.costWood;
+            if (team == cameraController.team)
+            {
+                cameraController.food += skillInfo.costFood;
+                cameraController.gold += skillInfo.costGold;
+                cameraController.wood += skillInfo.costWood;
+            }
             if (objectUIInfo != null)
             {
                 objectUIInfo.Destroy();
                 objectUIInfo = null;
             }
             Destroy(gameObject);
-            return true;
+            return;
         }
         if(state == BuildingState.Builded)
-            return DeleteFromProductionQuery(0);
-        return false;
+            DeleteFromProductionQuery(0);
+        return;
     }
 
     public override bool[] UICommand(string commandName)
@@ -414,7 +479,7 @@ public class BuildingBehavior : BaseBehavior
         if (!unitSelectionComponent.isSelected)
             return result;
         
-        if (team != cameraController.team || cameraController.chatInput)
+        if (team != cameraController.team || cameraController.IsHotkeysBlocked())
             return result;
 
         bool[] skillResult = ActivateSkills(commandName);
@@ -445,15 +510,17 @@ public class BuildingBehavior : BaseBehavior
         }
         if (commandName == "stop" || Input.GetKeyDown(KeyCode.H))
         {
-            result[0] = StopAction();
+            StopAction();
+            result[0] = true;
             return result;
         }
         return result;
     }
 
+    List<string> statistics = new List<string>();
     public override List<string> GetCostInformation()
     {
-        List<string> statistics = new List<string>();
+        statistics.Clear();
         if (skillInfo.costFood > 0)
             statistics.Add(new StringBuilder(30).AppendFormat("Food: {0:F0}", skillInfo.costFood).ToString());
         if (skillInfo.costGold > 0)

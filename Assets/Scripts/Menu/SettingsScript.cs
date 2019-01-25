@@ -36,9 +36,9 @@ namespace GangaGame
             public object defaultValue;
         }
 
-        public static void SetDefaultSettingsIfNotSetted()
+        public static void SetDefaultSettingsIfNotSetted(bool force = false)
         {
-            if (PlayerPrefs.GetInt("settingsSetted") != 1)
+            if (PlayerPrefs.GetInt("settingsSetted") != 1 || force)
             {
                 SettingsFild[] settings = GetSettingsFields();
                 foreach (var setting in settings)
@@ -58,13 +58,26 @@ namespace GangaGame
         public static SettingsFild[] GetSettingsFields()
         {
             List<SettingsFild> settings = new List<SettingsFild>();
-            settings.Add(new SettingsFild(typeof(string), "username", "Username", _tab: 0, _isMainMenu: true, _defaultValue: "Player"));
-            settings.Add(new SettingsFild(typeof(bool), "isUnitHealthAlwaysSeen", "Is unit health always displayed", _tab: 0, _defaultValue: 1));
-            settings.Add(new SettingsFild(typeof(bool), "isBuildingHealthAlwaysSeen", "Is building health always displayed", _tab: 0, _defaultValue: 0));
+            // Game
+            settings.Add(new SettingsFild(typeof(string), "username", "Username", _tab: 0, _isMainMenu: true, _defaultValue: ""));
+            settings.Add(new SettingsFild(typeof(bool), "isUnitHealthAlwaysSeen", "Unit healths always displayed", _tab: 0, _defaultValue: 1));
+            settings.Add(new SettingsFild(typeof(bool), "isBuildingHealthAlwaysSeen", "Buildings health always displayed", _tab: 0, _defaultValue: 0));
 
-            settings.Add(new SettingsFild(typeof(float), "musicVolume", "Music in game volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
-            settings.Add(new SettingsFild(typeof(float), "musicMenuVolume", "Music in menu volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
-            settings.Add(new SettingsFild(typeof(float), "soundsVolume", "Sounds volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
+            settings.Add(new SettingsFild(typeof(bool), "usePanning", "Panning with mouse", _tab: 0, _defaultValue: 1));
+
+            settings.Add(new SettingsFild(typeof(bool), "useKeyboardInput", "Use keyboard input", _tab: 0, _defaultValue: 1));
+            settings.Add(new SettingsFild(typeof(float), "keyboardMovementSpeed", "Movement speed", _tab: 0, _defaultValue: 20.0f, _maxRange: -1.0f));
+
+            settings.Add(new SettingsFild(typeof(bool), "useScreenEdgeInput", "Screen edge input", _tab: 0, _defaultValue: 1));
+            settings.Add(new SettingsFild(typeof(float), "screenEdgeMovementSpeed", "Screen edge border size", _tab: 0, _defaultValue: 25.0f, _maxRange: -1.0f));
+
+            settings.Add(new SettingsFild(typeof(bool), "useScrollwheelZooming", "Scrollwheel zooming", _tab: 0, _defaultValue: 1));
+            settings.Add(new SettingsFild(typeof(float), "scrollWheelZoomingSensitivity", "Scrollwheel sensitivity", _tab: 0, _defaultValue: 150.0f, _maxRange: -1.0f));
+            
+            // Sound
+            settings.Add(new SettingsFild(typeof(float), "musicVolume", "Music in game volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.25f));
+            settings.Add(new SettingsFild(typeof(float), "musicMenuVolume", "Music in menu volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.25f));
+            settings.Add(new SettingsFild(typeof(float), "soundsVolume", "Sounds volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.50f));
             settings.Add(new SettingsFild(typeof(float), "interfaceVolume", "Interface sounds volume", _tab: 1, _factor: 100.0f, _defaultValue: 0.5f));
             return settings.ToArray();
         }
@@ -163,7 +176,7 @@ namespace GangaGame
                         float floatValue = float.Parse(newValue) / setting.factor;
                         if (floatValue < setting.minRange)
                             return String.Format("\"{0}\" less than {1}", setting.title, setting.minRange);
-                        if (floatValue > setting.maxRange)
+                        if (floatValue > setting.maxRange && setting.maxRange > 0)
                             return String.Format("\"{0}\" more than {1}", setting.title, setting.maxRange);
 
                         PlayerPrefs.SetFloat(setting.name, floatValue);

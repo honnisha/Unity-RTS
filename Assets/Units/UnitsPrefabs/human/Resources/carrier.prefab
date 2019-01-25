@@ -2560,6 +2560,8 @@ MonoBehaviour:
   resourceEndless: 0
   sourceType: 0
   storedResources: 01000000
+  resourceHold: 0
+  resourceType: 0
   soundsInfo: []
   isInCameraView: 0
   buildHpPerSecond: 2.5
@@ -2567,8 +2569,6 @@ MonoBehaviour:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   resourceGatherInfo: []
-  resourceHold: 0
-  resourceType: 0
   farmInfo:
     type: 0
     gatherPerSecond: 0.5

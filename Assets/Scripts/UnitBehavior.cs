@@ -676,10 +676,11 @@ public class UnitBehavior : BaseBehavior
         return toolInfo;
     }
 
+    Dictionary<GameObject, float> objects = new Dictionary<GameObject, float>();
     public GameObject GetObjectToInteract(InteractigType type = InteractigType.None, ResourceType targetResource = ResourceType.None)
     {
+        objects.Clear();
         UnityEngine.Profiling.Profiler.BeginSample("p GetObjectToInteract"); // Profiler
-        Dictionary<GameObject, float> objects = new Dictionary<GameObject, float>();
         var allObjects = GetObjectsInRange(transform.position, 15.0f, team: -1).Concat(GameObject.FindGameObjectsWithTag("Ambient")).ToArray();
         foreach (GameObject oneObject in allObjects)
         {
@@ -1041,7 +1042,8 @@ public class UnitBehavior : BaseBehavior
             SendToDestroy();
     }
 
-    public void StopAction(bool deleteObject)
+    [PunRPC]
+    public override void _StopAction(bool deleteObject = false)
     {
         interactDistance = 0.0f;
         DestroyPointMarker();
@@ -1067,9 +1069,14 @@ public class UnitBehavior : BaseBehavior
     {
         queueCommands.Add(newTarget);
         if (newTarget is Vector3)
-            CreateOrUpdatePointMarker(Color.green, (Vector3)newTarget, 1.0f, false);
+            CreateOrUpdatePointMarker(Color.green, (Vector3)newTarget, 1.0f, false, PointMarker.MarkerType.Point);
         else
-            CreateOrUpdatePointMarker(Color.green, ((GameObject)newTarget).transform.position, 1.0f, false);
+        {
+            PointMarker.MarkerType markerType = PointMarker.MarkerType.Point;
+            if (((GameObject)newTarget).GetComponent<BuildingBehavior>() != null)
+                markerType = PointMarker.MarkerType.Arrow;
+            CreateOrUpdatePointMarker(Color.green, ((GameObject)newTarget).transform.position, 1.0f, false, markerType);
+        }
     }
 
     [PunRPC]
@@ -1101,7 +1108,7 @@ public class UnitBehavior : BaseBehavior
 
         base.tempDestinationPoint = point;
         if (displayMarker)
-            CreateOrUpdatePointMarker(Color.green, point, 1.5f, true);
+            CreateOrUpdatePointMarker(Color.green, point, 1.5f, true, PointMarker.MarkerType.Point);
     }
 
     public override void _GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
@@ -1127,8 +1134,12 @@ public class UnitBehavior : BaseBehavior
         if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team))
             colorMarker = Color.red;
 
+        PointMarker.MarkerType markerType = PointMarker.MarkerType.Point;
+        if(targetObject.GetComponent<BuildingBehavior>() != null)
+            markerType = PointMarker.MarkerType.Arrow;
+
         if (displayMarker)
-            CreateOrUpdatePointMarker(colorMarker, target.transform.position, 1.5f, true);
+            CreateOrUpdatePointMarker(colorMarker, target.transform.position, 1.5f, true, markerType);
     }
 
     public override bool[] UICommand(string commandName)
@@ -1139,7 +1150,7 @@ public class UnitBehavior : BaseBehavior
 
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-        if (team != cameraController.team || cameraController.chatInput)
+        if (team != cameraController.team || cameraController.IsHotkeysBlocked())
             return result;
 
         bool[] skillResult = ActivateSkills(commandName);
@@ -1158,7 +1169,7 @@ public class UnitBehavior : BaseBehavior
             int pos = Array.FindIndex(types, w => w == behaviorType) + 1;
             if (pos > 3)
                 pos = 0;
-            foreach(GameObject unit in cameraController.GetSelectedObjects())
+            foreach(GameObject unit in cameraController.selectedObjects)
             {
                 BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
                 unitBaseBehavior.behaviorType = types[pos];
@@ -1176,15 +1187,16 @@ public class UnitBehavior : BaseBehavior
         return true;
     }
 
+    List<string> statistics = new List<string>();
     public override List<string> GetStatistics()
     {
-        List<string> statistics = base.GetStatistics();
+        statistics.Clear();
         return statistics;
     }
 
     public override List<string> GetCostInformation()
     {
-        List<string> statistics = new List<string>();
+        statistics.Clear();
         statistics.Add(new StringBuilder(30).AppendFormat("Time to build: {0:F0} sec", skillInfo.timeToBuild).ToString());
         if (skillInfo.costFood > 0)
             statistics.Add(new StringBuilder(30).AppendFormat("Food: {0:F0}", skillInfo.costFood).ToString());

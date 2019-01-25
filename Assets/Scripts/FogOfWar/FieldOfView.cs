@@ -43,22 +43,17 @@ public class FieldOfView : MonoBehaviour
         viewMeshFilter.mesh = viewMesh;
 
         fogProjector = fogProjector ?? FindObjectOfType<FogProjector>();
-
-        StartCoroutine("FindTargetsWithDelay", .2f);
     }
 
-
-    IEnumerator FindTargetsWithDelay(float delay)
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(delay);
-            FindVisibleTargets();
-        }
-    }
-
+    private float timerToFindTargets = 0.0f;
     void LateUpdate()
     {
+        timerToFindTargets += Time.fixedDeltaTime;
+        if(timerToFindTargets >= 2.0f)
+        {
+            FindVisibleTargets();
+            timerToFindTargets = 0.0f;
+        }
         DrawFieldOfView();
         if (Vector3.Distance(transform.position, lastUpdatePos) > updateDistance || Time.time<.5f)
         {

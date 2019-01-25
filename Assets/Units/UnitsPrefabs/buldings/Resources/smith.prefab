@@ -275,6 +275,7 @@ MonoBehaviour:
     readableName: town center
     notDisplayWhenFalse: 0
   unitPosition: {x: 0, y: 0, z: 0}
+  uniqueId: -1
   interactType: 0
   attackTimer: 0
   attackDelayTimer: 0
@@ -286,10 +287,10 @@ MonoBehaviour:
     attackDelay: 0.5
     damageAfterTimer: 1
     attackType: 4
-    stabbingResist: 0
-    cuttingResist: 0
-    bitingResist: 0
-    magicResist: 0
+    stabbingResist: 30
+    cuttingResist: 70
+    bitingResist: 30
+    magicResist: 30
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
@@ -326,7 +327,7 @@ MonoBehaviour:
   productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
   InfoHTMLOffset: {x: 0, y: 3, z: 0}
-  pointMarkerPrefab: {fileID: 1174494487606054, guid: a3698f3e4f5fb734899fa95147e1baeb,
+  pointMarkerPrefab: {fileID: 1174494487606054, guid: 7723961c7b4a2cf4cbfa8e9a6c45ba62,
     type: 3}
   HTMLHealthSize: {x: 100, y: 100}
   visionToolPrefab: {fileID: 1311408724359970, guid: fc937d29efbc7d146a830e8e4d19ea62,
@@ -345,15 +346,20 @@ MonoBehaviour:
   canBeSelected: 1
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
+  allOutlines: []
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
   sourceType: 0
   storedResources: 
+  resourceHold: 0
+  resourceType: 0
+  soundsInfo: []
   isInCameraView: 0
   state: 3
   magnitDistance: 4
   tempMaterialsMode: 
+  placeConditions: []
   terrainChangeInfo:
     offset: {x: -3.1, y: -2.2}
     size: {x: 10, y: 11}
@@ -411,8 +417,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3516}
-  viewIdField: 0
-  InstantiationId: 7
+  viewIdField: 9
+  InstantiationId: 9
   isRuntimeInstantiated: 0
 --- !u!114 &3516
 MonoBehaviour:
