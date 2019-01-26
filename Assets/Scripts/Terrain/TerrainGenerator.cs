@@ -218,7 +218,7 @@ public class TerrainGenerator : MonoBehaviour
             newData["spawn"].Add(avalibleSpawnPositions[positionIndex]);
         }
 
-        newData["trees"] = GetCoordinates(minValue: 1.3f, destCount: maxTrees, randomOffset: 0.7f);
+        newData["trees"] = GetCoordinates(minValue: 1.25f, destCount: maxTrees, randomOffset: 0.7f);
 
         newData["gold"] = GetCoordinatesInBorderNested(goldRows, goldCountOnRow, (int)mainMapGenerateInfo.seed / 2, offsetPosDel: 0.8f);
 

@@ -45,7 +45,7 @@ public class FieldOfView : MonoBehaviour
         fogProjector = fogProjector ?? FindObjectOfType<FogProjector>();
     }
 
-    private float timerToFindTargets = 0.0f;
+    private float timerToFindTargets = 2.0f;
     void LateUpdate()
     {
         timerToFindTargets += Time.fixedDeltaTime;

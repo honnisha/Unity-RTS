@@ -10,6 +10,15 @@ namespace GangaGame
     [System.Serializable]
     public class SkillInfo
     {
+        public SkillInfo(string _name, string _readName, string _imagePath, string _readDescr, KeyCode _hotkey)
+        {
+            imagePath = _imagePath;
+            uniqueName = _name;
+            readableName = _readName;
+            readableDescription = _readDescr;
+            productionHotkey = _hotkey;
+        }
+
         public string uniqueName;
         public string readableName;
         public string readableDescription;

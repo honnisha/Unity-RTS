@@ -51,6 +51,6 @@ EditorBuildSettings:
     path: Assets/Levels/menu.unity
     guid: ca5b7c0e8f3e2804baf6dfdda6e64c48
   - enabled: 1
-    path: Assets/Levels/Map1/Map1.unity
+    path: Assets/Levels/Map1.unity
     guid: 63f68fe7c046f0a4d8a546500f2381f5
   m_configObjects: {}

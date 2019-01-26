@@ -287,6 +287,7 @@ MonoBehaviour:
     value: 1
     changeTexture: 1
     removeGrass: 1
+  stringsConditionInRange: []
 --- !u!114 &3380
 MonoBehaviour:
   m_ObjectHideFlags: 0

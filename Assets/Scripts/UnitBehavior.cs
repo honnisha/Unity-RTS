@@ -7,6 +7,7 @@ using UnityEngine.AI;
 using System.Linq;
 using Photon.Pun;
 using GangaGame;
+using UISpace;
 
 public class UnitBehavior : BaseBehavior
 {
@@ -677,7 +678,7 @@ public class UnitBehavior : BaseBehavior
     }
 
     Dictionary<GameObject, float> objects = new Dictionary<GameObject, float>();
-    public GameObject GetObjectToInteract(InteractigType type = InteractigType.None, ResourceType targetResource = ResourceType.None)
+    public GameObject GetObjectToInteract(InteractigType type = InteractigType.None)
     {
         objects.Clear();
         UnityEngine.Profiling.Profiler.BeginSample("p GetObjectToInteract"); // Profiler
@@ -695,13 +696,15 @@ public class UnitBehavior : BaseBehavior
                 if (oneObjectBuildingBehavior != null &&
                     (oneObjectBuildingBehavior.state == BuildingBehavior.BuildingState.Building ||
                         oneObjectBuildingBehavior.state == BuildingBehavior.BuildingState.Project))
-                    objects.Add(oneObject, distance);
+                    if(!objects.ContainsKey(oneObject))
+                        objects.Add(oneObject, distance);
             }
-            else
+            else if(type != InteractigType.None)
             {
                 if (oneObjectBaseBehavior.resourceCapacityType == resourceType && 
                     (oneObjectBaseBehavior.resourceCapacity > 0 || oneObjectBaseBehavior.resourceEndless))
-                    objects.Add(oneObject, distance);
+                    if (!objects.ContainsKey(oneObject))
+                        objects.Add(oneObject, distance);
             }
         }
         if (objects.Count > 0)
@@ -1186,25 +1189,18 @@ public class UnitBehavior : BaseBehavior
             return false;
         return true;
     }
-
-    List<string> statistics = new List<string>();
-    public override List<string> GetStatistics()
-    {
-        statistics.Clear();
-        return statistics;
-    }
-
+    
     public override List<string> GetCostInformation()
     {
-        statistics.Clear();
-        statistics.Add(new StringBuilder(30).AppendFormat("Time to build: {0:F0} sec", skillInfo.timeToBuild).ToString());
+        statisticStrings.Clear();
+        statisticStrings.Add(new StringBuilder(30).AppendFormat("Time to build: {0:F0} sec", skillInfo.timeToBuild).ToString());
         if (skillInfo.costFood > 0)
-            statistics.Add(new StringBuilder(30).AppendFormat("Food: {0:F0}", skillInfo.costFood).ToString());
+            statisticStrings.Add(new StringBuilder(30).AppendFormat("Food: {0:F0}", skillInfo.costFood).ToString());
         if (skillInfo.costGold > 0)
-            statistics.Add(new StringBuilder(30).AppendFormat("Gold: {0:F0}", skillInfo.costGold).ToString());
+            statisticStrings.Add(new StringBuilder(30).AppendFormat("Gold: {0:F0}", skillInfo.costGold).ToString());
         if (skillInfo.costWood > 0)
-            statistics.Add(new StringBuilder(30).AppendFormat("Wood: {0:F0}", skillInfo.costWood).ToString());
-        return statistics;
+            statisticStrings.Add(new StringBuilder(30).AppendFormat("Wood: {0:F0}", skillInfo.costWood).ToString());
+        return statisticStrings;
     }
 
     public override UnitStatistic GetStatisticsInfo()

@@ -45,11 +45,6 @@ html {
 	text-align: left;
 	overflow: hidden;
 }
-.proceduralContent {
-	position: relative;
-	width: 100%;
-	height: 100%;
-}
 .element {
 	image-rendering: crisp-edges;
 	width: auto;
@@ -58,16 +53,16 @@ html {
 	display: inline-block;
 }
 .title {
-    font-size: 110%;
+    font-size: 2.5vh;
 	font-weight: bold;
 	padding-bottom: 2px;
     text-shadow: 1px 1px 1px #000;
 }
 .resources {
-    font-size: 90%;
+    font-size: 2.1vh;
 }
 .infoBlock {
-	height: 30%;
+	height: 28%;
 	width: 88%;
 	display: inline-block;
 	position: absolute;
@@ -75,7 +70,8 @@ html {
 .description {
 	position: absolute;
 	height: 50px;
-    font-size: 75%;
+	width: 100%;
+    font-size: 1.7vh;
 	display: inline-block;
 	overflow: ellipsis;
     text-shadow: 1px 1px 1px #000;
@@ -88,7 +84,7 @@ html {
 	font-weight: bold;
 	margin: 0px;
 	width: 32%;
-    font-size: 65%;
+    font-size: 1.5vh;
 	color: #96C2FF;
     text-shadow: 1px 1px 1px #000;
 	display: inline-block;
@@ -210,7 +206,7 @@ html {
 	padding: 0px;
 	margin: 0px;
 	font-weight: bold;
-    font-size: 70%;
+    font-size: 1.5vh;
 	color: #89FFC1;
 }
 .elementsBlock {
@@ -221,7 +217,7 @@ html {
 .elementsContent {
 	margin-right: 5px;
 	margin-bottom: 5px;
-	height: 100%;
+	height: 28%;
 	width: auto;
 	display: inline-block;
 }
@@ -235,10 +231,10 @@ html {
 }
 .elementsContent > .hotkey {
 	margin: 5%;
-    font-size: 7px;
+    font-size: 1vh;
 	background: grey;
-	height: 10px;
-	width: 10px;
+	height: 25%;
+	width: 25%;
 	text-align: center;
     border: 1px solid black;
 }
@@ -270,7 +266,7 @@ html {
 }
 .minimap {
 	margin-left: 50%;
-	margin-top: 4%;
+	margin-top: 6%;
 	height: 100%;
 	width: 45%;
 }
@@ -338,7 +334,7 @@ html {
 	color: white;
 	background: #595959;
 }
-.cblock > .proceduralContent > .elementsBlock > .title {
+.cblock > .elementsBlock > .title {
     width: 50%;
     height: 70%;
 	overflow: ellipsis;
@@ -532,12 +528,6 @@ html {
 			msgboxDiv.remove();
 		}, timeout)
 	}
-	function SendChatMessage(message) {
-        var chatElement = document.getElementsByClassName("chat")[0];
-        var messageDiv = document.createElement("div");
-        messageDiv.innerHTML = message;
-        chatElement.appendChild(messageDiv);
-	}
 	function CreateInput() {
         var chatElement = document.getElementsByClassName("chatBox")[0];
         var inputElement = document.createElement("input");
@@ -677,26 +667,39 @@ html {
         text.innerText = "Sound";
         secondWindow.appendChild(text);
 	}
-
+	function SendChatMessage(message) {
+        var chatElement = document.getElementsByClassName("chat")[0];
+        var messageDiv = document.createElement("div");
+        messageDiv.innerHTML = message;
+        chatElement.appendChild(messageDiv);
+	}
 	function ClearInfo()
 	{
         document.getElementsByClassName("cblock")[0].innerHTML = "";
         document.getElementsByClassName("rblock")[0].innerHTML = "";
 	}
-	
-	function DrawInfo(parentElementClass, detailInfo, drawImage, discriptable, dinamicInfo, uniqueName, readableName, readableDescription, errorMessage, imagePath, hotkey, costInfo, tableStatistics) 
+	function DrawInfo(parentElementClass, detailInfo, drawImage, dinamicInfo, uniqueName, readableName, readableDescription, errorMessage, imagePath, hotkey, costInfo, tableStatistics, drawHP, imageID) 
 	{
         var parentElement = document.getElementsByClassName(parentElementClass)[0];
 
         if (detailInfo)
         {
+			if (drawHP)
+			{
+				var healthDiv = document.createElement("div");
+				healthDiv.className = "healthback";
+				healthDiv.innerHTML = "<div class=\"health unitHealth\"></div>";
+				parentElement.appendChild(healthDiv);
+			}
+
             var elementDiv = document.createElement("div");
             elementDiv.className = "title";
             elementDiv.innerHTML = readableName;
             parentElement.appendChild(elementDiv);
         }
+		var createdImage;
         if (drawImage)
-        {   
+        {
             var elementContent = document.createElement("div");
             elementContent.className = "elementsContent";
             parentElement.appendChild(elementContent);
@@ -704,8 +707,9 @@ html {
             if (errorMessage != "")
                 elementContent.className += " error";
 
-            var createdImage = document.createElement("img");
+            createdImage = document.createElement("img");
             createdImage.className = "element clckable";
+			createdImage.id = uniqueName;
             createdImage.setAttribute("src", imagePath);
             elementContent.appendChild(createdImage);
             if(hotkey != "")
@@ -716,10 +720,7 @@ html {
                 elementContent.appendChild(hotkeyDiv);
             }
         }
-        if (discriptable)
-        {
-            createdImage.className += " discriptable " + uniqueName;
-        }
+
         if (detailInfo)
         {
             if (createdImage != null)
@@ -745,36 +746,94 @@ html {
             {
                 var detailCostsDiv = document.createElement("div");
                 detailCostsDiv.className = "stats costs";
-                parentElement.appendChild(detailCostsDiv);
-                for (var cost in costInfo)
+                for (var index in costInfo)
                 {
                     var statsDiv = document.createElement("p");
-                    statsDiv.innerHTML = cost;
+                    statsDiv.innerHTML = costInfo[index];
                     detailCostsDiv.appendChild(statsDiv);
                 }
+                parentElement.appendChild(detailCostsDiv);
             }
             if (errorMessage != "")
             {
                 var errorMessageDiv = document.createElement("div");
                 errorMessageDiv.className = "errorMessage";
-                errorMessageDiv.innerHTML = unitImageInfo.errorMessage;
+                errorMessageDiv.innerHTML = errorMessage;
                 parentElement.appendChild(errorMessageDiv);
             }
             if (tableStatistics != null && tableStatistics.length > 0)
             {
                 var detailStatusticsDiv = document.createElement("div");
                 detailStatusticsDiv.className = "stats";
-                parentElement.appendChild(detailStatusticsDiv);
-                for (var statistic in tableStatistics)
+                for (var index in tableStatistics)
                 {
                     var stats = document.createElement("p");
-                    stats.innerHTML = statistic;
+                    stats.innerHTML = tableStatistics[index];
                     detailStatusticsDiv.appendChild(stats);
                 }
+                parentElement.appendChild(detailStatusticsDiv);
             }
         }
+		return createdImage;
+	}
+	var intervalId;
+	function CreateQueueElement(imagePath, index, timeToBuild, buildTimer)
+	{
+        var infoDiv = document.getElementsByClassName("query")[0];
+
+        var progressBaseDiv = document.createElement("div");
+        progressBaseDiv.className = "production clckable";
+        progressBaseDiv.id = index;
+        infoDiv.appendChild(progressBaseDiv);
+
+        var elementDiv = document.createElement("img");
+        elementDiv.setAttribute("src", imagePath);
+        elementDiv.className = "clckable";
+        elementDiv.id = index;
+        progressBaseDiv.appendChild(elementDiv);
+                
+        if (index == 0)
+        {
+            var progressDiv = document.createElement("div");
+            progressDiv.className = "clckable progressInterval";
+			var startWidth = buildTimer / timeToBuild * 100;
+            progressDiv.style.width = startWidth + "%";
+			progressDiv.id = index;
+            progressBaseDiv.appendChild(progressDiv);
+
+			var pos = 0;
+			intervalId = setInterval(frame, 500);
+			function frame() {
+				pos++;
+				var newWigth = startWidth - pos * 2;
+				progressDiv.style.width = newWigth + "%";
+			}
+        }
+		return progressBaseDiv;
+	}
+	function DeleteQueue()
+	{
+		if(intervalId)
+			clearInterval(intervalId);
+
+        if (document.getElementsByClassName("query").length > 0)
+            document.getElementsByClassName("query")[0].remove();
 	}
 </script>
+
+<style type='text/css'>
+@keyframes example {
+  0%   {background-color: red;}
+  100% {background-color: green;}
+}
+.animation {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  animation-name: example;
+  animation-duration: 4s;
+}
+</style>
 
 <div class="messages">
 </div>
@@ -799,11 +858,11 @@ html {
 		</div>
 	</div>
 	<div class="block">
-		<div class="center content cblock">
+		<div class="center content cblock clckable">
 		</div>
 	</div>
 	<div class="block">
-		<div class="right content rblock">
+		<div class="right content rblock clckable">
 		</div>
 	</div>
 </div>

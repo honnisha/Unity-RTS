@@ -500,6 +500,7 @@ public class BuildingBehavior : BaseBehavior
                 if (result[1])
                     return result;
                 productionQuery.Add(unit);
+                ProductionQueryUpdated();
 
                 if (productionQuery.Count <= 1)
                     buildTimer = baseBehaviorComponent.skillInfo.timeToBuild;

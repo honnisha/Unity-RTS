@@ -8,6 +8,7 @@ using System.Linq;
 using Photon.Pun;
 using UnityEngine.AI;
 using GangaGame;
+using UISpace;
 
 public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInterface
 {
@@ -342,6 +343,12 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         }
     }
 
+    public void ProductionQueryUpdated()
+    {
+        if (cameraController.selectedObjects.Count == 1 && cameraController.selectedObjects.Contains(gameObject))
+            cameraUIBaseScript.UpdateQueue(gameObject);
+    }
+
     public void UpdateProductionQuery()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateProductionQuery"); // Profiler
@@ -361,6 +368,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                     BaseBehavior firstElementBehaviorComponent = productionQuery[0].GetComponent<BaseBehavior>();
                     buildTimer = firstElementBehaviorComponent.skillInfo.timeToBuild;
                 }
+                ProductionQueryUpdated();
             }
         }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
@@ -819,8 +827,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                             productionQuery.Add(skillObject);
                             if (productionQuery.Count <= 1)
                                 buildTimer = skillScript.skillInfo.timeToBuild;
+                            ProductionQueryUpdated();
                         }
-                        cameraUIBaseScript.UpdateUI();
                     }
                     result[0] = true;
                     return result;
@@ -851,6 +859,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             cameraController.wood += skillScript.skillInfo.costWood;
         }
         productionQuery.RemoveAt(index);
+        ProductionQueryUpdated();
         if (index == 0 && productionQuery.Count > 0)
         {
             if (productionQuery[0].GetComponent<BaseBehavior>() != null)
@@ -858,7 +867,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             if (productionQuery[0].GetComponent<BaseSkillScript>() != null)
                 buildTimer = productionQuery[0].GetComponent<BaseSkillScript>().skillInfo.timeToBuild;
         }
-        cameraUIBaseScript.UpdateUI();
         return true;
     }
 
@@ -1013,11 +1021,13 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         return false;
     }
 
+    [HideInInspector]
+    public List<string> statisticStrings = new List<string>();
     public virtual List<string> GetStatistics()
     {
         UnitStatistic statisic = GetStatisticsInfo();
 
-        List<string> statistics = new List<string>();
+        statisticStrings.Clear();
         string attackTypeName = "";
         if (statisic.attackType == AttackType.Biting)
             attackTypeName = "Biting";
@@ -1030,15 +1040,15 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         if (statisic.attackType != AttackType.None)
         {
-            statistics.Add(String.Format("Att. type: {0}", attackTypeName));
-            statistics.Add(String.Format("Damage: {0:F0}", statisic.damage));
-            statistics.Add(String.Format("Attack speed: {0:F1} sec", statisic.attackTime));
+            statisticStrings.Add(new StringBuilder(30).AppendFormat("Att. type: {0}", attackTypeName).ToString());
+            statisticStrings.Add(new StringBuilder(30).AppendFormat("Damage: {0:F0}", statisic.damage).ToString());
+            statisticStrings.Add(new StringBuilder(30).AppendFormat("Attack speed: {0:F1} sec", statisic.attackTime).ToString());
         }
 
-        statistics.Add(String.Format("Stabbing resist: {0:F0}%", statisic.stabbingResist));
-        statistics.Add(String.Format("Cutting resist: {0:F0}%", statisic.cuttingResist));
-        statistics.Add(String.Format("Biting resist: {0:F0}%", statisic.bitingResist));
-        statistics.Add(String.Format("Magic resist: {0:F0}%", statisic.magicResist));
-        return statistics;
+        statisticStrings.Add(new StringBuilder(30).AppendFormat("Stabbing resist: {0:F0}%", statisic.stabbingResist).ToString());
+        statisticStrings.Add(new StringBuilder(30).AppendFormat("Cutting resist: {0:F0}%", statisic.cuttingResist).ToString());
+        statisticStrings.Add(new StringBuilder(30).AppendFormat("Biting resist: {0:F0}%", statisic.bitingResist).ToString());
+        statisticStrings.Add(new StringBuilder(30).AppendFormat("Magic resist: {0:F0}%", statisic.magicResist).ToString());
+        return statisticStrings;
     }
 }
