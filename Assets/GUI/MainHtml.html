@@ -93,7 +93,7 @@ html {
 	font-weight: bold;
 	margin: 0px;
 	width: 99%;
-    font-size: 65%;
+    font-size: 1.6vh;
 	color: red;
     text-shadow: 1px 1px 1px #000;
 	display: inline-block;
@@ -237,6 +237,10 @@ html {
 	width: 25%;
 	text-align: center;
     border: 1px solid black;
+}
+.elementsBlock > .elementsContent > .hotkey {
+	height: 100%;
+
 }
 .skills > .elementsContent > img{
     background: darkorange;
@@ -678,7 +682,13 @@ html {
         document.getElementsByClassName("cblock")[0].innerHTML = "";
         document.getElementsByClassName("rblock")[0].innerHTML = "";
 	}
-	function DrawInfo(parentElementClass, detailInfo, drawImage, dinamicInfo, uniqueName, readableName, readableDescription, errorMessage, imagePath, hotkey, costInfo, tableStatistics, drawHP, imageID) 
+	function ClearElementsBlock(elementsBlock)
+	{
+        var allElementsBlock = document.getElementsByClassName(elementsBlock);
+        if (allElementsBlock.length > 0)
+			allElementsBlock[0].innerHTML = "";
+	}
+	function DrawInfo(parentElementClass, blockImagesName, detailInfo, drawImage, dinamicInfo, uniqueName, readableName, readableDescription, errorMessage, imagePath, hotkey, costInfo, tableStatistics, drawHP, imageID) 
 	{
         var parentElement = document.getElementsByClassName(parentElementClass)[0];
 
@@ -697,6 +707,27 @@ html {
             elementDiv.innerHTML = readableName;
             parentElement.appendChild(elementDiv);
         }
+		
+		if (blockImagesName != "")
+		{
+            var elementsBlock;
+			var newBlockImagesName = "clckable elementsBlock " + blockImagesName;
+
+			if (errorMessage != "")
+				parentElement.className += " error";
+
+            var allElementsBlock = document.getElementsByClassName(newBlockImagesName);
+            if (allElementsBlock.length <= 0)
+            {
+                var elementsBlock = document.createElement("div");
+                elementsBlock.className = newBlockImagesName;
+				parentElement.appendChild(elementsBlock);
+            }
+            else
+                elementsBlock = allElementsBlock[0];
+			parentElement = elementsBlock;
+		}
+
 		var createdImage;
         if (drawImage)
         {

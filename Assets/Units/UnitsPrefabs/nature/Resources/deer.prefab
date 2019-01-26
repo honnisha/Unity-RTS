@@ -1783,6 +1783,7 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  statisticStrings: []
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}

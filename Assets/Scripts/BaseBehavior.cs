@@ -346,7 +346,10 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public void ProductionQueryUpdated()
     {
         if (cameraController.selectedObjects.Count == 1 && cameraController.selectedObjects.Contains(gameObject))
+        {
             cameraUIBaseScript.UpdateQueue(gameObject);
+            cameraUIBaseScript.UpdateSkillsInfo();
+        }
     }
 
     public void UpdateProductionQuery()

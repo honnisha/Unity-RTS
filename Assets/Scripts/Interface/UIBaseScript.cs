@@ -54,11 +54,24 @@ namespace UISpace
             else
                 UpdateQueue();
 
-            UpdateCommands(cameraController.selectedObjects);
+            DisplayCommands(cameraController.selectedObjects);
 
             DisplaySkillsInfo(cameraController.selectedObjects);
 
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+        }
+
+        public void UpdateSkillsInfo()
+        {
+            UI.document.Run("ClearElementsBlock", "skills");
+            UI.document.Run("ClearElementsBlock", "upgrades");
+            DisplaySkillsInfo(cameraController.selectedObjects);
+        }
+
+        public void UpdateCommands()
+        {
+            UI.document.Run("ClearElementsBlock", "commands");
+            DisplayCommands(cameraController.selectedObjects);
         }
 
         // Cache
@@ -95,6 +108,16 @@ namespace UISpace
             }
         }
 
+        private void SelectObject(MouseEvent mouseEvent)
+        {
+            cameraController.MoveCaeraToUnit(cameraController.selectedObjects[0]);
+        }
+
+        private void SelectOnly(MouseEvent mouseEvent)
+        {
+            cameraController.SelectOnly(mouseEvent.srcElement.id);
+        }
+
         private void OnElementOnMouseOver(MouseEvent mouseEvent)
         {
             DisplayDescription(mouseEvent.srcElement.id);
@@ -113,7 +136,10 @@ namespace UISpace
             if (selectedObjects.Count == 1)
             {
                 unitBaseBehaviorComponent = selectedObjects[0].GetComponent<BaseBehavior>();
-                DrawInfo("cblock", skillInfo: unitBaseBehaviorComponent.skillInfo, detailInfo: true, dinamicInfo: true, tableStatistics: unitBaseBehaviorComponent.GetStatistics().ToArray(), drawHP: true);
+                HtmlElement createdImage = DrawInfo(
+                    "cblock", skillInfo: unitBaseBehaviorComponent.skillInfo, detailInfo: true, dinamicInfo: true, 
+                    tableStatistics: unitBaseBehaviorComponent.GetStatistics().ToArray(), drawHP: true);
+                createdImage.onclick = SelectObject;
             }
             else
             {
@@ -123,8 +149,11 @@ namespace UISpace
                     unitBaseBehaviorComponent = selectedObject.GetComponent<BaseBehavior>();
                     if (!displayedNames.Contains(unitBaseBehaviorComponent.skillInfo.uniqueName))
                     {
-                        DrawInfo("cblock", skillInfo: unitBaseBehaviorComponent.skillInfo, detailInfo: false, tableStatistics: unitBaseBehaviorComponent.GetStatistics().ToArray());
+                        HtmlElement createdImage = DrawInfo(
+                            "cblock", skillInfo: unitBaseBehaviorComponent.skillInfo, detailInfo: false, 
+                            tableStatistics: unitBaseBehaviorComponent.GetStatistics().ToArray());
                         displayedNames.Add(unitBaseBehaviorComponent.skillInfo.uniqueName);
+                        createdImage.onclick = SelectOnly;
                     }
                 }
             }
@@ -143,48 +172,63 @@ namespace UISpace
             displayedNames.Clear();
             foreach (GameObject selectedObject in selectedObjects)
             {
-                unitBaseBehaviorComponent = selectedObject.GetComponent<BaseBehavior>();
-                foreach (GameObject skillObject in unitBaseBehaviorComponent.skillList.Concat(unitBaseBehaviorComponent.producedUnits))
+                foreach (SkillType skillTypeFor in new SkillType[] { SkillType.Skill, SkillType.Upgrade } )
                 {
-                    skillErrorInfo = BaseSkillScript.GetSkillErrorInfo(selectedObject, skillObject);
-                    if (!skillErrorInfo.isDisplayedAsSkill)
-                        continue;
-
-                    SkillInfo skillInfo = null;
-                    skillObjectBaseBehaviorComponent = skillObject.GetComponent<BaseBehavior>();
-                    skillScript = skillObject.GetComponent<BaseSkillScript>();
-                    if (skillObjectBaseBehaviorComponent != null && !displayedNames.Contains(skillObjectBaseBehaviorComponent.skillInfo.uniqueName))
+                    unitBaseBehaviorComponent = selectedObject.GetComponent<BaseBehavior>();
+                    foreach (GameObject skillObject in unitBaseBehaviorComponent.skillList.Concat(unitBaseBehaviorComponent.producedUnits))
                     {
-                        skillInfo = skillObjectBaseBehaviorComponent.skillInfo;
-                        costInfo = skillObjectBaseBehaviorComponent.GetCostInformation().ToArray();
-                        tableStatistics = skillObjectBaseBehaviorComponent.GetStatistics().ToArray();
-                    }
-                    if (skillScript != null && !displayedNames.Contains(skillScript.skillInfo.uniqueName))
-                    {
-                        skillInfo = skillScript.skillInfo;
-                        costInfo = skillScript.GetCostInformation().ToArray();
-                        tableStatistics = skillScript.GetStatistics().ToArray();
-                    }
-                    if (skillInfo != null)
-                    {
-                        HtmlElement createdImage = DrawInfo("rblock", skillInfo: skillInfo, detailInfo: false,
-                            costInfo: costInfo, tableStatistics: tableStatistics, hotkey: skillInfo.productionHotkey.ToString());
-                        displayedNames.Add(skillInfo.uniqueName);
-                        skillsCache.Add(skillObject, selectedObject);
-                        createdImage.onmousedown = OnElementMouseDown;
+                        skillErrorInfo = BaseSkillScript.GetSkillErrorInfo(selectedObject, skillObject);
+                        if (!skillErrorInfo.isDisplayedAsSkill)
+                            continue;
 
-                        // Description
-                        createdImage.onmouseover = OnElementOnMouseOver;
-                        createdImage.onmouseout = OnElementOnMouseOut;
+                        SkillInfo skillInfo = null;
+                        string blockImagesName = "";
+                        skillObjectBaseBehaviorComponent = skillObject.GetComponent<BaseBehavior>();
+                        skillScript = skillObject.GetComponent<BaseSkillScript>();
+                        if (skillObjectBaseBehaviorComponent != null && !displayedNames.Contains(skillObjectBaseBehaviorComponent.skillInfo.uniqueName))
+                        {
+                            skillInfo = skillObjectBaseBehaviorComponent.skillInfo;
+                            costInfo = skillObjectBaseBehaviorComponent.GetCostInformation().ToArray();
+                            tableStatistics = skillObjectBaseBehaviorComponent.GetStatistics().ToArray();
+                        }
+                        else if (skillScript != null && !displayedNames.Contains(skillScript.skillInfo.uniqueName))
+                        {
+                            skillInfo = skillScript.skillInfo;
+                            costInfo = skillScript.GetCostInformation().ToArray();
+                            tableStatistics = skillScript.GetStatistics().ToArray();
+                        }
+                        else
+                            continue;
 
-                        createdImage.onclick = OnElementOnClick;
+                        if (skillTypeFor != skillInfo.skillType)
+                            continue;
+
+                        if (skillInfo.skillType == SkillType.Skill)
+                            blockImagesName = "skills";
+                        else if (skillInfo.skillType == SkillType.Upgrade)
+                            blockImagesName = "upgrades";
+
+                        if (skillInfo != null)
+                        {
+                            HtmlElement createdImage = DrawInfo("rblock", blockImagesName: blockImagesName, skillInfo: skillInfo, detailInfo: false,
+                                costInfo: costInfo, tableStatistics: tableStatistics, hotkey: skillInfo.productionHotkey.ToString(), errorMessage: skillErrorInfo.errorMessage);
+                            displayedNames.Add(skillInfo.uniqueName);
+                            skillsCache.Add(skillObject, selectedObject);
+                            createdImage.onmousedown = OnElementMouseDown;
+
+                            // Description
+                            createdImage.onmouseover = OnElementOnMouseOver;
+                            createdImage.onmouseout = OnElementOnMouseOut;
+
+                            createdImage.onclick = OnElementOnClick;
+                        }
                     }
                 }
             }
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
 
-        public void UpdateCommands(List<GameObject> selectedObjects)
+        public void DisplayCommands(List<GameObject> selectedObjects)
         {
             UnityEngine.Profiling.Profiler.BeginSample("p UpdateCommands"); // Profiler
             if (selectedObjects.Count == 0)
@@ -204,6 +248,7 @@ namespace UISpace
 
                 createdImage.onmouseover = OnElementOnMouseOver;
                 createdImage.onmouseout = OnElementOnMouseOut;
+                createdImage.onmousedown = OnElementMouseDown;
             }
             if (unitBaseBehaviorComponent.behaviorType != BaseBehavior.BehaviorType.None)
             {
@@ -212,6 +257,7 @@ namespace UISpace
 
                 createdImage.onmouseover = OnElementOnMouseOver;
                 createdImage.onmouseout = OnElementOnMouseOut;
+                createdImage.onmousedown = OnElementMouseDown;
             }
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
@@ -220,7 +266,7 @@ namespace UISpace
             string parentElementString, SkillInfo skillInfo, string blockImagesName = "", bool drawImage = true, string errorMessage = "",
             string hotkey = "", bool detailInfo = false, bool dinamicInfo = false, string[] costInfo = null, string[] tableStatistics = null, bool drawHP = false)
         {
-            object createdImageObject = UI.document.Run("DrawInfo", parentElementString, detailInfo, drawImage, dinamicInfo, skillInfo.uniqueName, skillInfo.readableName, skillInfo.readableDescription,
+            object createdImageObject = UI.document.Run("DrawInfo", parentElementString, blockImagesName, detailInfo, drawImage, dinamicInfo, skillInfo.uniqueName, skillInfo.readableName, skillInfo.readableDescription,
             errorMessage, skillInfo.imagePath, hotkey, costInfo, tableStatistics, drawHP);
 
             return (HtmlElement)((Jint.Native.JsValue)createdImageObject).ToObject();
@@ -320,11 +366,9 @@ namespace UISpace
                     }
 
                     object createdObject = UI.document.Run("CreateQueueElement", imagePath, index, timeToBuild, unitBaseBehaviorComponent.buildTimer);
+                    index += 1;
                     HtmlElement createdQueue = (HtmlElement)((Jint.Native.JsValue)createdObject).ToObject();
                     createdQueue.onmousedown = RemoveQueueElementFromSelected;
-                    foreach(var progressInterval in createdQueue.getElementsByClassName("progressInterval"))
-                        progressInterval.onmousedown = RemoveQueueElementFromSelected;
-                    index += 1;
                 }
             }
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
@@ -408,6 +452,7 @@ namespace UISpace
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
             return false;
         }
+
         public void DestroyDescription()
         {
             var elements = UI.document.getElementsByClassName("containerDescription");
@@ -420,6 +465,11 @@ namespace UISpace
                 altInfos[0].remove();
 
             descriptionActiveClass = "";
+        }
+
+        public static void CreateInfoButton(string className, int count, string hotkey, string img)
+        {
+            UI.document.Run("CreateInfoButton", className, count, hotkey, img);
         }
     }
 }

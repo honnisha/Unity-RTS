@@ -141,8 +141,9 @@ MonoBehaviour:
     costWood: 0
     productionHotkey: 0
     skillType: 1
-  _skillConditions: 0
+  _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
+  uniqueId: -1
   interactType: 0
   attackTimer: 0
   attackDelayTimer: 0
@@ -161,7 +162,7 @@ MonoBehaviour:
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
-  behaviorType: 1
+  behaviorType: 4
   bloodEffect: {fileID: 0}
   bloodOnBroundEffects: []
   destroyEffectPrefab: {fileID: 0}
@@ -208,15 +209,21 @@ MonoBehaviour:
   canBeSelected: 1
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
+  allOutlines: []
   resourceCapacityType: 2
   resourceCapacity: 3000
   resourceEndless: 0
   sourceType: 0
   storedResources: 
+  resourceHold: 0
+  resourceType: 0
+  soundsInfo: []
   isInCameraView: 0
+  statisticStrings: []
   state: 3
   magnitDistance: 3
   tempMaterialsMode: 
+  placeConditions: []
   terrainChangeInfo:
     offset: {x: -1.5, y: -1.5}
     size: {x: 5, y: 5}
@@ -224,6 +231,7 @@ MonoBehaviour:
     value: 1
     changeTexture: 1
     removeGrass: 1
+  stringsConditionInRange: []
 --- !u!114 &269716401572185406
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -217,7 +217,8 @@ MonoBehaviour:
     distance: 2
   mapTexture: {fileID: 8400000, guid: 56adb43fe41a4764c9143e58c71146e9, type: 2}
   debugVisionGrid: 0
-  rangeProjector: {fileID: 0}
+  rangeProjector: {fileID: 7730875611660029107, guid: 1d527aad98412bd4f93c76f6d05dc889,
+    type: 3}
   selectedObjects: []
   selectedWindowType: 0
 --- !u!114 &114047147111761268
@@ -244,7 +245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28ef8c68bade09b41aca258d42a632f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lastTab: 2
+  lastTab: 0
   movementSettingsFoldout: 0
   zoomingSettingsFoldout: 0
   rotationSettingsFoldout: 0
@@ -339,8 +340,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 0}
-  viewIdField: 1
-  InstantiationId: 1
+  viewIdField: 2
+  InstantiationId: 2
   isRuntimeInstantiated: 0
 --- !u!114 &4844609676478205319
 MonoBehaviour:

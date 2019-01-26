@@ -210,7 +210,7 @@ MonoBehaviour:
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
-  behaviorType: 1
+  behaviorType: 4
   bloodEffect: {fileID: 0}
   bloodOnBroundEffects: []
   destroyEffectPrefab: {fileID: 0}
@@ -272,6 +272,11 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  statisticStrings:
+  - 'Stabbing resist: 30%'
+  - 'Cutting resist: 80%'
+  - 'Biting resist: 30%'
+  - 'Magic resist: 30%'
   state: 3
   magnitDistance: 5
   tempMaterialsMode: 
@@ -322,7 +327,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3389}
-  viewIdField: 4
+  viewIdField: 0
   InstantiationId: 4
   isRuntimeInstantiated: 0
 --- !u!114 &3389

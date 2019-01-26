@@ -118,7 +118,7 @@ MonoBehaviour:
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
-  behaviorType: 1
+  behaviorType: 4
   bloodEffect: {fileID: 0}
   bloodOnBroundEffects: []
   destroyEffectPrefab: {fileID: 0}
@@ -175,6 +175,7 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  statisticStrings: []
   state: 3
   magnitDistance: 2
   tempMaterialsMode: 
@@ -190,6 +191,7 @@ MonoBehaviour:
     value: 1
     changeTexture: 1
     removeGrass: 1
+  stringsConditionInRange: []
 --- !u!114 &3402
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -224,7 +226,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3403}
-  viewIdField: 7
+  viewIdField: 0
   InstantiationId: 7
   isRuntimeInstantiated: 0
 --- !u!114 &3403

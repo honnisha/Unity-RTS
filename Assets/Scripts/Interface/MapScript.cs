@@ -60,9 +60,6 @@ namespace GangaGame
                     }
                 }
             }
-
-            var gameInfoBlock = (HtmlElement)UI.document.getElementsByClassName("gameInfo")[0];
-            gameInfoBlock.innerHTML = "";
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
 

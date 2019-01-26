@@ -309,6 +309,11 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  statisticStrings:
+  - 'Stabbing resist: 20%'
+  - 'Cutting resist: 60%'
+  - 'Biting resist: 20%'
+  - 'Magic resist: 20%'
   state: 3
   magnitDistance: 4
   tempMaterialsMode: 
@@ -320,6 +325,7 @@ MonoBehaviour:
     value: 0
     changeTexture: 0
     removeGrass: 1
+  stringsConditionInRange: []
 --- !u!114 &3444
 MonoBehaviour:
   m_ObjectHideFlags: 0

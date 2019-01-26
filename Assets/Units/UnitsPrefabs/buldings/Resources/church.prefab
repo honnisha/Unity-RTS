@@ -211,7 +211,7 @@ MonoBehaviour:
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
-  behaviorType: 1
+  behaviorType: 4
   bloodEffect: {fileID: 0}
   bloodOnBroundEffects: []
   destroyEffectPrefab: {fileID: 0}
@@ -270,6 +270,7 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  statisticStrings: []
   state: 3
   magnitDistance: 5
   tempMaterialsMode: 
@@ -281,6 +282,7 @@ MonoBehaviour:
     value: 1
     changeTexture: 1
     removeGrass: 1
+  stringsConditionInRange: []
 --- !u!114 &2752
 MonoBehaviour:
   m_ObjectHideFlags: 0

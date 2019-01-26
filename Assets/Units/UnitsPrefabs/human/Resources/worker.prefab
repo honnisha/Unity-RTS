@@ -299,6 +299,14 @@ MonoBehaviour:
     soundList: []
     lastSoundIndex: 0
   isInCameraView: 0
+  statisticStrings:
+  - 'Att. type: Stabbing'
+  - 'Damage: 10'
+  - 'Attack speed: 1.4 sec'
+  - 'Stabbing resist: 20%'
+  - 'Cutting resist: 20%'
+  - 'Biting resist: 30%'
+  - 'Magic resist: 20%'
   buildHpPerSecond: 10
   buildingTool:
     prefab: {fileID: 1266908089214646, guid: 0d6787997193dc34882796b0a1a05748, type: 3}

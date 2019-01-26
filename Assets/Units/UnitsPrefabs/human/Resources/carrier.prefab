@@ -2564,6 +2564,11 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  statisticStrings:
+  - 'Stabbing resist: 0%'
+  - 'Cutting resist: 0%'
+  - 'Biting resist: 0%'
+  - 'Magic resist: 0%'
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}

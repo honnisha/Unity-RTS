@@ -1177,6 +1177,7 @@ public class UnitBehavior : BaseBehavior
                 BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
                 unitBaseBehavior.behaviorType = types[pos];
             }
+            cameraUIBaseScript.UpdateCommands();
             result[0] = true;
             return result;
         }
