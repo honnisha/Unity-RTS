@@ -218,6 +218,7 @@ namespace GangaGame
             }
             else
             {
+                UpdateViewChunks();
                 StartGame();
             }
         }
@@ -1112,6 +1113,7 @@ namespace GangaGame
 
         public List<GameObject> GetSelectUnitsOnScreen(GameObject selectUnit)
         {
+            selectingObjects.Clear();
             BaseBehavior baseBehaviorComponent = selectUnit.GetComponent<BaseBehavior>();
 
             Vector3 centerCamera = transform.position;
@@ -1125,10 +1127,10 @@ namespace GangaGame
                 {
                     UnitSelectionComponent selection = unit.transform.gameObject.GetComponent<UnitSelectionComponent>();
                     if (selection != null && IsWithinSelectionBounds(unit, new Vector3(0, 0, 0), new Vector3(Screen.width, Screen.height, 0)))
-                        objects.Add(unit);
+                        selectingObjects.Add(unit);
                 }
             }
-            return GetFilteredObjects(objects);
+            return GetFilteredObjects(selectingObjects);
         }
 
         public List<GameObject> GetFilteredObjects(List<GameObject> selectegObjects)

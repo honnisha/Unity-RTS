@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using AccidentalNoise;
 using System;
+using UnityEngine.UI;
 
 public class TerrainGenerator : MonoBehaviour
 {
@@ -27,16 +28,29 @@ public class TerrainGenerator : MonoBehaviour
     }
     public GenerateInfo mainMapGenerateInfo;
 
+    [HideInInspector]
     public Texture2D mapTexture;
+    
+    public RenderTexture fogTexture;
+    private Texture2D fogTexture2D;
+    
+    [HideInInspector]
+    public Texture2D blindTexture2D;
+
+    public GameObject BlindPlane;
 
     public bool generate = false;
     float[,] mapData;
 
     void Start()
     {
+        fogTexture2D = new Texture2D(fogTexture.width, fogTexture.height);
+        blindTexture2D = new Texture2D(fogTexture.width, fogTexture.height);
+        UpdateBlindTexture(forceBlack: true);
+        //newPixels = new Color[fogTexture.width * fogTexture.width];
     }
 
-    // Update is called once per frame
+    float timerToUpdateBlind = 0.0f;
     void Update()
     {
         if (generate)
@@ -44,7 +58,64 @@ public class TerrainGenerator : MonoBehaviour
             generate = false;
             Generate((int)mainMapGenerateInfo.seed);
         }
+
+        timerToUpdateBlind -= Time.fixedDeltaTime;
+        if(timerToUpdateBlind <= 0.0f)
+        {
+            UpdateBlindTexture();
+            timerToUpdateBlind = 0.5f;
+        }
     }
+
+    public void UpdateBlindTexture(bool forceBlack = false)
+    {
+        RenderTexture.active = fogTexture;
+        fogTexture2D.ReadPixels(new Rect(0, 0, fogTexture.width, fogTexture.height), 0, 0);
+        fogTexture2D.Apply();
+        RenderTexture.active = null; // added to avoid errors 
+
+        for (int y = 0; y < fogTexture.height; y++)
+        {
+            for (int x = 0; x < fogTexture.width; x++)
+            {
+                if(forceBlack)
+                {
+                    blindTexture2D.SetPixel(x, y, Color.black);
+                    continue;
+                }
+
+                if (blindTexture2D.GetPixel(x, y) == new Color(255, 255, 255, 0))
+                    continue;
+
+                if(fogTexture2D.GetPixel(x, y) == Color.black)
+                    blindTexture2D.SetPixel(x, y, new Color(255, 255, 255, 0));
+            }
+        }
+        blindTexture2D.Apply();
+        BlindPlane.GetComponent<Renderer>().material.mainTexture = blindTexture2D;
+    }
+
+    // Generate garbage but faster:
+    //Color[] pixels;
+    //Color[] newPixels;
+    //public void UpdateBlindTexture()
+    //{
+    //    RenderTexture.active = fogTexture;
+    //    fogTexture2D.ReadPixels(new Rect(0, 0, fogTexture.width, fogTexture.height), 0, 0);
+    //    fogTexture2D.Apply();
+    //    RenderTexture.active = null; // added to avoid errors 
+
+    //    pixels = fogTexture2D.GetPixels();
+
+    //    for (int i = 0; i < pixels.Length; i++)
+    //    {
+    //        if (pixels[i] == Color.black)
+    //            newPixels[i] = new Color(1, 1, 1, 0);
+    //    }
+    //    blindTexture2D.SetPixels(newPixels);
+    //    blindTexture2D.Apply();
+    //    BlindPlane.GetComponent<Renderer>().material.mainTexture = blindTexture2D;
+    //}
 
     public ModuleBase GetFractal()
     {
@@ -218,7 +289,7 @@ public class TerrainGenerator : MonoBehaviour
             newData["spawn"].Add(avalibleSpawnPositions[positionIndex]);
         }
 
-        newData["trees"] = GetCoordinates(minValue: 1.25f, destCount: maxTrees, randomOffset: 0.7f);
+        newData["trees"] = GetCoordinates(minValue: 1.2f, destCount: maxTrees, randomOffset: 0.7f);
 
         newData["gold"] = GetCoordinatesInBorderNested(goldRows, goldCountOnRow, (int)mainMapGenerateInfo.seed / 2, offsetPosDel: 0.8f);
 
@@ -238,6 +309,9 @@ public class TerrainGenerator : MonoBehaviour
         t.terrainData.heightmapResolution = newTerrainSize;
         t.terrainData.size = new Vector3(100 * newSize, 100, 100 * newSize);
         mainMapGenerateInfo.scale = newSize / 2.0f;
+
+        BlindPlane.transform.position = new Vector3(t.terrainData.size.x / 2 , 0.5f , t.terrainData.size.z / 2);
+        BlindPlane.transform.localScale = new Vector3(10 * newSize, 0, 10 * newSize);
 
         // Debug.Log("Terrain Generate: size:" + newSize + " " + t.terrainData.size);
 

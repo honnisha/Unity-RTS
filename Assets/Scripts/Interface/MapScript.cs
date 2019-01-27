@@ -40,6 +40,11 @@ namespace GangaGame
                     mapImage.style.width = "100%";
                 }
 
+                var blindFog = (HtmlElement)mapBlock.getElementsByClassName("blindFog")[0];
+                ((HtmlElement)blindFog).image = terrainGenerator.blindTexture2D;
+                blindFog.style.height = "100%";
+                blindFog.style.width = "100%";
+
                 var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
                 unitsBlock.onmousemove = OnElementOnMouseMove;
                 unitsBlock.innerHTML = "";
@@ -94,6 +99,10 @@ namespace GangaGame
 
         public static void CreateOrUpdateCameraOnMap(Dom.Element mapBlock, Dom.Element mapImage)
         {
+            var blindFog = (HtmlElement)mapBlock.getElementsByClassName("blindFog")[0];
+            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
+            ((HtmlElement)blindFog).image = terrainGenerator.blindTexture2D;
+
             UnityEngine.Profiling.Profiler.BeginSample("p CreateOrUpdateCameraOnMap"); // Profiler
             Vector3 vameraLookAt = Camera.main.transform.position - new Vector3(Camera.main.transform.forward.normalized.x, 0, Camera.main.transform.forward.normalized.z) * CameraController.GetCameraOffset();
             bool isCameraInTerrain = IsInTerrainRange(vameraLookAt);

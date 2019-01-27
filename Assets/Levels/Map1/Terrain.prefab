@@ -64,6 +64,9 @@ MonoBehaviour:
     seed: 1
     scale: 1
   mapTexture: {fileID: 0}
+  fogTexture: {fileID: 8400000, guid: 56adb43fe41a4764c9143e58c71146e9, type: 2}
+  blindTexture2D: {fileID: 0}
+  BlindPlane: {fileID: 0}
   generate: 0
 --- !u!218 &7089063114470558530
 Terrain:

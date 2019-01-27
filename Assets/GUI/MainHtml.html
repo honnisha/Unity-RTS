@@ -279,6 +279,12 @@ html {
 	position: relative;
 	-spark-filter: opacity(40%), invert(100%);
 }
+.blindFog {
+	top: -100%;
+	position: relative;
+	height: 100%;
+	width: 100%;
+}
 .units {
 	margin-top: -100%;
 	position: relative;
@@ -614,6 +620,10 @@ html {
         mapBlock.appendChild(element);
 		
         var element = document.createElement("div");
+        element.className = "blindFog clckable";
+        mapBlock.appendChild(element);
+		
+        var element = document.createElement("div");
         element.className = "units clckable";
         mapBlock.appendChild(element);
 		
@@ -882,6 +892,8 @@ html {
 				<img class="map clckable">
 				</img>
 				<div class="mapHolder clckable">
+				</div>
+				<div class="blindFog clckable">
 				</div>
 				<div class="units clckable">
 				</div>

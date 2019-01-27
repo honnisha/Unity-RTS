@@ -2377,8 +2377,7 @@ MonoBehaviour:
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
   cameraController: {fileID: 0}
-  skillList:
-  - {fileID: 0}
+  skillList: []
   producedUnits: []
   spawnPoint: {fileID: 0}
   spawnTarget: {x: 0, y: 0, z: 0}
@@ -2416,6 +2415,12 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  allObjects: []
+  statisticStrings:
+  - 'Stabbing resist: 0%'
+  - 'Cutting resist: 0%'
+  - 'Biting resist: 0%'
+  - 'Magic resist: 0%'
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}
@@ -2451,7 +2456,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3482}
-  viewIdField: 11
+  viewIdField: 0
   InstantiationId: 11
   isRuntimeInstantiated: 0
 --- !u!114 &3482
