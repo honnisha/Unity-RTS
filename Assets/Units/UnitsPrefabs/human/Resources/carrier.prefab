@@ -2564,6 +2564,7 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  allObjects: []
   statisticStrings:
   - 'Stabbing resist: 0%'
   - 'Cutting resist: 0%'

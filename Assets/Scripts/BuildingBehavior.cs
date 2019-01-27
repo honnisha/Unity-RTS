@@ -373,8 +373,8 @@ public class BuildingBehavior : BaseBehavior
         {
             if (placeCondition.type == PlaceConditionType.BlockedRange)
             {
-                var allBuildingsInRange = GetObjectsInRange(transform.position, placeCondition.range, team: -1, units: false);
-                foreach (GameObject building in allBuildingsInRange)
+                GetObjectsInRange(ref allObjects, transform.position, placeCondition.range, team: -1, units: false);
+                foreach (GameObject building in allObjects)
                 {
                     BaseBehavior baseBehaviorComponent = building.GetComponent<BaseBehavior>();
                     if (baseBehaviorComponent.team == team)
@@ -394,8 +394,8 @@ public class BuildingBehavior : BaseBehavior
         {
             if (placeCondition.type == PlaceConditionType.InRange)
             {
-                var allBuildingsInRange = GetObjectsInRange(transform.position, placeCondition.range, team: -1, units: false);
-                foreach (GameObject building in allBuildingsInRange)
+                GetObjectsInRange(ref allObjects, transform.position, placeCondition.range, team: -1, units: false);
+                foreach (GameObject building in allObjects)
                 {
                     BaseBehavior baseBehaviorComponent = building.GetComponent<BaseBehavior>();
                     if (baseBehaviorComponent.team == team)

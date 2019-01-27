@@ -1426,6 +1426,7 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  allObjects: []
   statisticStrings: []
   buildHpPerSecond: 2.5
   buildingTool:

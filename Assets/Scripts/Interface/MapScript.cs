@@ -11,11 +11,11 @@ namespace GangaGame
 {
     public static class MapScript
     {
-        public static void CreateOrUpdateMaps()
+        public static void CreateOrUpdateMaps(ref Dictionary<HtmlElement, HtmlElement> mapCache)
         {
+            mapCache.Clear();
             CameraController cameraController = Camera.main.GetComponent<CameraController>();
 
-            UnityEngine.Profiling.Profiler.BeginSample("p CreateOrUpdateMaps"); // Profiler
             foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
             {
                 // Draw map
@@ -31,6 +31,7 @@ namespace GangaGame
                     mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
                 }
                 var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
+                mapCache.Add((HtmlElement)mapBlock, mapImage);
 
                 if (cameraController.mapTexture.height > 0)
                 {
@@ -60,7 +61,6 @@ namespace GangaGame
                     }
                 }
             }
-            UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
 
         public static Vector3 mapPointToPosition(Vector2 mapPosition)

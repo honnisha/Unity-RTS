@@ -92,6 +92,7 @@ GameObject:
   - component: {fileID: 7758606727617589273}
   - component: {fileID: 4844609676478205319}
   - component: {fileID: 1955513798}
+  - component: {fileID: 1147268403}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -196,6 +197,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 442725ec6462378458223f647aa14b38, type: 3}
     lastSoundIndex: 0
   clickSound: {fileID: 8300000, guid: f5b8fc2cfbe71ec4794e141b3593c37c, type: 3}
+  interfaceSource: {fileID: 0}
   isSelecting: 0
   team: 1
   userId: 123
@@ -220,7 +222,6 @@ MonoBehaviour:
   rangeProjector: {fileID: 7730875611660029107, guid: 1d527aad98412bd4f93c76f6d05dc889,
     type: 3}
   selectedObjects: []
-  selectedWindowType: 0
 --- !u!114 &114047147111761268
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -340,8 +341,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 0}
-  viewIdField: 2
-  InstantiationId: 2
+  viewIdField: 1
+  InstantiationId: 1
   isRuntimeInstantiated: 0
 --- !u!114 &4844609676478205319
 MonoBehaviour:
@@ -379,9 +380,9 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 70
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 1
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -454,6 +455,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1147268403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1786807276630428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a7210a47ad01534691dbd08e511b511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selectedWindowType: 0
 --- !u!1 &1873556169503206
 GameObject:
   m_ObjectHideFlags: 0

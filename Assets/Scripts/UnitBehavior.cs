@@ -682,8 +682,8 @@ public class UnitBehavior : BaseBehavior
     {
         objects.Clear();
         UnityEngine.Profiling.Profiler.BeginSample("p GetObjectToInteract"); // Profiler
-        var allObjects = GetObjectsInRange(transform.position, 15.0f, team: -1).Concat(GameObject.FindGameObjectsWithTag("Ambient")).ToArray();
-        foreach (GameObject oneObject in allObjects)
+        GetObjectsInRange(ref allObjects, transform.position, 15.0f, team: -1);
+        foreach (GameObject oneObject in allObjects.Concat(GameObject.FindGameObjectsWithTag("Ambient")))
         {
             BaseBehavior oneObjectBaseBehavior = oneObject.GetComponent<BaseBehavior>();
             float distance = Vector3.Distance(gameObject.transform.position, oneObject.transform.position);
@@ -709,9 +709,8 @@ public class UnitBehavior : BaseBehavior
         }
         if (objects.Count > 0)
         {
-            var buildingsList = objects.ToList();
-            buildingsList.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
-            return buildingsList.First().Key;
+            objects.ToList().Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+            return objects.ToList().First().Key;
         }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         return null;
@@ -1186,8 +1185,10 @@ public class UnitBehavior : BaseBehavior
 
     public override bool IsHealthVisible()
     {
-        if (cameraController.tagsToSelect.Find(x => x.name == tag).healthVisibleOnlyWhenSelect && !unitSelectionComponent.isSelected)
-            return false;
+        if (!unitSelectionComponent.isSelected)
+            foreach (var tagToSelect in cameraController.tagsToSelect)
+                if (tagToSelect.healthVisibleOnlyWhenSelect && gameObject.CompareTag(tagToSelect.name))
+                    return false;
         return true;
     }
     

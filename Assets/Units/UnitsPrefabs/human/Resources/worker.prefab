@@ -299,6 +299,7 @@ MonoBehaviour:
     soundList: []
     lastSoundIndex: 0
   isInCameraView: 0
+  allObjects: []
   statisticStrings:
   - 'Att. type: Stabbing'
   - 'Damage: 10'

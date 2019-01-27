@@ -195,6 +195,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public UnitSelectionComponent unitSelectionComponent;
     [HideInInspector]
     public cakeslice.Outline[] allOutlines;
+    new Collider collider;
 
     [HideInInspector]
     public List<object> queueCommands = new List<object>();
@@ -261,6 +262,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     Renderer[] renders;
     virtual public void Awake()
     {
+        collider = GetComponent<Collider>();
         cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
         cameraController = Camera.main.GetComponent<CameraController>();
         unitSelectionComponent = GetComponent<UnitSelectionComponent>();
@@ -338,7 +340,10 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         int index = 0;
         foreach (GameObject tearObject in tearDisplay)
         {
-            tearObject.SetActive(tear == index);
+            if(allTurnOn)
+                tearObject.SetActive(true);
+            else
+                tearObject.SetActive(tear == index);
             index++;
         }
     }
@@ -445,8 +450,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                 objectUIInfo.transform.position += InfoHTMLOffset;
                 if (tempHealth != health)
                 {
-                    Dom.Element healthElement = objectUIInfo.document.getElementById("health");
-                    healthElement.style.width = String.Format("{0:F0}%", health / maxHealth * 100);
+                    objectUIInfo.document.getElementById("health").style.width = String.Format("{0:F0}%", health / maxHealth * 100);
                     tempHealth = health;
                 }
             }
@@ -591,8 +595,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
     public GameObject GetIntersection(GameObject exceptionUnit)
     {
-        Collider collider = GetComponent<Collider>();
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
         foreach (CameraController.TagToSelect tag in cameraController.tagsToSelect)
         {
             var allUnits = GameObject.FindGameObjectsWithTag(tag.name);
@@ -601,8 +603,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                 BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
                 if (unitBaseBehavior.IsVisible())
                 {
-                    Collider unitCollider = unit.GetComponent<Collider>();
-                    if (gameObject != unit && exceptionUnit != unit && collider.bounds.Intersects(unitCollider.bounds))
+                    if (gameObject != unit && exceptionUnit != unit && collider.bounds.Intersects(unit.GetComponent<Collider>().bounds))
                         return unit;
                 }
             }
@@ -660,10 +661,10 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             Destroy(pointMarker);
         pointMarker = null;
     }
-
-    public static List<GameObject> GetObjectsInRange(Vector3 position, float radius, bool live = true, int team = -1, bool units = true, bool buildings = true, bool ambient = true)
+    
+    public static void GetObjectsInRange(ref List<GameObject> objects, Vector3 position, float radius, bool live = true, int team = -1, bool units = true, bool buildings = true, bool ambient = true, int teamException = -1)
     {
-        List<GameObject> objects = new List<GameObject>();
+        objects.Clear();
         int unitsMask = 1 << LayerMask.NameToLayer("Unit");
         int buildingMask = 1 << LayerMask.NameToLayer("Building");
         int ambientMask = 1 << LayerMask.NameToLayer("Ambient");
@@ -679,20 +680,20 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         foreach (Collider collider in Physics.OverlapSphere(position, radius, mask))
         {
-            GameObject unit = collider.gameObject;
-            if(team != -1)
-            {
-                BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
-                if (unitBaseBehavior.team != team)
-                    continue;
-                if (unitBaseBehavior.live != live)
-                    continue;
-            }
-            objects.Add(unit);
+            BaseBehavior unitBaseBehavior = collider.gameObject.GetComponent<BaseBehavior>();
+            if (team != -1 && unitBaseBehavior.team != team)
+                continue;
+            if (unitBaseBehavior.live != live)
+                continue;
+            if(teamException != -1 && unitBaseBehavior.team == teamException)
+                continue;
+
+            objects.Add(collider.gameObject);
         }
-        return objects;
     }
 
+    [HideInInspector]
+    public List<GameObject> allObjects = new List<GameObject>();
     public bool AttackNearEnemies(Vector3 centerOfSearch, float range, int attackTeam = -1, float randomRange = 0.0f)
     {
         UnitStatistic statisic = GetStatisticsInfo();
@@ -701,7 +702,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         if(behaviorType == BehaviorType.Counterattack || behaviorType == BehaviorType.Aggressive)
         {
-            var allObjects = GetObjectsInRange(transform.position, range, team: attackTeam, buildings: false);
+            GetObjectsInRange(ref allObjects, transform.position, range, team: attackTeam, buildings: false, teamException: team);
             if (allObjects.Count <= 0)
                 return false;
 
@@ -720,9 +721,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             if (randomRange != 0.0f)
             {
                 // Get random target
-                var targetObjects = GetObjectsInRange(targetUnit.transform.position, randomRange, team: attackTeam);
-                if (targetObjects.Count > 0)
-                    targetUnit = targetObjects[UnityEngine.Random.Range(0, targetObjects.Count - 1)];
+                GetObjectsInRange(ref allObjects, targetUnit.transform.position, randomRange, team: attackTeam, teamException: team);
+                if (allObjects.Count > 0)
+                    targetUnit = allObjects[UnityEngine.Random.Range(0, allObjects.Count - 1)];
             }
             if (targetUnit != null)
             {
@@ -943,8 +944,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     }
     public GameObject GetObjectByUniqueId(int targetUniqueId)
     {
-        var allObjects = GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Ambient")).Concat(GameObject.FindGameObjectsWithTag("Unit")).ToArray();
-        foreach (GameObject unit in allObjects)
+        foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Ambient")).Concat(GameObject.FindGameObjectsWithTag("Unit")))
         {
             BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
             if (unitBaseBehavior.uniqueId == targetUniqueId)

@@ -46,6 +46,7 @@ public class FieldOfView : MonoBehaviour
     }
 
     private float timerToFindTargets = 2.0f;
+    private float timerToDrawFieldOfView = 0.5f;
     void LateUpdate()
     {
         timerToFindTargets += Time.fixedDeltaTime;
@@ -54,11 +55,16 @@ public class FieldOfView : MonoBehaviour
             FindVisibleTargets();
             timerToFindTargets = 0.0f;
         }
-        DrawFieldOfView();
-        if (Vector3.Distance(transform.position, lastUpdatePos) > updateDistance || Time.time<.5f)
+
+        timerToDrawFieldOfView += Time.fixedDeltaTime;
+        if (timerToDrawFieldOfView >= 0.5f)
         {
-            lastUpdatePos = transform.position;
+            DrawFieldOfView();
+            timerToDrawFieldOfView = 0.0f;
         }
+
+        if (Vector3.Distance(transform.position, lastUpdatePos) > updateDistance || Time.time<.5f)
+            lastUpdatePos = transform.position;
     }
 
     List<Transform> oldVisibleTargets = new List<Transform>();
@@ -67,9 +73,8 @@ public class FieldOfView : MonoBehaviour
     Vector3 offset = new Vector3(0, 1, 0);
     public void FindVisibleTargets()
     {
-        visibleTargets.Clear();
-        oldVisibleTargets.Clear();
         oldVisibleTargets.AddRange(visibleTargets);
+        visibleTargets.Clear();
 
         baseBehaviorComponent = gameObject.GetComponentInParent<BaseBehavior>();
         if (baseBehaviorComponent.live)
@@ -104,6 +109,7 @@ public class FieldOfView : MonoBehaviour
         foreach (Transform oldElement in oldVisibleTargets.Where(p => !visibleTargets.Any(l => p.GetHashCode() == l.GetHashCode())).ToArray())
             if (oldElement != null)
                 ElementStopVisible(oldElement.gameObject);
+        oldVisibleTargets.Clear();
     }
 
     public void ElementStartVisible(GameObject target)
@@ -122,15 +128,23 @@ public class FieldOfView : MonoBehaviour
         // Debug.Log("ElementStopVisible: " + target.name);
     }
 
+    List<Vector3> viewPoints = new List<Vector3>();
+    ObstacleInfo oldObstacle;
+    Vector3[] edges = new Vector3[2];
+    ObstacleInfo newObstacle;
+
+    Vector3[] vertices;
+    int[] triangles;
+
     void DrawFieldOfView()
     {
+        viewPoints.Clear();
+        oldObstacle = new ObstacleInfo();
         float stepAngleSize = viewAngle / meshResolution;
-        List<Vector3> viewPoints = new List<Vector3>();
-        ObstacleInfo oldObstacle = new ObstacleInfo();
         for (int i = 0; i <= meshResolution; i++)
         {
             float angle = transform.eulerAngles.y - viewAngle / 2 + stepAngleSize * i;
-            ObstacleInfo newObstacle = FindObstacles(angle);
+            newObstacle = FindObstacles(angle);
 
             if (i > 0)
             {
@@ -138,14 +152,14 @@ public class FieldOfView : MonoBehaviour
                 if (oldObstacle.hit != newObstacle.hit ||
                     oldObstacle.hit && edgeDstThresholdExceeded)
                 {
-                    EdgeInfo edge = FindEdge(oldObstacle, newObstacle);
-                    if (edge.pointA != Vector3.zero)
+                    FindEdge(oldObstacle, newObstacle, ref edges);
+                    if (edges[0] != Vector3.zero)
                     {
-                        viewPoints.Add(edge.pointA);
+                        viewPoints.Add(edges[0]);
                     }
-                    if (edge.pointB != Vector3.zero)
+                    if (edges[1] != Vector3.zero)
                     {
-                        viewPoints.Add(edge.pointB);
+                        viewPoints.Add(edges[1]);
                     }
                 }
             }
@@ -156,8 +170,8 @@ public class FieldOfView : MonoBehaviour
         }
 
         int vertexCount = viewPoints.Count + 1;
-        var vertices = new Vector3[vertexCount];
-        var triangles = new int[(vertexCount - 2) * 3];
+        vertices = new Vector3[vertexCount];
+        triangles = new int[(vertexCount - 2) * 3];
 
         vertices[0] = Vector3.zero;
         for (int i = 0; i < vertexCount - 1; i++)
@@ -180,43 +194,40 @@ public class FieldOfView : MonoBehaviour
     }
 
 
-    EdgeInfo FindEdge(ObstacleInfo minObstacle, ObstacleInfo maxObstacle)
+    void FindEdge(ObstacleInfo minObstacle, ObstacleInfo maxObstacle, ref Vector3[] edges)
     {
         float minAngle = minObstacle.angle;
         float maxAngle = maxObstacle.angle;
-        Vector3 minPoint = Vector3.zero;
-        Vector3 maxPoint = Vector3.zero;
+        edges[0] = Vector3.zero;
+        edges[1] = Vector3.zero;
 
         for (int i = 0; i < edgeResolveIterations; i++)
         {
             float angle = (minAngle + maxAngle) / 2;
-            ObstacleInfo newObstacle = FindObstacles(angle);
+            newObstacle = FindObstacles(angle);
 
             bool edgeDstThresholdExceeded = Mathf.Abs(minObstacle.dst - newObstacle.dst) > edgeDstThreshold;
             if (newObstacle.hit == minObstacle.hit && !edgeDstThresholdExceeded)
             {
                 minAngle = angle;
-                minPoint = newObstacle.point;
+                edges[0] = newObstacle.point;
             } else
             {
                 maxAngle = angle;
-                maxPoint = newObstacle.point;
+                edges[1] = newObstacle.point;
             }
         }
-
-        return new EdgeInfo(minPoint, maxPoint);
     }
 
-
+    RaycastHit hit;
+    Vector3 dir;
     ObstacleInfo FindObstacles(float globalAngle)
     {
-        Vector3 dir = DirFromAngle(globalAngle, true);
-        RaycastHit hit;
+        dir = DirFromAngle(globalAngle, true);
 
         if (DebugRayCast(transform.position, dir, out hit, viewRadius, obstacleMask))
-        {
             return new ObstacleInfo(true, hit.point + hit.normal * -viewDepth, hit.distance, globalAngle);
-        }
+
         return new ObstacleInfo(false, transform.position + dir * (viewRadius - viewDepth), viewRadius, globalAngle);
     }
 
@@ -255,18 +266,6 @@ public class FieldOfView : MonoBehaviour
             point = _point;
             dst = _dst;
             angle = _angle;
-        }
-    }
-
-    public struct EdgeInfo
-    {
-        public Vector3 pointA;
-        public Vector3 pointB;
-
-        public EdgeInfo(Vector3 _pointA, Vector3 _pointB)
-        {
-            pointA = _pointA;
-            pointB = _pointB;
         }
     }
 }
