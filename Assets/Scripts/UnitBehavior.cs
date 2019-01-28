@@ -236,7 +236,7 @@ public class UnitBehavior : BaseBehavior
     private void UnitStuck()
     {
         stucked = true;
-        StopAction(false);
+        StopAction(false, SendRPC: true);
         ActionIsDone(stopActionType: interactType);
         interactObject = null;
     }
@@ -1161,12 +1161,12 @@ public class UnitBehavior : BaseBehavior
 
         if (commandName == "stop" || Input.GetKeyDown(KeyCode.H))
         {
-            StopAction(true);
+            StopAction(true, SendRPC: true);
             return result;
         }
         if (commandName != null && commandName.Contains("behaviorType") || Input.GetKeyDown(KeyCode.T))
         {
-            StopAction(true);
+            StopAction(true, SendRPC: true);
             var types = new BehaviorType[4] { BehaviorType.Aggressive, BehaviorType.Counterattack, BehaviorType.Hold, BehaviorType.Run };
             int pos = Array.FindIndex(types, w => w == behaviorType) + 1;
             if (pos > 3)

@@ -20,20 +20,23 @@ namespace GangaGame
             {
                 // Draw map
                 TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
-                if (terrainGenerator != null && terrainGenerator.mapTexture != null)
+                if (terrainGenerator != null)
                 {
-                    ((HtmlElement)mapBlock).image = terrainGenerator.mapTexture;
-                    mapBlock.style.height = "100%";
-                    mapBlock.style.width = "100%";
+                    if (((HtmlElement)mapBlock).image == null && terrainGenerator.mapTexture != null)
+                    {
+                        ((HtmlElement)mapBlock).image = terrainGenerator.mapTexture;
+                        mapBlock.style.height = "100%";
+                        mapBlock.style.width = "100%";
+                    }
                 }
                 else
                 {
                     mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
                 }
-                var mapImage = (HtmlElement)mapBlock.getElementsByClassName("map")[0];
+                var mapImage = (HtmlElement)mapBlock.getElementsByClassName("mapVision")[0];
                 mapCache.Add((HtmlElement)mapBlock, mapImage);
 
-                if (cameraController.mapTexture.height > 0)
+                if (mapImage.image == null && terrainGenerator.mapTexture != null && cameraController.mapTexture.height > 0)
                 {
                     mapImage.image = cameraController.mapTexture;
                     mapImage.style.height = "100%";
@@ -41,12 +44,14 @@ namespace GangaGame
                 }
 
                 var blindFog = (HtmlElement)mapBlock.getElementsByClassName("blindFog")[0];
-                ((HtmlElement)blindFog).image = terrainGenerator.blindTexture2D;
-                blindFog.style.height = "100%";
-                blindFog.style.width = "100%";
+                if (blindFog.image == null && terrainGenerator.blindTexture2D != null && terrainGenerator.blindTexture2D.height > 0)
+                {
+                    blindFog.image = terrainGenerator.blindTexture;
+                    blindFog.style.height = "100%";
+                    blindFog.style.width = "100%";
+                }
 
                 var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
-                unitsBlock.onmousemove = OnElementOnMouseMove;
                 unitsBlock.innerHTML = "";
                 
                 // Draw units + calculate statistic
@@ -99,9 +104,9 @@ namespace GangaGame
 
         public static void CreateOrUpdateCameraOnMap(Dom.Element mapBlock, Dom.Element mapImage)
         {
-            var blindFog = (HtmlElement)mapBlock.getElementsByClassName("blindFog")[0];
+            //var blindFog = (HtmlElement)mapBlock.getElementsByClassName("blindFog")[0];
             TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
-            ((HtmlElement)blindFog).image = terrainGenerator.blindTexture2D;
+            //((HtmlElement)blindFog).image = terrainGenerator.blindTexture2D;
 
             UnityEngine.Profiling.Profiler.BeginSample("p CreateOrUpdateCameraOnMap"); // Profiler
             Vector3 vameraLookAt = Camera.main.transform.position - new Vector3(Camera.main.transform.forward.normalized.x, 0, Camera.main.transform.forward.normalized.z) * CameraController.GetCameraOffset();
@@ -139,21 +144,20 @@ namespace GangaGame
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
 
-        public static void OnElementOnMouseMove(MouseEvent mouseEvent)
+        public static void MapEvent(HtmlDivElement element)
         {
-            if (mouseEvent.htmlTarget.className.Contains("units") && !UnityEngine.Input.GetKey(KeyCode.LeftAlt))
+            if (!UnityEngine.Input.GetKey(KeyCode.LeftAlt))
             {
                 CameraController cameraController = Camera.main.GetComponent<CameraController>();
-
-                var element = (HtmlDivElement)mouseEvent.srcElement;
+                
                 var elementPos = new Vector2(element.getBoundingClientRect().X, element.getBoundingClientRect().Y);
-                var mousePos = PowerUI.CameraPointer.All[0].Position;
+                var mousePos = InputPointer.All[0].Position;
                 var mapPoint = (mousePos - elementPos) / new Vector2(element.getBoundingClientRect().Width, element.getBoundingClientRect().Height);
                 if (UnityEngine.Input.GetMouseButton(0))
                 {
                     MoveCameraToPoint(mapPointToPosition(mapPoint));
                 }
-                else if (UnityEngine.Input.GetMouseButtonDown(1))
+                else if (UnityEngine.Input.GetMouseButton(1))
                 {
                     foreach (var unit in cameraController.selectedObjects)
                     {

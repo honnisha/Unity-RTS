@@ -181,7 +181,7 @@ namespace GangaGame
                     animalsCountOnRow: 5 * mapSize, animalsRows: mapSize);
 
                 InstantiateObjects(
-                    spawnData, maxTrees: 750 * mapSize + 100,
+                    spawnData, maxTrees: 1000 * mapSize,
                     treePrefabs: terrainGenerator.treePrefabs, goldPrefabs: terrainGenerator.goldPrefabs, animalPrefabs: terrainGenerator.animalsPrefabs);
 
                 // Create bots
@@ -204,6 +204,9 @@ namespace GangaGame
                     GameObject DLight = GameObject.FindGameObjectWithTag("Light");
                     DLight.GetComponent<Light>().intensity = 1.3f;
                 }
+
+                if (!GameInfo.playerSpectate)
+                    terrainGenerator.UpdateBlindTexture(init: true);
 
                 if (PhotonNetwork.InRoom)
                 {
@@ -237,6 +240,9 @@ namespace GangaGame
         void Update()
         {
             activeOver = InputPointer.All[0].ActiveOver;
+
+            if (activeOver != null && activeOver.className.Contains("units"))
+                MapScript.MapEvent((HtmlDivElement)activeOver);
 
             UnityEngine.Profiling.Profiler.BeginSample("p Update vision and map"); // Profiler
             cameraPositionX = transform.position.x;

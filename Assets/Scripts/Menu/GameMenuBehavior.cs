@@ -77,6 +77,9 @@ namespace GangaGame
 
             foreach (Dom.Element element in UI.document.getElementsByClassName("saveSettings"))
                 element.onclick = TabChangeOrSaveSettings;
+
+            foreach (Dom.Element element in UI.document.getElementsByClassName("SettingsTab"))
+                element.onclick = TabChangeOrSaveSettings;
         }
 
         public void CreateWindow(WindowType windowType)
@@ -88,7 +91,7 @@ namespace GangaGame
             else if (windowType == WindowType.BigMap)
             {
                 UI.document.Run("DisplayBigMapWindow");
-                cameraController.UpdateStatistic();
+                MapScript.CreateOrUpdateMaps(ref cameraController.mapCache);
             }
             else if (windowType == WindowType.Settings)
             {

@@ -211,7 +211,7 @@ MonoBehaviour:
   unitSelectionComponent: {fileID: 0}
   allOutlines: []
   resourceCapacityType: 2
-  resourceCapacity: 3000
+  resourceCapacity: 1500
   resourceEndless: 0
   sourceType: 0
   storedResources: 
@@ -219,6 +219,7 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  allObjects: []
   statisticStrings: []
   state: 3
   magnitDistance: 3

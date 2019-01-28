@@ -36,6 +36,7 @@ public class TerrainGenerator : MonoBehaviour
     
     [HideInInspector]
     public Texture2D blindTexture2D;
+    public RenderTexture blindTexture;
 
     public GameObject BlindPlane;
 
@@ -44,13 +45,10 @@ public class TerrainGenerator : MonoBehaviour
 
     void Start()
     {
-        fogTexture2D = new Texture2D(fogTexture.width, fogTexture.height);
-        blindTexture2D = new Texture2D(fogTexture.width, fogTexture.height);
-        UpdateBlindTexture(forceBlack: true);
         //newPixels = new Color[fogTexture.width * fogTexture.width];
     }
 
-    float timerToUpdateBlind = 0.0f;
+    float timerToUpdateBlind = 0.05f;
     void Update()
     {
         if (generate)
@@ -59,43 +57,50 @@ public class TerrainGenerator : MonoBehaviour
             Generate((int)mainMapGenerateInfo.seed);
         }
 
-        timerToUpdateBlind -= Time.fixedDeltaTime;
-        if(timerToUpdateBlind <= 0.0f)
+        if (initBlindTexture)
         {
-            UpdateBlindTexture();
-            timerToUpdateBlind = 0.5f;
+            timerToUpdateBlind -= Time.fixedDeltaTime;
+            if (timerToUpdateBlind <= 0.0f)
+            {
+                UpdateBlindTexture();
+                timerToUpdateBlind = 0.5f;
+            }
         }
     }
 
-    public void UpdateBlindTexture(bool forceBlack = false)
+    Color[] newPixels;
+    bool initBlindTexture = false;
+    public void UpdateBlindTexture(bool init = false)
     {
+        if (init)
+            initBlindTexture = true;
+
         RenderTexture.active = fogTexture;
         fogTexture2D.ReadPixels(new Rect(0, 0, fogTexture.width, fogTexture.height), 0, 0);
         fogTexture2D.Apply();
-        RenderTexture.active = null; // added to avoid errors 
+        RenderTexture.active = null;
 
+        Color newColor = Color.white;
+        newColor.a = 0;
         for (int y = 0; y < fogTexture.height; y++)
         {
             for (int x = 0; x < fogTexture.width; x++)
             {
-                if(forceBlack)
-                {
+                if (fogTexture2D.GetPixel(x, y) == Color.black)
+                    blindTexture2D.SetPixel(x, y, newColor);
+
+                else if (init)
                     blindTexture2D.SetPixel(x, y, Color.black);
-                    continue;
-                }
-
-                if (blindTexture2D.GetPixel(x, y) == new Color(255, 255, 255, 0))
-                    continue;
-
-                if(fogTexture2D.GetPixel(x, y) == Color.black)
-                    blindTexture2D.SetPixel(x, y, new Color(255, 255, 255, 0));
             }
         }
+
         blindTexture2D.Apply();
-        BlindPlane.GetComponent<Renderer>().material.mainTexture = blindTexture2D;
+        Graphics.Blit(blindTexture2D, blindTexture);
     }
 
     // Generate garbage but faster:
+    // One day mankind will invent a way to get an array without generating garbage, I beelive
+    // on this day I will uncomment this code
     //Color[] pixels;
     //Color[] newPixels;
     //public void UpdateBlindTexture()
@@ -105,6 +110,7 @@ public class TerrainGenerator : MonoBehaviour
     //    fogTexture2D.Apply();
     //    RenderTexture.active = null; // added to avoid errors 
 
+          // Pure evil
     //    pixels = fogTexture2D.GetPixels();
 
     //    for (int i = 0; i < pixels.Length; i++)
@@ -300,6 +306,9 @@ public class TerrainGenerator : MonoBehaviour
 
     public void Generate(int mapSeed, int newSize = 3)
     {
+        fogTexture2D = new Texture2D(fogTexture.width, fogTexture.height);
+        blindTexture2D = new Texture2D(fogTexture.width, fogTexture.height);
+
         mainMapGenerateInfo.seed = (uint)mapSeed;
         Terrain t = Terrain.activeTerrain;
 
@@ -309,8 +318,7 @@ public class TerrainGenerator : MonoBehaviour
         t.terrainData.heightmapResolution = newTerrainSize;
         t.terrainData.size = new Vector3(100 * newSize, 100, 100 * newSize);
         mainMapGenerateInfo.scale = newSize / 2.0f;
-
-        BlindPlane.transform.position = new Vector3(t.terrainData.size.x / 2 , 0.5f , t.terrainData.size.z / 2);
+        
         BlindPlane.transform.localScale = new Vector3(10 * newSize, 0, 10 * newSize);
 
         // Debug.Log("Terrain Generate: size:" + newSize + " " + t.terrainData.size);

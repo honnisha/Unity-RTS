@@ -12,8 +12,6 @@ using UISpace;
 
 public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInterface
 {
-    private PhotonView photonView;
-
     #region Unit info
 
     [Header("Unit info")]
@@ -266,7 +264,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
         cameraController = Camera.main.GetComponent<CameraController>();
         unitSelectionComponent = GetComponent<UnitSelectionComponent>();
-        photonView = GetComponent<PhotonView>();
         anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         obstacle = GetComponent<NavMeshObstacle>();
@@ -953,9 +950,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         return null;
     }
 
-    public void StopAction(bool deleteObject = false)
+    public void StopAction(bool deleteObject = false, bool SendRPC = false)
     {
-        if (PhotonNetwork.InRoom)
+        if (PhotonNetwork.InRoom && SendRPC)
             photonView.RPC("_StopAction", PhotonTargets.All, deleteObject);
         else
             _StopAction(deleteObject);

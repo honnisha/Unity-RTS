@@ -24,6 +24,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _BlendTex:
+        m_Texture: {fileID: 8400000, guid: 56adb43fe41a4764c9143e58c71146e9, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -45,7 +49,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 8400000, guid: 2be1e5a699f2bc14a9b4467c14ff5959, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex2:
+        m_Texture: {fileID: 8400000, guid: 2be1e5a699f2bc14a9b4467c14ff5959, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -76,10 +84,32 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _t1:
+        m_Texture: {fileID: 8400000, guid: 2be1e5a699f2bc14a9b4467c14ff5959, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _t2:
+        m_Texture: {fileID: 8400000, guid: 56adb43fe41a4764c9143e58c71146e9, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _t3:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _t4:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _t5:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
     - PixelSnap: 0
+    - _Blend: 0
+    - _BlendAlpha: 0
     - _BumpScale: 1
-    - _Cutoff: 0.856
+    - _Cutoff: 0.904
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EnableExternalAlpha: 0
@@ -96,6 +126,12 @@ Material:
     - _Threshold: 1
     - _UVSec: 0
     - _ZWrite: 1
+    - _ac: 0
+    - _acm: 1
+    - _rb: 0
+    - _rc: 0
+    - _rg: 0
+    - num: 5
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Data: {r: 0, g: 0, b: 1, a: 1}
@@ -103,3 +139,7 @@ Material:
     - _Flip: {r: 1, g: 1, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _tint1: {r: 1, g: 1, b: 1, a: 0}
+    - _tint2: {r: 1, g: 1, b: 1, a: 0}
+    - _tint3: {r: 1, g: 1, b: 1, a: 0}
+    - _tint5: {r: 1, g: 1, b: 1, a: 0}

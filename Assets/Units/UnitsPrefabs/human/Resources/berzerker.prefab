@@ -1021,7 +1021,6 @@ GameObject:
   - component: {fileID: 114634354996762512}
   - component: {fileID: 7661890078232436951}
   - component: {fileID: 5791970414735973560}
-  - component: {fileID: 3490932408842945219}
   m_Layer: 12
   m_Name: berzerker
   m_TagString: Unit
@@ -1144,11 +1143,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: 1
+  tear: 0
   ownerId: 1
   maxHealth: 180
   health: 0
   live: 1
   pointToInteract: {fileID: 0}
+  tearDisplay: []
   debug: 0
   isWalkAround: 0
   timeToWalk: 0
@@ -1164,25 +1165,29 @@ MonoBehaviour:
     costGold: 25
     costWood: 0
     productionHotkey: 100
+    skillType: 0
+  _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
-  damage: 20
-  rangeAttack: 1.5
+  uniqueId: -1
   interactType: 0
-  attackTime: 2.5
-  attackDelay: 1.2
-  damageAfterTimer: 1
   attackTimer: 0
   attackDelayTimer: 0
   attacked: 0
-  attackType: 1
-  stabbingResist: 5
-  cuttingResist: 40
-  bitingResist: 10
-  magicResist: 60
-  behaviorType: 2
-  agrRange: 20
-  alertRange: 10
+  defaultStatistic:
+    damage: 10
+    rangeAttack: 2
+    attackTime: 2
+    attackDelay: 0.5
+    damageAfterTimer: 1
+    attackType: 4
+    stabbingResist: 0
+    cuttingResist: 0
+    bitingResist: 0
+    magicResist: 0
+    agrRange: 20
+    alertRange: 10
   actionEffect: {fileID: 0}
+  behaviorType: 2
   bloodEffect: {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc,
     type: 3}
   bloodOnBroundEffects:
@@ -1212,6 +1217,12 @@ MonoBehaviour:
   curSpeed: 0
   cameraController: {fileID: 0}
   skillList: []
+  producedUnits: []
+  spawnPoint: {fileID: 0}
+  spawnTarget: {x: 0, y: 0, z: 0}
+  spawnTargetObject: {fileID: 0}
+  buildTimer: 0
+  productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
   InfoHTMLOffset: {x: 0, y: 2.2, z: 0}
   pointMarkerPrefab: {fileID: 1174494487606054, guid: 7723961c7b4a2cf4cbfa8e9a6c45ba62,
@@ -1220,6 +1231,7 @@ MonoBehaviour:
   visionToolPrefab: {fileID: 1311408724359970, guid: fc937d29efbc7d146a830e8e4d19ea62,
     type: 3}
   visionCount: 0
+  uqeryLimit: 5
   beenSeen: 0
   holderObject: {fileID: 0}
   timerToCreateHolder: 0
@@ -1232,19 +1244,23 @@ MonoBehaviour:
   canBeSelected: 1
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
+  allOutlines: []
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
   sourceType: 0
   storedResources: 
+  resourceHold: 0
+  resourceType: 0
+  soundsInfo: []
   isInCameraView: 0
+  allObjects: []
+  statisticStrings: []
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}
     holder: {fileID: 0}
   resourceGatherInfo: []
-  resourceHold: 0
-  resourceType: 0
   farmInfo:
     type: 0
     gatherPerSecond: 0.5
@@ -1275,7 +1291,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 5791970414735973560}
-  viewIdField: 8
+  viewIdField: 0
   InstantiationId: 8
   isRuntimeInstantiated: 0
 --- !u!114 &5791970414735973560
@@ -1293,39 +1309,6 @@ MonoBehaviour:
   m_SynchronizePosition: 1
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
---- !u!114 &3490932408842945219
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1528613431990062}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowLayerWeightsInspector: 1
-  ShowParameterInspector: 1
-  m_SynchronizeParameters:
-  - Type: 9
-    SynchronizeType: 0
-    Name: Die
-  - Type: 9
-    SynchronizeType: 0
-    Name: Damaged
-  - Type: 1
-    SynchronizeType: 0
-    Name: AttackSpeed
-  - Type: 1
-    SynchronizeType: 0
-    Name: Speed
-  - Type: 9
-    SynchronizeType: 0
-    Name: Attack
-  m_SynchronizeLayers:
-  - SynchronizeType: 0
-    LayerIndex: 0
 --- !u!1 &1542925025188426
 GameObject:
   m_ObjectHideFlags: 0

@@ -265,6 +265,8 @@ html {
 }
 
 .mapBlock {
+	height: 100%;
+	width: 100%;
 	background-size: 100%;
 	background: green;
 }
@@ -274,13 +276,14 @@ html {
 	height: 100%;
 	width: 45%;
 }
-.map {
+.mapVision {
     text-align: center;
 	position: relative;
 	-spark-filter: opacity(40%), invert(100%);
 }
 .blindFog {
-	top: -100%;
+	margin-top: -100%;
+	background-size: 100%;
 	position: relative;
 	height: 100%;
 	width: 100%;
@@ -612,7 +615,7 @@ html {
         bapBlock.appendChild(mapBlock);
 		
         var element = document.createElement("img");
-        element.className = "map clckable";
+        element.className = "mapVision clckable";
         mapBlock.appendChild(element);
 		
         var element = document.createElement("div");
@@ -672,12 +675,12 @@ html {
         secondWindow.appendChild(text);
 		
         var text = document.createElement("p");
-        text.className = "tab gameTab clckable";
+        text.className = "tab SettingsTab gameTab clckable";
         text.innerText = "Game";
         secondWindow.appendChild(text);
 		
         var text = document.createElement("p");
-        text.className = "tab soundTab clckable";
+        text.className = "tab SettingsTab soundTab clckable";
         text.innerText = "Sound";
         secondWindow.appendChild(text);
 	}
@@ -889,12 +892,12 @@ html {
 		</div>
 		<div class="minimap">
 			<div class="mapBlock">
-				<img class="map clckable">
+				<img class="mapVision clckable">
 				</img>
-				<div class="mapHolder clckable">
-				</div>
-				<div class="blindFog clckable">
-				</div>
+				<img class="mapHolder clckable">
+				</img>
+				<img class="blindFog clckable">
+				</img>
 				<div class="units clckable">
 				</div>
 			</div>

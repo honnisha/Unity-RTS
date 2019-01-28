@@ -511,7 +511,7 @@ public class BuildingBehavior : BaseBehavior
         }
         if (commandName == "stop" || Input.GetKeyDown(KeyCode.H))
         {
-            StopAction();
+            StopAction(SendRPC: true);
             result[0] = true;
             return result;
         }

@@ -38,7 +38,7 @@ QualitySettings:
     particleRaycastBudget: 4
     asyncUploadTimeSlice: 2
     asyncUploadBufferSize: 4
-    asyncUploadPersistentBuffer: 1
+    asyncUploadPersistentBuffer: 0
     resolutionScalingFixedDPIFactor: 1
     excludedTargetPlatforms: []
   - serializedVersion: 2

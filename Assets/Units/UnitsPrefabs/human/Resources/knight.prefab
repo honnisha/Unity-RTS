@@ -700,7 +700,6 @@ GameObject:
   - component: {fileID: 114024932627925992}
   - component: {fileID: 5544117149830189870}
   - component: {fileID: 240754948708690846}
-  - component: {fileID: 4502919790686401177}
   m_Layer: 12
   m_Name: knight
   m_TagString: Unit
@@ -935,6 +934,8 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  allObjects: []
+  statisticStrings: []
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}
@@ -988,39 +989,6 @@ MonoBehaviour:
   m_SynchronizePosition: 1
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
---- !u!114 &4502919790686401177
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1323032547063684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowLayerWeightsInspector: 1
-  ShowParameterInspector: 1
-  m_SynchronizeParameters:
-  - Type: 9
-    SynchronizeType: 0
-    Name: Die
-  - Type: 9
-    SynchronizeType: 0
-    Name: Damaged
-  - Type: 1
-    SynchronizeType: 0
-    Name: AttackSpeed
-  - Type: 1
-    SynchronizeType: 0
-    Name: Speed
-  - Type: 9
-    SynchronizeType: 0
-    Name: Attack
-  m_SynchronizeLayers:
-  - SynchronizeType: 0
-    LayerIndex: 0
 --- !u!1 &1362703751022212
 GameObject:
   m_ObjectHideFlags: 0

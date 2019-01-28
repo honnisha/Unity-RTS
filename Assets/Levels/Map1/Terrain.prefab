@@ -51,8 +51,8 @@ MonoBehaviour:
   goldPrefabs:
   - {fileID: 156588864358899212, guid: a71994c5ee0ba014d853a4b5c52796ca, type: 3}
   animalsPrefabs:
-  - {fileID: 1937853774954928, guid: 5933b4810ee168c43b7e430718f8fa76, type: 3}
-  - {fileID: 1677176852055214, guid: 57d5c75ff596c3047a4ebbba9f351416, type: 3}
+  - {fileID: 1031, guid: 5933b4810ee168c43b7e430718f8fa76, type: 3}
+  - {fileID: 982, guid: 57d5c75ff596c3047a4ebbba9f351416, type: 3}
   layersCount: 9
   mainMapGenerateInfo:
     fractalType: 3
@@ -66,6 +66,7 @@ MonoBehaviour:
   mapTexture: {fileID: 0}
   fogTexture: {fileID: 8400000, guid: 56adb43fe41a4764c9143e58c71146e9, type: 2}
   blindTexture2D: {fileID: 0}
+  blindTexture: {fileID: 8400000, guid: 2be1e5a699f2bc14a9b4467c14ff5959, type: 2}
   BlindPlane: {fileID: 0}
   generate: 0
 --- !u!218 &7089063114470558530
