@@ -234,7 +234,7 @@ MonoBehaviour:
   - {fileID: 8540848253650812173, guid: 84864e8678640f049a78b1bc289461cb, type: 3}
   - {fileID: 883, guid: d5f1902170d3f1948b963c5837c2aa4e, type: 3}
   - {fileID: 1241, guid: 73ecf9833b78deb48bbb9e084d03c0b9, type: 3}
-  - {fileID: 779, guid: 601738f4d30038c4db1250fba0a66f48, type: 3}
+  - {fileID: 594, guid: 601738f4d30038c4db1250fba0a66f48, type: 3}
   - {fileID: 1355, guid: d4c6db7860c9e7440be6fc0d981d1525, type: 3}
   producedUnits: []
   spawnPoint: {fileID: 0}
@@ -385,7 +385,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3006}
-  viewIdField: 12
+  viewIdField: 0
   InstantiationId: 12
   isRuntimeInstantiated: 0
 --- !u!114 &3006
