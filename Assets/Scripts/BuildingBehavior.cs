@@ -241,14 +241,17 @@ public class BuildingBehavior : BaseBehavior
         live = false;
         gameObject.layer = LayerMask.NameToLayer("Project");
 
-        UnityEngine.AI.NavMeshObstacle navMesh = GetComponent<UnityEngine.AI.NavMeshObstacle>();
-        if (navMesh != null)
-            navMesh.enabled = false;
-
-        var allNewRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
-        foreach (var render in allNewRenders)
-            foreach (var material in render.materials)
-                tempMaterialsMode.Add((int)material.GetFloat("_Mode"));
+        if (team == cameraController.team)
+        {
+            UnityEngine.AI.NavMeshObstacle navMesh = GetComponent<UnityEngine.AI.NavMeshObstacle>();
+            if (navMesh != null)
+                navMesh.enabled = false;
+        
+            var allNewRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
+            foreach (var render in allNewRenders)
+                foreach (var material in render.materials)
+                    tempMaterialsMode.Add((int)material.GetFloat("_Mode"));
+        }
     }
 
     public void SetAsProject()
@@ -259,10 +262,13 @@ public class BuildingBehavior : BaseBehavior
         projector.active = false;
         projector.GetComponent<Projector>().material.color = newColor;
 
-        var allRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
-        foreach (var render in allRenders)
-            foreach (var material in render.materials)
-                material.color = newColor;
+        if (team == cameraController.team)
+        {
+            var allRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
+            foreach (var render in allRenders)
+                foreach (var material in render.materials)
+                    material.color = newColor;
+        }
 
         state = BuildingBehavior.BuildingState.Project;
         unitSelectionComponent.canBeSelected = true;
