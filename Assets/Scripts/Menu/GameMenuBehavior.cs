@@ -2,13 +2,14 @@
 using PowerUI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace GangaGame
 {
     public class GameMenuBehavior : MonoBehaviour
     {
-        public enum WindowType { None, MainMenu, BigMap, Settings };
+        public enum WindowType { None, MainMenu, BigMap, Settings, LoadSave };
         [HideInInspector]
         public WindowType selectedWindowType = WindowType.None;
         public Dictionary<WindowType, List<object>> menuInfos = new Dictionary<WindowType, List<object>>();
@@ -25,6 +26,9 @@ namespace GangaGame
 
             menuInfos.Add(WindowType.Settings, new List<object>());
             menuInfos[WindowType.Settings].Add("CreateSettings");
+
+            menuInfos.Add(WindowType.LoadSave, new List<object>());
+            menuInfos[WindowType.LoadSave].Add("LoadSaveButton");
 
             UpdateMenuUIEvents();
         }
@@ -80,6 +84,12 @@ namespace GangaGame
 
             foreach (Dom.Element element in UI.document.getElementsByClassName("SettingsTab"))
                 element.onclick = TabChangeOrSaveSettings;
+
+            foreach (Dom.Element element in UI.document.getElementsByClassName("saveGame"))
+                element.onclick = OnButtonSaveGame;
+
+            foreach (Dom.Element element in UI.document.getElementsByClassName("loadingButton"))
+                element.onclick = LoadFileClick;
         }
 
         public void CreateWindow(WindowType windowType)
@@ -87,7 +97,7 @@ namespace GangaGame
             CameraController cameraController = Camera.main.GetComponent<CameraController>();
             cameraController.interfaceSource.PlayOneShot(cameraController.clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
             if (windowType == WindowType.MainMenu)
-                UI.document.Run("CreateMenu");
+                UI.document.Run("CreateMenu", !PhotonNetwork.InRoom);
             else if (windowType == WindowType.BigMap)
             {
                 UI.document.Run("DisplayBigMapWindow");
@@ -96,23 +106,26 @@ namespace GangaGame
             else if (windowType == WindowType.Settings)
             {
                 UI.document.Run("DisplaySettingsWindow");
-                SettingsScript.CreateSettings("SettingsContent");
+                SettingsScript.CreateSettings("WindowContent");
+            }
+            else if (windowType == WindowType.LoadSave)
+            {
+                LoadSaveScript.selectedFile = "";
+                UI.document.Run("DisplayLoadSaveWindow");
+                LoadSaveScript.UpdateSaveList();
             }
         }
 
         public void DestroyWindow()
         {
-            if (selectedWindowType == WindowType.MainMenu)
-                if (UI.document.getElementsByClassName("menu").length > 0)
-                    UI.document.getElementsByClassName("menu")[0].innerHTML = "";
-
-            if (selectedWindowType == WindowType.BigMap || selectedWindowType == WindowType.Settings)
-                if (UI.document.getElementsByClassName("window").length > 0)
-                    UI.document.getElementsByClassName("window")[0].remove();
-
-            if (selectedWindowType == WindowType.Settings)
-                if (UI.document.getElementsByClassName("secondWindow").length > 0)
-                    UI.document.getElementsByClassName("secondWindow")[0].remove();
+            if (UI.document.getElementsByClassName("menu").length > 0)
+                UI.document.getElementsByClassName("menu")[0].innerHTML = "";
+                
+            if (UI.document.getElementsByClassName("window").length > 0)
+                UI.document.getElementsByClassName("window")[0].remove();
+                
+            if (UI.document.getElementsByClassName("secondWindow").length > 0)
+                UI.document.getElementsByClassName("secondWindow")[0].remove();
         }
 
         void MenuUIClick(MouseEvent mouseEvent)
@@ -148,9 +161,31 @@ namespace GangaGame
             }
         }
 
+        void OnButtonSaveGame(MouseEvent mouseEvent)
+        {
+            string saveName = LoadSaveScript.SaveGame();
+
+            var messageDiv = UI.document.getElementsByClassName("windowMessage")[0];
+            messageDiv.innerHTML = new StringBuilder(60).AppendFormat("Game saved: {0}", saveName).ToString();
+            messageDiv.style.color = "green";
+            LoadSaveScript.UpdateSaveList();
+        }
+
+        void LoadFileClick(MouseEvent mouseEvent)
+        {
+            if (mouseEvent.srcElement.className.Contains("LoadFile"))
+            {
+                LoadSaveScript.LoadFile();
+            }
+            if (mouseEvent.srcElement.className.Contains("DeleteFile"))
+            {
+                LoadSaveScript.DeleteSaveFile();
+            }
+        }
+
         void TabChangeOrSaveSettings(MouseEvent mouseEvent)
         {
-            bool changed = SettingsScript.ChangeTabOrSaveSettings(mouseEvent.srcElement.className, windowSettings: "SettingsContent", saveClassName: "saveSettings", errorClassName: "settingsMessage", mainMenu: false);
+            bool changed = SettingsScript.ChangeTabOrSaveSettings(mouseEvent.srcElement.className, windowSettings: "WindowContent", saveClassName: "saveSettings", errorClassName: "windowMessage", mainMenu: false);
             if (changed)
             {
                 CameraController cameraController = Camera.main.GetComponent<CameraController>();

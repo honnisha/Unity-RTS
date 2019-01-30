@@ -148,6 +148,7 @@ namespace GangaGame
         public TextAsset LobbyHTMLFile;
         public TextAsset RoomHTMLFile;
         public TextAsset SettingsHTMLFile;
+        public TextAsset LoadingHTMLFile;
 
         public AudioClip menuMusic;
         public float musicDelay = 0.0f;
@@ -244,6 +245,13 @@ namespace GangaGame
                     GameInfo.SetReady(false);
                     GameInfo.mapSize = GameInfo.defaultMapSize;
                     UpdateRoomView();
+                    return;
+                }
+                if (className.Contains("load"))
+                {
+                    singleplayer = true;
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
+                    UI.document.innerHTML = LoadingHTMLFile.text;
                     return;
                 }
                 if (className.Contains("multiplayer"))

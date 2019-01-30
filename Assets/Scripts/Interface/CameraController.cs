@@ -105,6 +105,9 @@ namespace GangaGame
         private float keyTimer = 0.0f;
         private int keyPressed;
 
+        [HideInInspector]
+        public int mapSeed = 0;
+
         UIBaseScript cameraUIBaseScript;
 
         RTS_Cam.RTS_Camera RTS_Camera;
@@ -121,7 +124,7 @@ namespace GangaGame
             for (int number = 1; number <= 9; number++)
                 unitsBinds.Add(KeyCode.Alpha0 + number, new List<GameObject>());
 
-            int mapSeed = UnityEngine.Random.Range(0, 1000);
+            mapSeed = UnityEngine.Random.Range(0, 1000);
             int mapSize = GameInfo.mapSize;
             int playerCount = 0;
             // Multiplayer

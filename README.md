@@ -2,6 +2,7 @@ Ganga RTS
 =======
 
 Autor: Nikita Ivanov (Gangashman) ganagsh@gmail.com
+Game community discord: https://discord.gg/tEwD4x
 
 Using in game:
 =======

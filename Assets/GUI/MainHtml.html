@@ -1,7 +1,11 @@
 <link rel="stylesheet" type="text/css" href="css/settings.css">
-<script type='text/javascript' src="js/settings.js"></script>
 <link rel="stylesheet" type="text/css" href="css/loading.css">
+<link rel="stylesheet" type="text/css" href="css/loadSave.css">
+
+<script type='text/javascript' src="js/settings.js"></script>
 <script type='text/javascript' src="js/loading.js"></script>
+<script type='text/javascript' src="js/loadSave.js"></script>
+
 <style type='text/css'>
 html {
     height: 100%;
@@ -489,23 +493,24 @@ html {
 .loading > .loadingBlock {
     background-image: url("paper dark.png") no-repeat;
 }
-.SettingsWindow {
+.window {
 	left: 50%;
 	margin-left: -350px;
 	width: 700px;
 	text-align: center;
 }
-.SettingsContent {
+.WindowContent {
 	height: 80%;
 	margin: 5% 5% 0 5%;
 }
-.settingsMessage {
+.windowMessage {
 	width: 100%;
 	text-align: center;
 	padding-bottom: 5px;
     text-shadow: 1px 1px 1px #000;
 }
-.settingsButton {
+.wButton {
+    background: url("button gray.png") no-repeat;
 	margin-left: 10px;
 	padding: 4px 7px;
 	width: 100px;
@@ -513,14 +518,33 @@ html {
 	display: inline-block;
 	color: gray;
 }
-.settingsButton:hover {
+.wButton:hover {
 	color: white;
 }
-.closeSettings {
-    background: url("button gray.png") no-repeat;
-}
-.saveSettings {
+.buttonRed {
     background: url("button red.png") no-repeat;
+}
+.LoadSaveWindow > .WindowContent {
+	overflow-y: scroll;
+}
+.loadNote {
+    background: url("title") no-repeat;
+	background-size: 100%;
+	height: 22px;
+	width: 400px;
+	padding-top: 3px;
+	margin-bottom: 3px;
+	display: inline-block;
+	color: gray;
+    border: 1px solid black;
+}
+.loadNote:hover {
+	color: white;
+    border: 1px solid gray;
+}
+.selected {
+    border: 1px solid white!important;
+	color: white!important;
 }
 </style>
 <script>
@@ -553,7 +577,7 @@ html {
         buttonElement.innerText = "Send";
         chatElement.appendChild(buttonElement);
 	}
-	function CreateMenu() {
+	function CreateMenu(saveLoadButtons) {
         var menuHolder = document.getElementsByClassName("menu")[0];
         var element = document.createElement("div");
         menuHolder.appendChild(element);
@@ -562,6 +586,14 @@ html {
         menuElement.className = "clckable MainMenuButton CloseMenu";
         menuElement.innerText = "Return to game";
         element.appendChild(menuElement);
+		
+		if(saveLoadButtons)
+		{
+			var menuElement = document.createElement("div");
+			menuElement.className = "clckable LoadSaveButton";
+			menuElement.innerText = "Save / Load";
+			element.appendChild(menuElement);
+		}
 		
         var menuElement = document.createElement("div");
         menuElement.className = "clckable MainMenuButton CreateSettings";
@@ -639,7 +671,7 @@ html {
         var htmlBlock = document.getElementsByTagName("html")[0];
 
         var windowBlock = document.createElement("div");
-        windowBlock.className = "window SettingsWindow clckable";
+        windowBlock.className = "window clckable";
         htmlBlock.appendChild(windowBlock);
 		
         var element = document.createElement("div");
@@ -648,21 +680,21 @@ html {
         windowBlock.appendChild(element);
 		
         var contentBlock = document.createElement("div");
-        contentBlock.className = "SettingsContent clckable";
+        contentBlock.className = "WindowContent clckable";
         windowBlock.appendChild(contentBlock);
 
-        var settingsMessage = document.createElement("div");
-        settingsMessage.className = "settingsMessage clckable";
-        settingsMessage.innerText = " ";
-        windowBlock.appendChild(settingsMessage);
+        var windowMessage = document.createElement("div");
+        windowMessage.className = "windowMessage clckable";
+        windowMessage.innerText = " ";
+        windowBlock.appendChild(windowMessage);
 
         var saveButton = document.createElement("div");
-        saveButton.className = "settingsButton closeSettings CreateSettings clckable";
+        saveButton.className = "wButton CreateSettings clckable";
         saveButton.innerText = "Cancel";
         windowBlock.appendChild(saveButton);
 
         var saveButton = document.createElement("div");
-        saveButton.className = "settingsButton saveSettings clckable";
+        saveButton.className = "wButton buttonRed saveSettings clckable";
         saveButton.innerText = "Save settings";
         windowBlock.appendChild(saveButton);
 
@@ -682,6 +714,55 @@ html {
         var text = document.createElement("p");
         text.className = "tab SettingsTab soundTab clckable";
         text.innerText = "Sound";
+        secondWindow.appendChild(text);
+	}
+	function DisplayLoadSaveWindow() {
+        var htmlBlock = document.getElementsByTagName("html")[0];
+
+        var windowBlock = document.createElement("div");
+        windowBlock.className = "window LoadSaveWindow clckable";
+        htmlBlock.appendChild(windowBlock);
+		
+        var element = document.createElement("div");
+        element.className = "closeWindow LoadSaveButton clckable";
+        element.innerText = "X";
+        windowBlock.appendChild(element);
+		
+        var contentBlock = document.createElement("div");
+        contentBlock.className = "WindowContent clckable";
+        windowBlock.appendChild(contentBlock);
+
+        var windowMessage = document.createElement("div");
+        windowMessage.className = "windowMessage clckable";
+        windowMessage.innerText = " ";
+        windowBlock.appendChild(windowMessage);
+
+        var saveButton = document.createElement("div");
+        saveButton.className = "wButton LoadSaveButton clckable";
+        saveButton.innerText = "Cancel";
+        windowBlock.appendChild(saveButton);
+
+        var saveButton = document.createElement("div");
+        saveButton.className = "wButton buttonRed saveGame clckable";
+        saveButton.innerText = "Save game";
+        windowBlock.appendChild(saveButton);
+		
+        var secondWindow = document.createElement("div");
+        secondWindow.className = "secondWindow clckable";
+        htmlBlock.appendChild(secondWindow);
+		
+        var text = document.createElement("h4");
+        text.innerText = "Options:";
+        secondWindow.appendChild(text);
+		
+        var text = document.createElement("p");
+        text.className = "tab loadingButton LoadFile clckable";
+        text.innerText = "Load file";
+        secondWindow.appendChild(text);
+		
+        var text = document.createElement("p");
+        text.className = "tab loadingButton DeleteFile clckable";
+        text.innerText = "Delete file";
         secondWindow.appendChild(text);
 	}
 	function SendChatMessage(message) {

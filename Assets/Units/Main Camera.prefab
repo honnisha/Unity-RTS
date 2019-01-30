@@ -197,7 +197,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 442725ec6462378458223f647aa14b38, type: 3}
     lastSoundIndex: 0
   clickSound: {fileID: 8300000, guid: f5b8fc2cfbe71ec4794e141b3593c37c, type: 3}
-  interfaceSource: {fileID: 0}
+  interfaceSource: {fileID: 4627805803697384586}
   isSelecting: 0
   team: 1
   userId: 123
@@ -341,8 +341,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 0}
-  viewIdField: 1
-  InstantiationId: 1
+  viewIdField: 2
+  InstantiationId: 2
   isRuntimeInstantiated: 0
 --- !u!114 &4844609676478205319
 MonoBehaviour:
@@ -356,8 +356,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
+  m_SynchronizePosition: 0
+  m_SynchronizeRotation: 0
   m_SynchronizeScale: 0
 --- !u!82 &1955513798
 AudioSource:

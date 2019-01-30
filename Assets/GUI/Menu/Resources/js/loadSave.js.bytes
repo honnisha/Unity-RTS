@@ -1,0 +1,15 @@
+function CreateLoadingRecord(contentClass, name, selected) {
+	var contentElement = document.getElementsByClassName(contentClass)[0];
+
+    var loadNote = document.createElement("div");
+    loadNote.className = "loadNote clckable";
+
+	if (selected)
+		loadNote.className += " selected";
+
+    loadNote.innerText = name;
+    loadNote.id = name;
+    contentElement.appendChild(loadNote);
+
+	return loadNote;
+}
