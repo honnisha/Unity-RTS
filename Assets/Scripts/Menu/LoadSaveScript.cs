@@ -12,7 +12,6 @@ namespace GangaGame
 {
     public static class LoadSaveScript
     {
-        public const string saveFolder = "save";
 
         public static string selectedFile = "";
         
@@ -38,33 +37,52 @@ namespace GangaGame
             UpdateSaveList();
         }
 
+        public static void DeleteSaveFile()
+        {
+            if (selectedFile == "")
+                return;
+
+            // QuickSaveRaw.Delete(selectedFile);
+            string savePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low";
+            savePath = Path.Combine(savePath, Application.companyName);
+            savePath = Path.Combine(savePath, Application.productName);
+            savePath = Path.Combine(savePath, "QuickSave");
+            savePath = Path.Combine(savePath, selectedFile + ".json");
+            File.Delete(savePath);
+            UpdateSaveList();
+        }
+
         public static void LoadFile()
         {
             if (selectedFile == "")
                 return;
-            
-            string simple = BayatGames.SaveGameFree.SaveGame.Load<string>("simple.txt", "The Default Value");
+
+            QuickSaveReader reader = QuickSaveReader.Create(selectedFile);
+
+            GameInfo.mapSeed = reader.Read<int>(GameInfo.MAP_SEED);
+            GameInfo.mapSize = reader.Read<int>(GameInfo.MAP_SIZE);
+            GameInfo.playerTeam = reader.Read<int>("playerTeam");
+
             UI.document.Run("CreateLoadingScreen", "Loading: " + selectedFile);
 
             selectedFile = "";
             SceneManager.LoadScene("Levels/Map1");
         }
 
-        public static void DeleteSaveFile()
-        {
-            if (selectedFile == "")
-                return;
-
-            QuickSaveRaw.Delete(Path.Combine(saveFolder, selectedFile));
-            UpdateSaveList();
-        }
-
         public static string SaveGame()
         {
             CameraController cameraController = Camera.main.GetComponent<CameraController>();
 
-            string saveName = Path.Combine(saveFolder, DateTime.Now.ToString("MM_dd_yyyy_HH_mm_ss"));
-            QuickSaveRaw.SaveInt(saveName, "seed", cameraController.mapSeed);
+            string saveName = DateTime.Now.ToString("MM_dd_yyyy_HH_mm_ss");
+
+            QuickSaveWriter quickSaveWriter = QuickSaveWriter.Create(saveName);
+
+            quickSaveWriter.Write(GameInfo.MAP_SEED, GameInfo.mapSeed);
+            quickSaveWriter.Write(GameInfo.MAP_SIZE, GameInfo.mapSize);
+            quickSaveWriter.Write("playerTeam", GameInfo.playerTeam);
+
+            quickSaveWriter.Commit();
+            
             return saveName;
         }
     }

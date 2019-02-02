@@ -1,10 +1,14 @@
 Ganga RTS
 =======
+Ganga RTS is an open-source multiplayer-player medieval-fantasy 3D RTS (obviously) based on an Unity engine and inspired by classic RTS.</br>
+</br>
+Autor: Nikita Ivanov (Gangashman) ganagsh@gmail.com</br>
 
-Autor: Nikita Ivanov (Gangashman) ganagsh@gmail.com
-Game community discord: https://discord.gg/tEwD4x
+Community
+=======
+Discord: https://discord.gg/heFtYfE
 
-Using in game:
+Used Libraries:
 =======
 PowerUI for interface.</br>
 Photon Unity Networking 2 for multiplayer.</br>

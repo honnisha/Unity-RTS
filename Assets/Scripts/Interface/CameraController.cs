@@ -105,9 +105,6 @@ namespace GangaGame
         private float keyTimer = 0.0f;
         private int keyPressed;
 
-        [HideInInspector]
-        public int mapSeed = 0;
-
         UIBaseScript cameraUIBaseScript;
 
         RTS_Cam.RTS_Camera RTS_Camera;
@@ -124,7 +121,6 @@ namespace GangaGame
             for (int number = 1; number <= 9; number++)
                 unitsBinds.Add(KeyCode.Alpha0 + number, new List<GameObject>());
 
-            mapSeed = UnityEngine.Random.Range(0, 1000);
             int mapSize = GameInfo.mapSize;
             int playerCount = 0;
             // Multiplayer
@@ -153,7 +149,7 @@ namespace GangaGame
 
                 object mapSeedObd;
                 if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(GameInfo.MAP_SEED, out mapSeedObd))
-                    mapSeed = (int)mapSeedObd;
+                    GameInfo.mapSeed = (int)mapSeedObd;
 
                 object mapSizeObd;
                 if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(GameInfo.MAP_SIZE, out mapSizeObd))
@@ -176,7 +172,7 @@ namespace GangaGame
             TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
             if (terrainGenerator)
             {
-                terrainGenerator.Generate(mapSeed, mapSize);
+                terrainGenerator.Generate(GameInfo.mapSeed, mapSize);
                 UpdateViewChunks();
                 spawnData = terrainGenerator.GetSpawnData(
                     spawnCount: playerCount + GameInfo.GetNPCInfo().Count, maxTrees: 1000 * mapSize,

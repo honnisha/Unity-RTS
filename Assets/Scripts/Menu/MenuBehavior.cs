@@ -25,6 +25,7 @@ namespace GangaGame
         public static int playerTeam = 1;
         public static bool playerSpectate = false;
         public static List<int> NPCList = new List<int>();
+        public static int mapSeed = 0;
 
         public const int defaultMapSize = 3;
         public static int mapSize = defaultMapSize;
@@ -244,6 +245,7 @@ namespace GangaGame
                     UI.document.innerHTML = RoomHTMLFile.text;
                     GameInfo.SetReady(false);
                     GameInfo.mapSize = GameInfo.defaultMapSize;
+                    GameInfo.mapSeed = UnityEngine.Random.Range(0, 1000);
                     UpdateRoomView();
                     return;
                 }

@@ -161,13 +161,17 @@ namespace GangaGame
             }
         }
 
+        public void DisplayMessage(string message)
+        {
+            var messageDiv = UI.document.getElementsByClassName("windowMessage")[0];
+            messageDiv.innerHTML = message;
+            messageDiv.style.color = "green";
+        }
+
         void OnButtonSaveGame(MouseEvent mouseEvent)
         {
             string saveName = LoadSaveScript.SaveGame();
-
-            var messageDiv = UI.document.getElementsByClassName("windowMessage")[0];
-            messageDiv.innerHTML = new StringBuilder(60).AppendFormat("Game saved: {0}", saveName).ToString();
-            messageDiv.style.color = "green";
+            DisplayMessage(new StringBuilder(60).AppendFormat("Game saved: {0}", saveName).ToString());
             LoadSaveScript.UpdateSaveList();
         }
 
@@ -180,6 +184,8 @@ namespace GangaGame
             if (mouseEvent.srcElement.className.Contains("DeleteFile"))
             {
                 LoadSaveScript.DeleteSaveFile();
+                DisplayMessage(new StringBuilder(60).AppendFormat("File deleted: {0}", LoadSaveScript.selectedFile).ToString());
+                LoadSaveScript.selectedFile = "";
             }
         }
 
