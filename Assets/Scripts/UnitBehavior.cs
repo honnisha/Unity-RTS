@@ -8,6 +8,7 @@ using System.Linq;
 using Photon.Pun;
 using GangaGame;
 using UISpace;
+using CI.QuickSave;
 
 public class UnitBehavior : BaseBehavior
 {
@@ -35,8 +36,6 @@ public class UnitBehavior : BaseBehavior
     private string interactAnimation = "";
 
     public ResourceGatherInfo farmInfo;
-    [HideInInspector]
-    public GameObject interactObject;
     private float interactTimer = 0.0f;
     private float interactDistance = 0.0f;
 

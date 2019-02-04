@@ -1,5 +1,134 @@
 <link rel="stylesheet" type="text/css" href="css/menu.css">
+<link rel="stylesheet" type="text/css" href="css/loadSave.css">
+<link rel="stylesheet" type="text/css" href="css/loading.css">
+
+<script type='text/javascript' src="js/loadSave.js"></script>
+<script type='text/javascript' src="js/loading.js"></script>
+<style type='text/css'>
+html {
+    background: url("background-dark.png") no-repeat;
+	background-size: 100%;
+}
+.loading {
+    background: url("background-mountans-dark.png") no-repeat;
+	background-size: 100%;
+}
+.loading > .loadingBlock {
+    background-image: url("paper dark.png") no-repeat;
+}
+.content {
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	text-align: center;
+}
+.button {
+	width: 150px;
+    background: url("button gray.png") no-repeat;
+	background-size: 100%;
+	display: inline-block;
+}
+.button-red {
+    background: url("button red") no-repeat;
+	background-size: 100%;
+	display: inline-block;
+}
+.settingsContent {
+	position: relative;
+	height: 70%;
+	width: auto;
+}
+.settingsBlock {
+	margin-left: 100px;
+	padding-top: 4%;
+	height: 95%;
+	width: 700px;
+    background-image: url("paper dark.png") no-repeat;
+	background-size: 100%;
+	display: inline-block;
+}
+.settingsTabBlock {
+	margin-left: 10px;
+	margin-bottom: 60%;
+	padding: 10px 20px;
+	height: 30%;
+	width: 160px;
+    background-image: url("paper dark.png") no-repeat;
+	background-size: 100%;
+	display: inline-block;
+	text-align: left;
+}
+.settingsTabBlock > h4 {
+    text-shadow: 1px 1px 1px #000;
+}
+.settingsTabBlock > p {
+    text-shadow: 1px 1px 1px #000;
+	margin: 4px 0 0 0;
+	color: grey;
+}
+.settingsTabBlock > p:hover {
+	color: white;
+}
+.title {
+    text-shadow: 1px 1px 1px #000;
+    background: url("title.png") no-repeat;
+	background-size: 100%;
+	margin-top: 5%;
+	padding: 10px;
+	width: 250px;
+	margin-bottom: 5px;
+	text-align: center;
+	display: inline-block;
+}
+.settingsContainer {
+	height: 91%!important;
+	width: 100%;
+	display: inline-block;
+}
+.messageSettings {
+    text-shadow: 1px 1px 1px #000;
+	width: 100%;
+	display: inline-block;
+}
+.WindowContent {
+	overflow-y: scroll;
+}
+.loadNote {
+    background: url("title") no-repeat;
+	background-size: 100%;
+	height: 22px;
+	width: 400px;
+	padding-top: 3px;
+	margin-bottom: 3px;
+	display: inline-block;
+	color: gray;
+    border: 1px solid black;
+}
+.loadNote:hover {
+	color: white;
+    border: 1px solid gray;
+}
+.selected {
+    border: 1px solid white!important;
+	color: white!important;
+}
+</style>
 
 <div class="content">
-	<div class="title">Ganga Game</div>
+	<div class="title">Load game</div>
+	<div class="settingsContent">
+		<div class="settingsBlock">
+			<div class="settingsContainer WindowContent"></div>
+			<div class="messageSettings windowMessage"> </div>
+		</div>
+	
+		<div class="settingsTabBlock">
+			<h4>Options:</h4>
+			<p class="tab LoadFile">Load file</p>
+			<p class="tab DeleteFile">Delete File</p>
+		</div>
+	</div>
+
+	<div class="button backToMenu">Back</div>
 </div>

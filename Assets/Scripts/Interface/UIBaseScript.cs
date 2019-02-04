@@ -266,9 +266,11 @@ namespace UISpace
             string parentElementString, SkillInfo skillInfo, string blockImagesName = "", bool drawImage = true, string errorMessage = "",
             string hotkey = "", bool detailInfo = false, bool dinamicInfo = false, string[] costInfo = null, string[] tableStatistics = null, bool drawHP = false)
         {
+            UnityEngine.Profiling.Profiler.BeginSample("p DrawInfo"); // Profiler
             object createdImageObject = UI.document.Run("DrawInfo", parentElementString, blockImagesName, detailInfo, drawImage, dinamicInfo, skillInfo.uniqueName, skillInfo.readableName, skillInfo.readableDescription,
             errorMessage, skillInfo.imagePath, hotkey, costInfo, tableStatistics, drawHP);
 
+            UnityEngine.Profiling.Profiler.EndSample(); // Profiler
             return (HtmlElement)((Jint.Native.JsValue)createdImageObject).ToObject();
         }
 

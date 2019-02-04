@@ -12,9 +12,7 @@ namespace GangaGame
 {
     public static class LoadSaveScript
     {
-
         public static string selectedFile = "";
-        
         static HtmlElement loadNote;
 
         public static void UpdateSaveList() //"secondWindow"
@@ -27,14 +25,8 @@ namespace GangaGame
 
                 object createdImageObject = UI.document.Run("CreateLoadingRecord", "WindowContent", saveName, selected);
                 loadNote = (HtmlElement)((Jint.Native.JsValue)createdImageObject).ToObject();
-                loadNote.onclick = SelectLoadNote;
+                loadNote.onclick = CameraController.SelectLoadNote;
             }
-        }
-
-        private static void SelectLoadNote(MouseEvent mouseEvent)
-        {
-            selectedFile = mouseEvent.srcElement.id;
-            UpdateSaveList();
         }
 
         public static void DeleteSaveFile()
@@ -64,9 +56,8 @@ namespace GangaGame
             GameInfo.playerTeam = reader.Read<int>("playerTeam");
 
             UI.document.Run("CreateLoadingScreen", "Loading: " + selectedFile);
-
-            selectedFile = "";
-            SceneManager.LoadScene("Levels/Map1");
+            
+            SceneManager.LoadSceneAsync("Levels/Map1");
         }
 
         public static string SaveGame()
@@ -80,6 +71,17 @@ namespace GangaGame
             quickSaveWriter.Write(GameInfo.MAP_SEED, GameInfo.mapSeed);
             quickSaveWriter.Write(GameInfo.MAP_SIZE, GameInfo.mapSize);
             quickSaveWriter.Write("playerTeam", GameInfo.playerTeam);
+            quickSaveWriter.Write("cameraPosition", Camera.main.transform.position);
+            quickSaveWriter.Write("cameraRotation", Camera.main.transform.rotation);
+
+            int index = 0;
+            foreach (GameObject unitObject in GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")))
+            {
+                BaseBehavior unitBaseBehavior = unitObject.GetComponent<BaseBehavior>();
+                unitBaseBehavior.Save(ref quickSaveWriter, index);
+                index++;
+            }
+            quickSaveWriter.Write("indexCount", index);
 
             quickSaveWriter.Commit();
             

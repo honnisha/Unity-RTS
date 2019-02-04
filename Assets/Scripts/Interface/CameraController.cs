@@ -8,6 +8,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UISpace;
 using GangaGame;
+using CI.QuickSave;
 
 namespace GangaGame
 {
@@ -91,7 +92,8 @@ namespace GangaGame
         bool[,] chanksView = new bool[0, 0];
         float chunkSize = 11.0f;
         public bool debugVisionGrid = false;
-        private int uniqueIdIndex = 0;
+        [HideInInspector]
+        public int uniqueIdIndex = 0;
 
         [Header("Effects")]
         public GameObject rangeProjector;
@@ -106,11 +108,14 @@ namespace GangaGame
         private int keyPressed;
 
         UIBaseScript cameraUIBaseScript;
+        TerrainGenerator terrainGenerator;
+        public static float clickLoadTimer = 0.0f;
 
         RTS_Cam.RTS_Camera RTS_Camera;
 
         void Start()
         {
+            terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
             RTS_Camera = GetComponent<RTS_Cam.RTS_Camera>();
             cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
             audioSource = GetComponent<AudioSource>();
@@ -169,7 +174,6 @@ namespace GangaGame
             RTS_Camera.SetHeight();
 
             UI.document.Run("UpdateLoadingDescription", "Create terrain");
-            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
             if (terrainGenerator)
             {
                 terrainGenerator.Generate(GameInfo.mapSeed, mapSize);
@@ -178,7 +182,62 @@ namespace GangaGame
                     spawnCount: playerCount + GameInfo.GetNPCInfo().Count, maxTrees: 1000 * mapSize,
                     goldCountOnRow: 4 * mapSize, goldRows: mapSize,
                     animalsCountOnRow: 5 * mapSize, animalsRows: mapSize);
+                
+                LoadLevel(mapSize, playerCount);
 
+                if (!GameInfo.playerSpectate)
+                    terrainGenerator.UpdateBlindTexture(init: true);
+
+                if (PhotonNetwork.InRoom)
+                {
+                    ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_LOADED_LEVEL, true } };
+                    PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+                    UI.document.Run("UpdateLoadingDescription", "Waiting for other players");
+                }
+                else
+                {
+                    StartGame();
+                }
+            }
+            else
+            {
+                UpdateViewChunks();
+                StartGame();
+            }
+        }
+
+        public void LoadLevel(int mapSize, int playerCount)
+        {
+            // Load save game
+            if (LoadSaveScript.selectedFile != "")
+            {
+                InstantiateObjects(
+                    spawnData, maxTrees: 1000 * mapSize,
+                    treePrefabs: terrainGenerator.treePrefabs, goldPrefabs: terrainGenerator.goldPrefabs);
+
+                QuickSaveReader saveReader = QuickSaveReader.Create(LoadSaveScript.selectedFile);
+
+                int indexCount = saveReader.Read<int>("indexCount");
+
+                for (int index = 0; index < indexCount; index++)
+                    BaseBehavior.Load(ref saveReader, index);
+
+                foreach (GameObject unitObject in GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")))
+                {
+                    BaseBehavior unitBaseBehavior = unitObject.GetComponent<BaseBehavior>();
+                    unitBaseBehavior.RestoreTarget();
+                }
+
+                Vector3 cameraPosition = saveReader.Read<Vector3>("cameraPosition");
+                Quaternion cameraRotation = saveReader.Read<Quaternion>("cameraRotation");
+                Camera.main.transform.position = cameraPosition;
+                Camera.main.transform.rotation = cameraRotation;
+
+                LoadSaveScript.selectedFile = "";
+            }
+            // Create new game
+            else
+            {
                 InstantiateObjects(
                     spawnData, maxTrees: 1000 * mapSize,
                     treePrefabs: terrainGenerator.treePrefabs, goldPrefabs: terrainGenerator.goldPrefabs, animalPrefabs: terrainGenerator.animalsPrefabs);
@@ -203,25 +262,22 @@ namespace GangaGame
                     GameObject DLight = GameObject.FindGameObjectWithTag("Light");
                     DLight.GetComponent<Light>().intensity = 1.3f;
                 }
+            }
+            if (clickLoadTimer > 0.0f)
+                clickLoadTimer -= Time.fixedDeltaTime;
+        }
 
-                if (!GameInfo.playerSpectate)
-                    terrainGenerator.UpdateBlindTexture(init: true);
-
-                if (PhotonNetwork.InRoom)
-                {
-                    ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable() { { GameInfo.PLAYER_LOADED_LEVEL, true } };
-                    PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-                    UI.document.Run("UpdateLoadingDescription", "Waiting for other players");
-                }
-                else
-                {
-                    StartGame();
-                }
+        public static void SelectLoadNote(MouseEvent mouseEvent)
+        {
+            if (clickLoadTimer > 0.0f && LoadSaveScript.selectedFile == mouseEvent.srcElement.id)
+            {
+                LoadSaveScript.LoadFile();
             }
             else
             {
-                UpdateViewChunks();
-                StartGame();
+                clickLoadTimer = 0.4f;
+                LoadSaveScript.selectedFile = mouseEvent.srcElement.id;
+                LoadSaveScript.UpdateSaveList();
             }
         }
 
@@ -557,7 +613,7 @@ namespace GangaGame
                 StartGame();
         }
 
-        public void InstantiateObjects(Dictionary<string, List<Vector3>> newSpawnData, List<GameObject> treePrefabs, List<GameObject> goldPrefabs, List<GameObject> animalPrefabs, int maxTrees = 0)
+        public void InstantiateObjects(Dictionary<string, List<Vector3>> newSpawnData, List<GameObject> treePrefabs, List<GameObject> goldPrefabs, List<GameObject> animalPrefabs = null, int maxTrees = 0)
         {
             int index = 0;
             foreach (Vector3 objectPosition in newSpawnData["trees"])
@@ -587,7 +643,7 @@ namespace GangaGame
                 // newGold.transform.SetParent(Terrain.activeTerrain.transform);
             }
 
-            if (GameInfo.IsMasterClient())
+            if (GameInfo.IsMasterClient() && animalPrefabs != null)
             {
                 foreach (Vector3 objectPosition in newSpawnData["animals"])
                 {
@@ -595,6 +651,8 @@ namespace GangaGame
                     for (int i = 0; i < 7; i++)
                     {
                         GameObject newAnimal = PhotonNetwork.Instantiate(prefab.name, BaseBehavior.GetRandomPoint(objectPosition, 10.0f), prefab.transform.rotation);
+                        BaseBehavior baseBehaviorComponent = newAnimal.GetComponent<BaseBehavior>();
+                        baseBehaviorComponent.prefabName = prefab.name;
                     }
                 }
             }
@@ -612,6 +670,7 @@ namespace GangaGame
             else
             {
                 BaseBehavior baseBehaviorComponent = createdUnit.GetComponent<BaseBehavior>();
+                baseBehaviorComponent.prefabName = createSpawnBuildingName;
                 if (PhotonNetwork.InRoom)
                     createdUnit.GetComponent<PhotonView>().RPC("ChangeOwner", PhotonTargets.All, newUserId, NewTeam);
                 else
@@ -628,6 +687,8 @@ namespace GangaGame
 
         public void StartGame()
         {
+            GC.Collect();
+
             UpdateSettings();
             UI.document.Run("DeleteLoadingScreen");
             PlayMusic(MusicType.Normal, delay: 1.0f, dropCount: true);

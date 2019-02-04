@@ -264,6 +264,7 @@ MonoBehaviour:
   LobbyHTMLFile: {fileID: 4900000, guid: 1d9b36997eb41674f8330ac7c921b136, type: 3}
   RoomHTMLFile: {fileID: 4900000, guid: 9c14ae6ff8f587249a43322a8807b0e2, type: 3}
   SettingsHTMLFile: {fileID: 4900000, guid: c8c3eb7fe0d594d4789e528325272524, type: 3}
+  LoadingHTMLFile: {fileID: 4900000, guid: 4b31c860ff307994a8507e95a0cde0fc, type: 3}
   menuMusic: {fileID: 8300000, guid: 3e6dcb68accff4c458b34d8ac8231b7c, type: 3}
   musicDelay: 0
   clickSound: {fileID: 8300000, guid: f5b8fc2cfbe71ec4794e141b3593c37c, type: 3}

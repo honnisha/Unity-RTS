@@ -9,6 +9,8 @@ using Photon.Pun;
 using UnityEngine.AI;
 using GangaGame;
 using UISpace;
+using CI.QuickSave;
+using UnityEditor;
 
 public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInterface
 {
@@ -44,6 +46,10 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
     [HideInInspector]
     public int uniqueId = -1;
+    [HideInInspector]
+    public GameObject interactObject;
+    [HideInInspector]
+    public int interactObjectUniqueId = -1;
 
     #endregion
 
@@ -121,8 +127,10 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public NavMeshObstacle obstacle;
     [HideInInspector]
     public Animator anim;
-    //[HideInInspector]
+    [HideInInspector]
     public GameObject target;
+    [HideInInspector]
+    public int targetUniqueId = -1;
     [HideInInspector]
     public Vector3 tempDestinationPoint = Vector3.zero;
     [HideInInspector]
@@ -194,6 +202,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     [HideInInspector]
     public cakeslice.Outline[] allOutlines;
     new Collider collider;
+    [HideInInspector]
+    public string prefabName = "";
 
     [HideInInspector]
     public List<object> queueCommands = new List<object>();
@@ -282,7 +292,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         if (spawnPoint != null)
             spawnTarget = spawnPoint.transform.position;
     }
-    
+
     [HideInInspector]
     public bool isInCameraView = false;
     public bool IsInCameraView() { return isInCameraView; }
@@ -292,9 +302,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     virtual public void Update()
     {
         UpdateVision();
-        
+
         UpdateDestroyBehavior();
-        
+
         UpdateVisionTool();
 
         UpdateHealth();
@@ -337,7 +347,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         int index = 0;
         foreach (GameObject tearObject in tearDisplay)
         {
-            if(allTurnOn)
+            if (allTurnOn)
                 tearObject.SetActive(true);
             else
                 tearObject.SetActive(tear == index);
@@ -395,17 +405,21 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             GameObject createdObject = PhotonNetwork.Instantiate(createdPrefabName, spawnPoint.transform.position, spawnPoint.transform.rotation);
 
             BaseBehavior createdObjectBehaviorComponent = createdObject.GetComponent<BaseBehavior>();
+            createdObjectBehaviorComponent.prefabName = createdPrefabName;
+
+            createdObjectBehaviorComponent.uniqueId = cameraController.uniqueIdIndex++;
+
             PhotonView createdPhotonView = createdObject.GetComponent<PhotonView>();
             // Set owner
             if (PhotonNetwork.InRoom)
                 createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
             else
                 createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
-            
+
             if (spawnTargetObject != null)
                 createdObjectBehaviorComponent.GiveOrder(spawnTargetObject, true, false);
             else
-                createdObjectBehaviorComponent.GiveOrder(BaseBehavior.GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
+                createdObjectBehaviorComponent.GiveOrder(GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
             createdObjects.Add(createdObject);
         }
         return createdObjects;
@@ -428,7 +442,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                     objectUIInfo.transform.position += InfoHTMLOffset;
                     objectUIInfo.document.innerHTML = HTMLHealthFile.text;
                     objectUIInfo.Layer = LayerMask.NameToLayer("HP");
-                    
+
                     objectUIInfo.document.getElementById("health").style.background = GetDisplayColor(false);
                     tempHealth = 0.0f;
                 }
@@ -658,7 +672,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             Destroy(pointMarker);
         pointMarker = null;
     }
-    
+
     public static void GetObjectsInRange(ref List<GameObject> objects, Vector3 position, float radius, bool live = true, int team = -1, bool units = true, bool buildings = true, bool ambient = true, int teamException = -1)
     {
         objects.Clear();
@@ -682,7 +696,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                 continue;
             if (unitBaseBehavior.live != live)
                 continue;
-            if(teamException != -1 && unitBaseBehavior.team == teamException)
+            if (teamException != -1 && unitBaseBehavior.team == teamException)
                 continue;
 
             objects.Add(collider.gameObject);
@@ -697,7 +711,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         if (statisic.attackType == AttackType.None && interactType != InteractigType.Attacking)
             return false;
 
-        if(behaviorType == BehaviorType.Counterattack || behaviorType == BehaviorType.Aggressive)
+        if (behaviorType == BehaviorType.Counterattack || behaviorType == BehaviorType.Aggressive)
         {
             GetObjectsInRange(ref allObjects, transform.position, range, team: attackTeam, buildings: false, teamException: team);
             if (allObjects.Count <= 0)
@@ -815,7 +829,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                             cameraController.buildedObject = skillObject;
                         }
                     }
-                    else if(skillScript != null)
+                    else if (skillScript != null)
                     {
                         result[1] = !SpendResources(skillScript.skillInfo.costFood, skillScript.skillInfo.costGold, skillScript.skillInfo.costWood);
                         if (result[1])
@@ -843,7 +857,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     {
         if (index >= productionQuery.Count)
             return false;
-        
+
         BaseBehavior baseBehavior = productionQuery[index].GetComponent<BaseBehavior>();
         BaseSkillScript skillScript = productionQuery[index].GetComponent<BaseSkillScript>();
 
@@ -871,7 +885,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         return true;
     }
 
-    public virtual void StartVisible(BaseBehavior senderBaseBehaviorComponent){ }
+    public virtual void StartVisible(BaseBehavior senderBaseBehaviorComponent) { }
     public virtual void StopVisible(BaseBehavior senderBaseBehaviorComponent) { }
 
     public virtual void GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
@@ -933,7 +947,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         _GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker, overrideQueueCommands, speed);
     }
     [PunRPC]
-    public virtual void GiveOrderUniqueID(int targetUniqueId, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
+    public virtual void GiveOrderUniqueID(int targetUniqueId, bool displayMarker = false, bool overrideQueueCommands = true, float speed = 0.0f)
     {
         GameObject unit = GetObjectByUniqueId(targetUniqueId);
         if (unit != null)
@@ -986,7 +1000,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
                 notEnoughMessage = String.Format("{0} gold: {1:F0}", notEnoughMessage, gold - cameraController.gold);
             if (cameraController.wood < wood)
                 notEnoughMessage = String.Format("{0} wood: {1:F0}", notEnoughMessage, wood - cameraController.wood);
-            
+
             cameraUIBaseScript.DisplayMessage(notEnoughMessage, 3000, "notEnoughResources");
             return false;
         }
@@ -1004,14 +1018,14 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             if (baseBehaviorComponent.skillInfo.uniqueName == unitName && baseBehaviorComponent.team == TCTeam &&
                 (baseBehaviorComponent.tear >= minTear && (baseBehaviorComponent.tear <= maxTear || maxTear == 0)))
                 return true;
-        }   
+        }
         return false;
     }
 
     public bool IsQueueContain(string uniqueSkillName)
     {
         if (productionQuery.Count > 0)
-            foreach(GameObject objectInQueue in productionQuery)
+            foreach (GameObject objectInQueue in productionQuery)
             {
                 if (objectInQueue.GetComponent<BaseBehavior>() != null && objectInQueue.GetComponent<BaseBehavior>().skillInfo.uniqueName == uniqueSkillName)
                     return true;
@@ -1050,5 +1064,97 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         statisticStrings.Add(new StringBuilder(30).AppendFormat("Biting resist: {0:F0}%", statisic.bitingResist).ToString());
         statisticStrings.Add(new StringBuilder(30).AppendFormat("Magic resist: {0:F0}%", statisic.magicResist).ToString());
         return statisticStrings;
+    }
+
+    static string[] valueArray = new string[] { "health", "live", "uniqueId" };
+    public void Save(ref QuickSaveWriter saveWriter, int index)
+    {
+        if (prefabName == "")
+            return;
+
+        saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "path").ToString(), prefabName);
+        saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "position").ToString(), transform.position);
+        saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "rotation").ToString(), transform.rotation);
+        saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "localScale").ToString(), transform.localScale);
+        saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "team").ToString(), team);
+        saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "ownerId").ToString(), ownerId);
+
+        if (agent != null && target == null && agent.destination != null && agent.hasPath)
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "agentDestination").ToString(), agent.destination);
+        else
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "agentDestination").ToString(), Vector3.zero);
+
+        if (target != null)
+        {
+            BaseBehavior targetBehaviorComponent = target.GetComponent<BaseBehavior>();
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "targetUniqueId").ToString(), targetBehaviorComponent.uniqueId);
+        }
+        else
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "targetUniqueId").ToString(), -1);
+        if (interactObject != null)
+        {
+            BaseBehavior targetBehaviorComponent = interactObject.GetComponent<BaseBehavior>();
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "interactObjectUniqueId").ToString(), targetBehaviorComponent.uniqueId);
+        }
+        else
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "interactObjectUniqueId").ToString(), -1);
+
+        foreach (string valueName in valueArray)
+        {
+            object value = this.GetType().GetField(valueName).GetValue(this);
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, valueName).ToString(), value);
+        }
+    }
+
+    public static void Load(ref QuickSaveReader saveReader, int index)
+    {
+        string prefabName = saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "path").ToString());
+        if (prefabName == "")
+            return;
+
+        Vector3 position = saveReader.Read<Vector3>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "position").ToString());
+        Vector3 localScale = saveReader.Read<Vector3>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "localScale").ToString());
+        Quaternion rotation = saveReader.Read<Quaternion>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "rotation").ToString());
+        GameObject newObject = PhotonNetwork.Instantiate(prefabName, position, rotation);
+        newObject.transform.localScale = localScale;
+
+        BaseBehavior baseBehaviorComponent = newObject.GetComponent<BaseBehavior>();
+        baseBehaviorComponent.prefabName = prefabName;
+
+        baseBehaviorComponent.targetUniqueId = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "targetUniqueId").ToString());
+        baseBehaviorComponent.interactObjectUniqueId = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "interactObjectUniqueId").ToString());
+
+        Vector3 targetPosition = saveReader.Read<Vector3>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "agentDestination").ToString());
+        if (targetPosition != Vector3.zero)
+            baseBehaviorComponent.GiveOrder(targetPosition, false, false);
+
+        int newTeam = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "team").ToString());
+        string newOwner = saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "ownerId").ToString());
+        baseBehaviorComponent.ChangeOwner(newOwner, newTeam);
+
+        foreach (string valueName in valueArray)
+        {
+            var info = baseBehaviorComponent.GetType().GetField(valueName).GetValue(baseBehaviorComponent);
+            var value = saveReader.Read<object>(new StringBuilder(15).AppendFormat("{0}_{1}", index, valueName).ToString());
+            baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, value);
+        }
+
+        CameraController cameraController = Camera.main.GetComponent<CameraController>();
+        if (baseBehaviorComponent.uniqueId > cameraController.uniqueIdIndex)
+            cameraController.uniqueIdIndex = baseBehaviorComponent.uniqueId + 1;
+    }
+
+    public void RestoreTarget()
+    {
+        if (targetUniqueId > -1)
+        {
+            GiveOrderUniqueID(targetUniqueId);
+            targetUniqueId = -1;
+        }
+        if (interactObjectUniqueId > -1)
+        {
+            GiveOrderUniqueID(interactObjectUniqueId);
+            interactObjectUniqueId = -1;
+        }
     }
 }

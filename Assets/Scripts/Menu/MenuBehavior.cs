@@ -188,7 +188,7 @@ namespace GangaGame
                 {
                     musicSource.Stop();
                     if (singleplayer)
-                        SceneManager.LoadScene(loadedLevel);
+                        SceneManager.LoadSceneAsync(loadedLevel);
                     else
                         PhotonNetwork.LoadLevel(loadedLevel);
                     loadedLevel = "";
@@ -254,6 +254,7 @@ namespace GangaGame
                     singleplayer = true;
                     soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     UI.document.innerHTML = LoadingHTMLFile.text;
+                    LoadSaveScript.UpdateSaveList();
                     return;
                 }
                 if (className.Contains("multiplayer"))
