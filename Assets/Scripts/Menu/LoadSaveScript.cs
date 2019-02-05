@@ -15,7 +15,10 @@ namespace GangaGame
         public static string selectedFile = "";
         static HtmlElement loadNote;
 
-        public static void UpdateSaveList() //"secondWindow"
+        public static string loadLevel = "";
+        public static float loadLevelTimer = 0.0f;
+
+        public static void UpdateSaveList()
         {
             UI.document.getElementsByClassName("WindowContent")[0].innerHTML = "";
             
@@ -33,8 +36,7 @@ namespace GangaGame
         {
             if (selectedFile == "")
                 return;
-
-            // QuickSaveRaw.Delete(selectedFile);
+            
             string savePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low";
             savePath = Path.Combine(savePath, Application.companyName);
             savePath = Path.Combine(savePath, Application.productName);
@@ -44,7 +46,7 @@ namespace GangaGame
             UpdateSaveList();
         }
 
-        public static void LoadFile()
+        public static void LoadFileSettings()
         {
             if (selectedFile == "")
                 return;
@@ -54,10 +56,6 @@ namespace GangaGame
             GameInfo.mapSeed = reader.Read<int>(GameInfo.MAP_SEED);
             GameInfo.mapSize = reader.Read<int>(GameInfo.MAP_SIZE);
             GameInfo.playerTeam = reader.Read<int>("playerTeam");
-
-            UI.document.Run("CreateLoadingScreen", "Loading: " + selectedFile);
-            
-            SceneManager.LoadSceneAsync("Levels/Map1");
         }
 
         public static string SaveGame()
@@ -74,6 +72,10 @@ namespace GangaGame
             quickSaveWriter.Write("cameraPosition", Camera.main.transform.position);
             quickSaveWriter.Write("cameraRotation", Camera.main.transform.rotation);
 
+            quickSaveWriter.Write("gold", cameraController.gold);
+            quickSaveWriter.Write("wood", cameraController.wood);
+            quickSaveWriter.Write("food", cameraController.food);
+
             int index = 0;
             foreach (GameObject unitObject in GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")))
             {
@@ -86,6 +88,34 @@ namespace GangaGame
             quickSaveWriter.Commit();
             
             return saveName;
+        }
+
+        public static void RestoreGame()
+        {
+            QuickSaveReader saveReader = QuickSaveReader.Create(LoadSaveScript.selectedFile);
+
+            int indexCount = saveReader.Read<int>("indexCount");
+
+            for (int index = 0; index < indexCount; index++)
+                BaseBehavior.Load(ref saveReader, index);
+
+            foreach (GameObject unitObject in GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")))
+            {
+                BaseBehavior unitBaseBehavior = unitObject.GetComponent<BaseBehavior>();
+                unitBaseBehavior.RestoreBehavior();
+            }
+
+            Vector3 cameraPosition = saveReader.Read<Vector3>("cameraPosition");
+            Quaternion cameraRotation = saveReader.Read<Quaternion>("cameraRotation");
+            Camera.main.transform.position = cameraPosition;
+            Camera.main.transform.rotation = cameraRotation;
+
+            CameraController cameraController = Camera.main.GetComponent<CameraController>();
+            cameraController.gold = saveReader.Read<float>("gold");
+            cameraController.wood = saveReader.Read<float>("wood");
+            cameraController.food = saveReader.Read<float>("food");
+
+            selectedFile = "";
         }
     }
 }

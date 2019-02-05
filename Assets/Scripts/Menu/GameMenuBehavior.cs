@@ -44,12 +44,14 @@ namespace GangaGame
                             if (UnityEngine.Input.GetKeyDown((KeyCode)eventType))
                             {
                                 UpdateWindows(menuInfo.Key);
-                                break;
+                                return;
                             }
+                if (UnityEngine.Input.GetKeyDown(KeyCode.Escape))
+                    UpdateWindows();
             }
         }
 
-        public void UpdateWindows(WindowType newWindowsType)
+        public void UpdateWindows(WindowType newWindowsType = WindowType.None)
         {
             WindowType cacheWindow = selectedWindowType;
             if(selectedWindowType != WindowType.None)
@@ -161,7 +163,7 @@ namespace GangaGame
             }
         }
 
-        public void DisplayMessage(string message)
+        public static void DisplayMessage(string message)
         {
             var messageDiv = UI.document.getElementsByClassName("windowMessage")[0];
             messageDiv.innerHTML = message;
@@ -175,11 +177,11 @@ namespace GangaGame
             LoadSaveScript.UpdateSaveList();
         }
 
-        void LoadFileClick(MouseEvent mouseEvent)
+        public static void LoadFileClick(MouseEvent mouseEvent)
         {
             if (mouseEvent.srcElement.className.Contains("LoadFile"))
             {
-                LoadSaveScript.LoadFile();
+                LoadSaveScript.LoadFileSettings();
             }
             if (mouseEvent.srcElement.className.Contains("DeleteFile"))
             {

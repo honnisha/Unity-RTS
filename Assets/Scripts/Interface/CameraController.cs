@@ -9,6 +9,7 @@ using Photon.Realtime;
 using UISpace;
 using GangaGame;
 using CI.QuickSave;
+using UnityEngine.SceneManagement;
 
 namespace GangaGame
 {
@@ -215,25 +216,7 @@ namespace GangaGame
                     spawnData, maxTrees: 1000 * mapSize,
                     treePrefabs: terrainGenerator.treePrefabs, goldPrefabs: terrainGenerator.goldPrefabs);
 
-                QuickSaveReader saveReader = QuickSaveReader.Create(LoadSaveScript.selectedFile);
-
-                int indexCount = saveReader.Read<int>("indexCount");
-
-                for (int index = 0; index < indexCount; index++)
-                    BaseBehavior.Load(ref saveReader, index);
-
-                foreach (GameObject unitObject in GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")))
-                {
-                    BaseBehavior unitBaseBehavior = unitObject.GetComponent<BaseBehavior>();
-                    unitBaseBehavior.RestoreTarget();
-                }
-
-                Vector3 cameraPosition = saveReader.Read<Vector3>("cameraPosition");
-                Quaternion cameraRotation = saveReader.Read<Quaternion>("cameraRotation");
-                Camera.main.transform.position = cameraPosition;
-                Camera.main.transform.rotation = cameraRotation;
-
-                LoadSaveScript.selectedFile = "";
+                LoadSaveScript.RestoreGame();
             }
             // Create new game
             else
@@ -266,12 +249,16 @@ namespace GangaGame
             if (clickLoadTimer > 0.0f)
                 clickLoadTimer -= Time.fixedDeltaTime;
         }
-
+        
         public static void SelectLoadNote(MouseEvent mouseEvent)
         {
             if (clickLoadTimer > 0.0f && LoadSaveScript.selectedFile == mouseEvent.srcElement.id)
             {
-                LoadSaveScript.LoadFile();
+                LoadSaveScript.LoadFileSettings();
+
+                UI.document.Run("CreateLoadingScreen", "Loading: " + LoadSaveScript.selectedFile);
+                LoadSaveScript.loadLevelTimer = 0.5f;
+                LoadSaveScript.loadLevel = "Levels/Map1";
             }
             else
             {
@@ -358,6 +345,16 @@ namespace GangaGame
             {
                 cameraUIBaseScript.UpdateUI();
                 selectedObjectsChanged = false;
+            }
+
+            if (LoadSaveScript.loadLevel != "")
+            {
+                LoadSaveScript.loadLevelTimer -= Time.fixedDeltaTime;
+                if(LoadSaveScript.loadLevelTimer <= 0.0f)
+                {
+                    SceneManager.LoadSceneAsync(LoadSaveScript.loadLevel);
+                    LoadSaveScript.loadLevel = "";
+                }
             }
 
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
@@ -653,6 +650,7 @@ namespace GangaGame
                         GameObject newAnimal = PhotonNetwork.Instantiate(prefab.name, BaseBehavior.GetRandomPoint(objectPosition, 10.0f), prefab.transform.rotation);
                         BaseBehavior baseBehaviorComponent = newAnimal.GetComponent<BaseBehavior>();
                         baseBehaviorComponent.prefabName = prefab.name;
+                        baseBehaviorComponent.uniqueId = uniqueIdIndex++;
                     }
                 }
             }

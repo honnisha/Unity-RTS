@@ -182,6 +182,8 @@ MonoBehaviour:
   _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
   uniqueId: -1
+  interactObject: {fileID: 0}
+  interactObjectUniqueId: -1
   interactType: 2
   attackTimer: -0.00851091
   attackDelayTimer: -1.2085108
@@ -225,6 +227,7 @@ MonoBehaviour:
   obstacle: {fileID: 0}
   anim: {fileID: 2841}
   target: {fileID: 0}
+  targetUniqueId: -1
   tempDestinationPoint: {x: 0, y: 0, z: 0}
   previousPosition: {x: 0.49584627, y: 0.08150244, z: 70.49363}
   curSpeed: 0
@@ -264,6 +267,7 @@ MonoBehaviour:
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
   allOutlines: []
+  prefabName: 
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -351,7 +355,6 @@ MonoBehaviour:
       prefab: {fileID: 5905209926080179135, guid: a4b9c724c66fa5145bda1c94ae29125d,
         type: 3}
       holder: {fileID: 693}
-  interactObject: {fileID: 0}
 --- !u!136 &2921
 CapsuleCollider:
   m_ObjectHideFlags: 0

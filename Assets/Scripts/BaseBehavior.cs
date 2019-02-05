@@ -14,6 +14,8 @@ using UnityEditor;
 
 public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInterface
 {
+    static readonly string[] savedFields = new string[] { "health", "live", "uniqueId", "tear", "resourceCapacity", "resourceHold" };
+
     #region Unit info
 
     [Header("Unit info")]
@@ -1066,7 +1068,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         return statisticStrings;
     }
 
-    static string[] valueArray = new string[] { "health", "live", "uniqueId" };
     public void Save(ref QuickSaveWriter saveWriter, int index)
     {
         if (prefabName == "")
@@ -1078,6 +1079,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "localScale").ToString(), transform.localScale);
         saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "team").ToString(), team);
         saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "ownerId").ToString(), ownerId);
+        saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "resourceType").ToString(), (int)resourceType);
 
         if (agent != null && target == null && agent.destination != null && agent.hasPath)
             saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "agentDestination").ToString(), agent.destination);
@@ -1099,7 +1101,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         else
             saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "interactObjectUniqueId").ToString(), -1);
 
-        foreach (string valueName in valueArray)
+        foreach (string valueName in savedFields)
         {
             object value = this.GetType().GetField(valueName).GetValue(this);
             saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, valueName).ToString(), value);
@@ -1130,13 +1132,29 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         int newTeam = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "team").ToString());
         string newOwner = saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "ownerId").ToString());
+
+        baseBehaviorComponent.resourceType = (ResourceType)Enum.Parse(typeof(ResourceType), saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "resourceType").ToString()));
+
         baseBehaviorComponent.ChangeOwner(newOwner, newTeam);
 
-        foreach (string valueName in valueArray)
+        foreach (string valueName in savedFields)
         {
-            var info = baseBehaviorComponent.GetType().GetField(valueName).GetValue(baseBehaviorComponent);
-            var value = saveReader.Read<object>(new StringBuilder(15).AppendFormat("{0}_{1}", index, valueName).ToString());
-            baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, value);
+            try
+            {
+                var info = baseBehaviorComponent.GetType().GetField(valueName).GetValue(baseBehaviorComponent);
+                var value = saveReader.Read<object>(new StringBuilder(15).AppendFormat("{0}_{1}", index, valueName).ToString());
+                baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, value);
+            }
+            catch (ArgumentException e)
+            {
+                Debug.LogError(new StringBuilder().AppendFormat(
+                    "Error for restore {0}_{1} value for {2}: {3}", index, valueName, baseBehaviorComponent.skillInfo.uniqueName, e.Message).ToString());
+            }
+            catch (QuickSaveException e)
+            {
+                Debug.LogError(new StringBuilder().AppendFormat(
+                    "QuickSaveException {0}_{1} value for {2}: {3}", index, valueName, baseBehaviorComponent.skillInfo.uniqueName, e.Message).ToString());
+            }
         }
 
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
@@ -1144,7 +1162,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             cameraController.uniqueIdIndex = baseBehaviorComponent.uniqueId + 1;
     }
 
-    public void RestoreTarget()
+    public void RestoreBehavior()
     {
         if (targetUniqueId > -1)
         {
@@ -1156,5 +1174,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             GiveOrderUniqueID(interactObjectUniqueId);
             interactObjectUniqueId = -1;
         }
+        if (!live)
+            anim.SetTrigger("Die");
     }
 }
