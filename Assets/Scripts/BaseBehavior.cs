@@ -14,7 +14,7 @@ using UnityEditor;
 
 public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInterface
 {
-    static readonly string[] savedFields = new string[] { "health", "live", "uniqueId", "tear", "resourceCapacity", "resourceHold" };
+    static readonly string[] savedFields = new string[] { "health", "live", "uniqueId", "tear", "resourceCapacity", "resourceHold", "resourceType" };
 
     #region Unit info
 
@@ -1132,9 +1132,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         int newTeam = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "team").ToString());
         string newOwner = saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "ownerId").ToString());
-
-        baseBehaviorComponent.resourceType = (ResourceType)Enum.Parse(typeof(ResourceType), saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "resourceType").ToString()));
-
+        
         baseBehaviorComponent.ChangeOwner(newOwner, newTeam);
 
         foreach (string valueName in savedFields)
@@ -1142,8 +1140,12 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             try
             {
                 var info = baseBehaviorComponent.GetType().GetField(valueName).GetValue(baseBehaviorComponent);
-                var value = saveReader.Read<object>(new StringBuilder(15).AppendFormat("{0}_{1}", index, valueName).ToString());
-                baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, value);
+                Type fieldType = baseBehaviorComponent.GetType().GetField(valueName).FieldType;
+                object value = saveReader.Read<object>(new StringBuilder(15).AppendFormat("{0}_{1}", index, valueName).ToString());
+                if (fieldType.IsEnum)
+                    baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, Enum.Parse(fieldType, (string)value));
+                else
+                    baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, value);
             }
             catch (ArgumentException e)
             {
