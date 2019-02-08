@@ -74,6 +74,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         resourceType = ResourceType.None;
     }
 
+    float newIntersectionTimer = 0.0f;
     override public void Update()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p UserUpdate"); // Profiler
@@ -189,6 +190,26 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                     obstacle.enabled = false;
             }
         }
+
+
+        newIntersectionTimer += Time.fixedDeltaTime;
+        if (toolInHandTimer > 1.0f)
+        {
+            UnityEngine.Profiling.Profiler.BeginSample("p Getting is outlineDraw"); // Profiler
+            bool newIntersection = false;
+            if (team > 0 && IsInCameraView() && IsVisible() && live && Physics.Linecast(transform.position + new Vector3(0, 1.0f, 0), Camera.main.transform.position))
+                newIntersection = true;
+            else
+                newIntersection = false;
+
+            if (newIntersection != unitSelectionComponent.intersection)
+            {
+                unitSelectionComponent.intersection = newIntersection;
+                unitSelectionComponent.SetOutline(newIntersection);
+            }
+            newIntersectionTimer = 0.0f;
+        }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public override void UpdateIsInCameraView(bool newState)

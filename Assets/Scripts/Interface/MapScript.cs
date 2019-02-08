@@ -6,6 +6,7 @@ using PowerUI;
 using System;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
+using System.Text;
 
 namespace GangaGame
 {
@@ -15,11 +16,11 @@ namespace GangaGame
         {
             mapCache.Clear();
             CameraController cameraController = Camera.main.GetComponent<CameraController>();
+            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
 
             foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
             {
                 // Draw map
-                TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
                 if (terrainGenerator != null)
                 {
                     if (((HtmlElement)mapBlock).image == null && terrainGenerator.mapTexture != null)
@@ -102,6 +103,7 @@ namespace GangaGame
             return false;
         }
 
+        static Dom.Element cameraDiv = null;
         public static void CreateOrUpdateCameraOnMap(Dom.Element mapBlock, Dom.Element mapImage)
         {
             //var blindFog = (HtmlElement)mapBlock.getElementsByClassName("blindFog")[0];
@@ -115,15 +117,15 @@ namespace GangaGame
             float cameraHeight = cameraScale / 1.2f;
             float cameraWidtht = cameraScale;
             Vector2 positionCameraOnMap = GetPositionOnMap(vameraLookAt);
-            Dom.Element cameraDiv = null;
+            cameraDiv = null;
             if (isCameraInTerrain)
             {
                 if (mapBlock.getElementsByClassName("mapCamera").length <= 0)
                 {
                     cameraDiv = UI.document.createElement("div");
                     cameraDiv.className = "mapCamera clckable";
-                    cameraDiv.style.height = String.Format("{0}%", cameraHeight);
-                    cameraDiv.style.width = String.Format("{0}%", cameraWidtht);
+                    cameraDiv.style.height = new StringBuilder(7).AppendFormat("{0}%", cameraHeight).ToString();
+                    cameraDiv.style.width = new StringBuilder(7).AppendFormat("{0}%", cameraWidtht).ToString();
                     mapBlock.appendChild(cameraDiv);
                 }
                 else
@@ -131,9 +133,9 @@ namespace GangaGame
                 
                 if (cameraDiv != null)
                 {
-                    cameraDiv.style.left = String.Format("{0}%", positionCameraOnMap.x * 100.0f);
-                    cameraDiv.style.bottom = String.Format("{0}%", positionCameraOnMap.y * 100.0f);
-                    cameraDiv.style.transform = String.Format("rotate({0}deg) translate(-50%,-50%)", Camera.main.transform.rotation.eulerAngles.y);
+                    cameraDiv.style.left = new StringBuilder(7).AppendFormat("{0}%", positionCameraOnMap.x * 100.0f).ToString();
+                    cameraDiv.style.bottom = new StringBuilder(7).AppendFormat("{0}%", positionCameraOnMap.y * 100.0f).ToString();
+                    cameraDiv.style.transform = new StringBuilder(30).AppendFormat("rotate({0}deg) translate(-50%,-50%)", Camera.main.transform.rotation.eulerAngles.y).ToString();
                 }
             }
             else if (mapBlock.getElementsByClassName("mapCamera").length <= 0)

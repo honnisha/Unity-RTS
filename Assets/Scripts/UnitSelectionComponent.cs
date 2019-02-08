@@ -18,7 +18,8 @@ public class UnitSelectionComponent : MonoBehaviour
     int projectorColorId = -1;
     Projector projectorComponent;
     bool outlineState = true;
-    bool intersection = false;
+    [HideInInspector]
+    public bool intersection = false;
 
     // Use this for initialization
     void Start ()
@@ -68,29 +69,6 @@ public class UnitSelectionComponent : MonoBehaviour
             outline.color = projectorColorId;
 
         projectorComponent.material.color = projectorColor;
-    }
-
-    void Update()
-    {
-        UnityEngine.Profiling.Profiler.BeginSample("p Getting is outlineDraw"); // Profiler
-
-        bool newIntersection = false;
-        if (buildingBehavior == null)
-        {
-            if (baseBehaviorComponent.team > 0 && baseBehaviorComponent.IsInCameraView() &&
-                baseBehaviorComponent.IsVisible() && baseBehaviorComponent.live &&
-                Physics.Linecast(transform.position + new Vector3(0, 1.0f, 0), Camera.main.transform.position))
-                newIntersection = true;
-            else
-                newIntersection = false;
-        }
-        if (newIntersection != intersection)
-        {
-            intersection = newIntersection;
-            SetOutline(intersection);
-        }
-
-        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     public void SetSelect(bool newState)

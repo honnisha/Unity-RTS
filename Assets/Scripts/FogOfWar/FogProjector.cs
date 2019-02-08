@@ -31,7 +31,10 @@ public class FogProjector : MonoBehaviour
     public void Update()
     {
         Terrain t = Terrain.activeTerrain;
-        if (transform.position.x != (t.terrainData.size / 2).x)
-            UpdateFog();
+        if (t != null && t.terrainData != null)
+        {
+            if (transform.position.x != (t.terrainData.size / 2).x)
+                UpdateFog();
+        }
     }
 }

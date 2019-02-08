@@ -1355,7 +1355,7 @@ MonoBehaviour:
     attackTime: 2
     attackDelay: 0.5
     damageAfterTimer: 1
-    attackType: 2
+    attackType: 4
     stabbingResist: 10
     cuttingResist: 10
     bitingResist: 10
@@ -1503,8 +1503,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3099}
-  viewIdField: 17
-  InstantiationId: 17
+  viewIdField: 16
+  InstantiationId: 16
   isRuntimeInstantiated: 0
 --- !u!114 &3099
 MonoBehaviour:

@@ -164,8 +164,8 @@ MonoBehaviour:
   team: 1
   tear: 0
   ownerId: 1
-  maxHealth: 400
-  health: 400
+  maxHealth: 250
+  health: 250
   live: 1
   pointToInteract: {fileID: 0}
   tearDisplay: []
@@ -173,7 +173,7 @@ MonoBehaviour:
   isWalkAround: 0
   timeToWalk: 0
   timerToWalk: 0
-  visionDistanve: 15
+  visionDistanve: 17
   _skillInfo:
     uniqueName: Tower
     readableName: Tower
@@ -201,16 +201,16 @@ MonoBehaviour:
   attackDelayTimer: 0
   attacked: 0
   defaultStatistic:
-    damage: 15
-    rangeAttack: 20
+    damage: 12
+    rangeAttack: 15
     attackTime: 2
     attackDelay: 0.5
     damageAfterTimer: 0
     attackType: 0
-    stabbingResist: 80
-    cuttingResist: 40
+    stabbingResist: 70
+    cuttingResist: 30
     bitingResist: 20
-    magicResist: 20
+    magicResist: 30
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 3166841639019410048}
@@ -329,7 +329,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2839}
-  viewIdField: 2
+  viewIdField: 0
   InstantiationId: 2
   isRuntimeInstantiated: 0
 --- !u!114 &2839
@@ -354,10 +354,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2057}
     m_Modifications:
-    - target: {fileID: 100000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
-      propertyPath: m_Name
-      value: tower_small
-      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -404,15 +400,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
       propertyPath: m_LocalScale.x
-      value: 93.51038
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
       propertyPath: m_LocalScale.y
-      value: 93.51038
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
       propertyPath: m_LocalScale.z
       value: 93.51038
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
+      propertyPath: m_Name
+      value: tower_small
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 749452c483f72ef47acbba156497acfa, type: 3}

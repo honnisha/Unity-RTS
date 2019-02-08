@@ -406,16 +406,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8542834260049952407}
     m_Modifications:
-    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
-        type: 3}
-      propertyPath: m_Name
-      value: barrel_wood_01_a
-      objectReference: {fileID: 0}
-    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
-        type: 3}
-      propertyPath: m_Layer
-      value: 13
-      objectReference: {fileID: 0}
     - target: {fileID: 8416126871334850896, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -486,6 +476,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.010000003
       objectReference: {fileID: 0}
+    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
+        type: 3}
+      propertyPath: m_Name
+      value: barrel_wood_01_a
+      objectReference: {fileID: 0}
+    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 8416126871335275872, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
         type: 3}
       propertyPath: m_Layer
@@ -521,16 +521,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8542834260049952407}
     m_Modifications:
-    - target: {fileID: 4729729346356671069, guid: 3d1ca4b894e91b24daa36982ffe7a39c,
-        type: 3}
-      propertyPath: m_Name
-      value: barrel_wood_01_b
-      objectReference: {fileID: 0}
-    - target: {fileID: 4729729346356671069, guid: 3d1ca4b894e91b24daa36982ffe7a39c,
-        type: 3}
-      propertyPath: m_Layer
-      value: 13
-      objectReference: {fileID: 0}
     - target: {fileID: 4729729346356637309, guid: 3d1ca4b894e91b24daa36982ffe7a39c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -601,6 +591,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.010000003
       objectReference: {fileID: 0}
+    - target: {fileID: 4729729346356671069, guid: 3d1ca4b894e91b24daa36982ffe7a39c,
+        type: 3}
+      propertyPath: m_Name
+      value: barrel_wood_01_b
+      objectReference: {fileID: 0}
+    - target: {fileID: 4729729346356671069, guid: 3d1ca4b894e91b24daa36982ffe7a39c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 4729729346356671053, guid: 3d1ca4b894e91b24daa36982ffe7a39c,
         type: 3}
       propertyPath: m_Layer
@@ -641,14 +641,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8542834260049952407}
     m_Modifications:
-    - target: {fileID: 1407835281125732, guid: c3a5ff4c1fbc0084aa065c5d66d17dae, type: 3}
-      propertyPath: m_Name
-      value: Wagon
-      objectReference: {fileID: 0}
-    - target: {fileID: 1407835281125732, guid: c3a5ff4c1fbc0084aa065c5d66d17dae, type: 3}
-      propertyPath: m_Layer
-      value: 13
-      objectReference: {fileID: 0}
     - target: {fileID: 4888091692523146, guid: c3a5ff4c1fbc0084aa065c5d66d17dae, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.0075155445
@@ -705,6 +697,14 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.01
       objectReference: {fileID: 0}
+    - target: {fileID: 1407835281125732, guid: c3a5ff4c1fbc0084aa065c5d66d17dae, type: 3}
+      propertyPath: m_Name
+      value: Wagon
+      objectReference: {fileID: 0}
+    - target: {fileID: 1407835281125732, guid: c3a5ff4c1fbc0084aa065c5d66d17dae, type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c3a5ff4c1fbc0084aa065c5d66d17dae, type: 3}
 --- !u!4 &7641369873943435353 stripped
@@ -720,14 +720,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8542834260049952407}
     m_Modifications:
-    - target: {fileID: 100000, guid: bac507c36de686b45bb77ed54a77c06f, type: 3}
-      propertyPath: m_Name
-      value: storage
-      objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: bac507c36de686b45bb77ed54a77c06f, type: 3}
-      propertyPath: m_Layer
-      value: 13
-      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: bac507c36de686b45bb77ed54a77c06f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.0083207125
@@ -783,6 +775,14 @@ PrefabInstance:
     - target: {fileID: 400000, guid: bac507c36de686b45bb77ed54a77c06f, type: 3}
       propertyPath: m_LocalScale.z
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: bac507c36de686b45bb77ed54a77c06f, type: 3}
+      propertyPath: m_Name
+      value: storage
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: bac507c36de686b45bb77ed54a77c06f, type: 3}
+      propertyPath: m_Layer
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 2300000, guid: bac507c36de686b45bb77ed54a77c06f, type: 3}
       propertyPath: m_Materials.Array.data[0]

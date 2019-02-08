@@ -783,8 +783,11 @@ namespace GangaGame
                                 else
                                 {
                                     //baseBehaviorComponent.GiveOrder(hit.point);
-                                    float distance = Vector3.Distance(unit.transform.position, hit.point);
-                                    formationList.Add(unit, distance);
+                                    if (!formationList.ContainsKey(unit))
+                                    {
+                                        float distance = Vector3.Distance(unit.transform.position, hit.point);
+                                        formationList.Add(unit, distance);
+                                    }
                                 }
                             }
                         }
