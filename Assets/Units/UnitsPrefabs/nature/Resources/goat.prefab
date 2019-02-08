@@ -1393,11 +1393,11 @@ MonoBehaviour:
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
   cameraController: {fileID: 0}
+  cameraUIBaseScript: {fileID: 0}
   skillList: []
   producedUnits: []
   spawnPoint: {fileID: 0}
   spawnTarget: {x: 0, y: 0, z: 0}
-  spawnTargetObject: {fileID: 0}
   buildTimer: 0
   productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}

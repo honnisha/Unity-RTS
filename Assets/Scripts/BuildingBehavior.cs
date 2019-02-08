@@ -8,13 +8,12 @@ using Photon.Pun;
 using System.Linq;
 using GangaGame;
 
-public class BuildingBehavior : BaseBehavior
+public class BuildingBehavior : BaseBehavior, IPunObservable
 {
     #region Units
 
     public enum BuildingState { Selected, Project, Building, Builded };
     [Header("Building info")]
-    public BuildingState state = BuildingState.Builded;
     public float magnitDistance = 2.0f;
 
     public List<int> tempMaterialsMode = new List<int>();
@@ -45,6 +44,22 @@ public class BuildingBehavior : BaseBehavior
     [Header("Terrain modifications")]
     public TerrainChangeInfo terrainChangeInfo;
     private bool terrainHasChanged = false;
+
+    void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(this.state);
+            stream.SendNext(this.health);
+            stream.SendNext(this.live);
+        }
+        else
+        {
+            this.state = (BuildingState)stream.ReceiveNext();
+            this.health = (int)stream.ReceiveNext();
+            this.live = (bool)stream.ReceiveNext();
+        }
+    }
 
     public override void Awake()
     {
@@ -87,6 +102,49 @@ public class BuildingBehavior : BaseBehavior
         UpdateTerrain();
 
         UpdatePointMarker();
+
+        UpdateAttackBehavior();
+
+        DoAttack();
+    }
+
+    void UpdateAttackBehavior()
+    {
+        if (actionEffect == null)
+            return;
+
+        UnitStatistic statisic = GetStatisticsInfo();
+
+        if (Time.frameCount % 15 == 0)
+        {
+            if (behaviorType == BehaviorType.Aggressive)
+                AttackNearEnemies(transform.position, statisic.agrRange, -1, randomRange: 8.0f);
+        }
+
+        if (target != null && interactType == InteractigType.None)
+        {
+            Vector3 offset = new Vector3(0, 0.5f, 0);
+            RaycastHit hit;
+            if (Physics.Raycast(actionEffect.transform.position + offset, (target.transform.position + offset - (actionEffect.transform.position + offset)).normalized, out hit, statisic.rangeAttack))
+            {
+                if (hit.transform.gameObject.GetHashCode() == target.GetHashCode())
+                {
+                    Attack(target);
+                }
+            }
+            else
+            {
+                ActionIsDone();
+            }
+        }
+    }
+
+    public override void Attack(GameObject target)
+    {
+        if (!live)
+            return;
+
+        base.Attack(target);
     }
 
     public override void UpdateIsInCameraView(bool newState)
@@ -128,8 +186,15 @@ public class BuildingBehavior : BaseBehavior
         {
             if (unitSelectionComponent.isSelected && team == cameraController.team && ownerId == cameraController.userId)
             {
-                if (spawnTargetObject != null)
-                    CreateOrUpdatePointMarker(Color.green, spawnTargetObject.transform.position, 0.0f, true, PointMarker.MarkerType.Arrow);
+                if (target != null)
+                {
+                    Color color = Color.green;
+                    BaseBehavior targetBehaviorComponent = target.GetComponent<BaseBehavior>();
+                    if (IsTeamEnemy(targetBehaviorComponent.team))
+                        color = Color.red;
+
+                    CreateOrUpdatePointMarker(color, target.transform.position, 0.0f, true, PointMarker.MarkerType.Arrow);
+                }
                 else
                     CreateOrUpdatePointMarker(Color.green, spawnTarget, 0.0f, true, PointMarker.MarkerType.Flag);
             }
@@ -232,126 +297,127 @@ public class BuildingBehavior : BaseBehavior
         return true;
     }
 
-    [PunRPC]
-    public void SetAsSelected()
+    private BuildingState _state = BuildingState.Builded;
+    public BuildingState state
     {
-        state = BuildingBehavior.BuildingState.Selected;
-        unitSelectionComponent.canBeSelected = false;
-        health = 0;
-        live = false;
-        gameObject.layer = LayerMask.NameToLayer("Project");
-
-        if (team == cameraController.team)
+        set
         {
-            UnityEngine.AI.NavMeshObstacle navMesh = GetComponent<UnityEngine.AI.NavMeshObstacle>();
-            if (navMesh != null)
-                navMesh.enabled = false;
-        
-            var allNewRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
-            foreach (var render in allNewRenders)
-                foreach (var material in render.materials)
-                    tempMaterialsMode.Add((int)material.GetFloat("_Mode"));
-        }
-    }
+            if (value == BuildingState.Selected)
+            {
+                unitSelectionComponent.canBeSelected = false;
+                health = 0;
+                live = false;
+                gameObject.layer = LayerMask.NameToLayer("Project");
 
-    public void SetAsProject()
-    {
-        Color newColor = new Color(1, 1, 1, 0.45f);
-
-        GameObject projector = GetComponent<UnitSelectionComponent>().projector;
-        projector.active = false;
-        projector.GetComponent<Projector>().material.color = newColor;
-
-        if (team == cameraController.team)
-        {
-            var allRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
-            foreach (var render in allRenders)
-                foreach (var material in render.materials)
-                    material.color = newColor;
-        }
-
-        state = BuildingBehavior.BuildingState.Project;
-        unitSelectionComponent.canBeSelected = true;
-    }
-    
-
-    [PunRPC]
-    public void SetAsBuilding(Vector3 newPosition)
-    {
-        transform.position = newPosition;
-
-        gameObject.layer = LayerMask.NameToLayer("Building");
-        live = true;
-        UnityEngine.AI.NavMeshObstacle navMesh = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
-        if (navMesh != null)
-            navMesh.enabled = true;
-
-        state = BuildingState.Building;
-        unitSelectionComponent.canBeSelected = true;
-        var allRenders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
-        int index = 0;
-        if (tempMaterialsMode.Count > 0)
-        {
-            foreach (var render in allRenders)
-                foreach (var material in render.materials)
+                if (team == cameraController.team)
                 {
-                    // https://github.com/jamesjlinden/unity-decompiled/blob/master/UnityEditor/UnityEditor/StandardShaderGUI.cs
-                    material.SetFloat("_Mode", tempMaterialsMode[index]);
-                    #region Standard shaders setters
+                    NavMeshObstacle navMesh = GetComponent<NavMeshObstacle>();
+                    if (navMesh != null)
+                        navMesh.enabled = false;
 
-                    if (tempMaterialsMode[index] == 0)
-                    {
-                        material.SetOverrideTag("RenderType", "");
-                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                        material.SetInt("_ZWrite", 1);
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                        material.renderQueue = -1;
-                    }
-                    if (tempMaterialsMode[index] == 1)
-                    {
-                        material.SetOverrideTag("RenderType", "TransparentCutout");
-                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                        material.SetInt("_ZWrite", 1);
-                        material.EnableKeyword("_ALPHATEST_ON");
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
-                    }
-                    if (tempMaterialsMode[index] == 2)
-                    {
-                        material.SetOverrideTag("RenderType", "Transparent");
-                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                        material.SetInt("_ZWrite", 0);
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        material.EnableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-                    }
-                    if (tempMaterialsMode[index] == 2)
-                    {
-                        material.SetOverrideTag("RenderType", "Transparent");
-                        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                        material.SetInt("_ZWrite", 0);
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-                        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-                    }
-
-                    #endregion
-                    index++;
-                    material.color = new Color(1, 1, 1, 1.0f);
+                    var allNewRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
+                    foreach (var render in allNewRenders)
+                        foreach (var material in render.materials)
+                            tempMaterialsMode.Add((int)material.GetFloat("_Mode"));
                 }
+                UpdateVision();
+            }
+            if (value == BuildingState.Project)
+            {
+                Color newColor = new Color(1, 1, 1, 0.45f);
+
+                GameObject projector = GetComponent<UnitSelectionComponent>().projector;
+                projector.active = false;
+                projector.GetComponent<Projector>().material.color = newColor;
+
+                if (team == cameraController.team)
+                {
+                    var allRenders = GetComponents<Renderer>().Concat(GetComponentsInChildren<Renderer>()).ToArray();
+                    foreach (var render in allRenders)
+                        foreach (var material in render.materials)
+                            material.color = newColor;
+                }
+                unitSelectionComponent.canBeSelected = true;
+                UpdateVision();
+            }
+            if (value == BuildingState.Building)
+            {
+                gameObject.layer = LayerMask.NameToLayer("Building");
+                live = true;
+                UnityEngine.AI.NavMeshObstacle navMesh = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
+                if (navMesh != null)
+                    navMesh.enabled = true;
+                
+                unitSelectionComponent.canBeSelected = true;
+                var allRenders = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>()).ToArray();
+                int index = 0;
+                if (tempMaterialsMode.Count > 0)
+                {
+                    foreach (var render in allRenders)
+                        foreach (var material in render.materials)
+                        {
+                            // https://github.com/jamesjlinden/unity-decompiled/blob/master/UnityEditor/UnityEditor/StandardShaderGUI.cs
+                            material.SetFloat("_Mode", tempMaterialsMode[index]);
+                            #region Standard shaders setters
+
+                            if (tempMaterialsMode[index] == 0)
+                            {
+                                material.SetOverrideTag("RenderType", "");
+                                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                                material.SetInt("_ZWrite", 1);
+                                material.DisableKeyword("_ALPHATEST_ON");
+                                material.DisableKeyword("_ALPHABLEND_ON");
+                                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                                material.renderQueue = -1;
+                            }
+                            if (tempMaterialsMode[index] == 1)
+                            {
+                                material.SetOverrideTag("RenderType", "TransparentCutout");
+                                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                                material.SetInt("_ZWrite", 1);
+                                material.EnableKeyword("_ALPHATEST_ON");
+                                material.DisableKeyword("_ALPHABLEND_ON");
+                                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+                            }
+                            if (tempMaterialsMode[index] == 2)
+                            {
+                                material.SetOverrideTag("RenderType", "Transparent");
+                                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                                material.SetInt("_ZWrite", 0);
+                                material.DisableKeyword("_ALPHATEST_ON");
+                                material.EnableKeyword("_ALPHABLEND_ON");
+                                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                            }
+                            if (tempMaterialsMode[index] == 2)
+                            {
+                                material.SetOverrideTag("RenderType", "Transparent");
+                                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                                material.SetInt("_ZWrite", 0);
+                                material.DisableKeyword("_ALPHATEST_ON");
+                                material.DisableKeyword("_ALPHABLEND_ON");
+                                material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                            }
+
+                            #endregion
+                            index++;
+                            material.color = new Color(1, 1, 1, 1.0f);
+                        }
+                }
+                tempMaterialsMode.Clear();
+                if (spawnPoint != null)
+                    spawnTarget = spawnPoint.transform.position;
+                UpdateVision();
+            }
+            _state = value;
         }
-        tempMaterialsMode.Clear();
-        if (spawnPoint != null)
-            spawnTarget = spawnPoint.transform.position;
+        get { return _state; }
     }
 
     public bool IsUnitCanBuild(GameObject builder)
@@ -441,7 +507,7 @@ public class BuildingBehavior : BaseBehavior
         if (!live)
             return;
 
-        spawnTargetObject = null;
+        target = null;
         spawnTarget = point;
     }
     
@@ -451,7 +517,7 @@ public class BuildingBehavior : BaseBehavior
             return;
 
         spawnTarget = new Vector3();
-        spawnTargetObject = targetObject;
+        target = targetObject;
     }
 
     [PunRPC]
@@ -471,7 +537,8 @@ public class BuildingBehavior : BaseBehavior
                 objectUIInfo.Destroy();
                 objectUIInfo = null;
             }
-            Destroy(gameObject);
+            PhotonView.Destroy(gameObject);
+            cameraUIBaseScript.UpdateUI();
             return;
         }
         if(state == BuildingState.Builded)

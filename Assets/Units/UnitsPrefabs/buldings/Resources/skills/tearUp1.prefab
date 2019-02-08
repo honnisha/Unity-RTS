@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _skillInfo:
-    uniqueName: upgradeTear
+    uniqueName: upgradeTear1
     readableName: Upgrade
     readableDescription: Upgrade
     imagePath: skills/upgrade

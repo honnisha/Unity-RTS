@@ -10,7 +10,7 @@ using GangaGame;
 using UISpace;
 using CI.QuickSave;
 
-public class UnitBehavior : BaseBehavior
+public class UnitBehavior : BaseBehavior, IPunObservable
 {
     #region Building worker info
 
@@ -45,6 +45,22 @@ public class UnitBehavior : BaseBehavior
     private bool blockedBuilding = false;
     private float toolInHandTimer = 0.0f;
     private float timetToStuck = 0.0f;
+
+    void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(this.interactType);
+            stream.SendNext(this.health);
+            stream.SendNext(this.live);
+        }
+        else
+        {
+            this.interactType = (InteractigType)stream.ReceiveNext();
+            this.health = (int)stream.ReceiveNext();
+            this.live = (bool)stream.ReceiveNext();
+        }
+    }
 
     public override void Awake()
     {
@@ -254,49 +270,6 @@ public class UnitBehavior : BaseBehavior
         }
     }
 
-    public void DoAttack()
-    {
-        if (interactType == InteractigType.Attacking && target != null)
-        {
-            UnitStatistic statisic = GetStatisticsInfo();
-            BaseBehavior targetBaseBehavior = null;
-            if (target != null)
-                targetBaseBehavior = target.GetComponent<BaseBehavior>();
-
-            if (IsTeamEnemy(targetBaseBehavior.team))
-            {
-                base.attackDelayTimer -= Time.deltaTime;
-                if (!base.attacked && base.attackDelayTimer <= 0.0f && target != null)
-                {
-                    // Damage deal
-                    base.attacked = true;
-                    if (statisic.damageAfterTimer)
-                        targetBaseBehavior.TakeDamage(statisic.damage, gameObject);
-                    if (actionEffect != null)
-                    {
-                        ActionEffect unitActionEffect = actionEffect.transform.gameObject.GetComponent<ActionEffect>();
-                        unitActionEffect.activate(gameObject, target, statisic.damage);
-                    }
-                }
-                base.attackTimer -= Time.deltaTime;
-                if (base.attackTimer <= 0.0f)
-                {
-                    interactType = InteractigType.None;
-                    if (!targetBaseBehavior.live || tempDestinationPoint != Vector3.zero)
-                    {
-                        ActionIsDone();
-
-                        StartInteract(target);
-                    }
-                    else
-                    {
-                        SetAgentStopped(false);
-                    }
-                }
-            }
-        }
-    }
-
     public void MoveToTarget()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p MoveToTarget"); // Profiler
@@ -314,6 +287,9 @@ public class UnitBehavior : BaseBehavior
             {
                 if (targetBuildingBehavior.state == BuildingBehavior.BuildingState.Builded && !IsCanWorkOnFarm(target))
                 {
+                    UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+                    cameraUIBaseScript.DisplayMessage("Only one worker can work in farm", 1500, "farmError");
+
                     StopAction(true);
                     ActionIsDone(InteractigType.Farming);
                     return;
@@ -332,52 +308,34 @@ public class UnitBehavior : BaseBehavior
 
             float minDistance = minDistanceToInteract;
             bool reachDest = false;
-            bool isTargetEnemy = false;
-            if (targetBaseBehavior != null)
-                if (IsTeamEnemy(targetBaseBehavior.team) && statisic.attackType != AttackType.None)
-                    isTargetEnemy = true;
 
-            if (isTargetEnemy && targetBaseBehavior.live)
+            if (IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live)
                 minDistance = statisic.rangeAttack;
-
-            bool targetIsPoint = false;
+            
             bool colliderCheck = true;
             if (isBuilding)
             {
                 targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
                 if (targetBuildingBehavior.sourceType == SourceType.Farm)
-                {
-                    targetIsPoint = true;
                     colliderCheck = false;
-                }
             }
 
-            float dist = Vector3.Distance(gameObject.transform.position, target.transform.position);
-            RaycastHit hit;
+            // float dist = Vector3.Distance(gameObject.transform.position, target.transform.position);
             // If unit and target close enough
-            if (targetIsPoint && Vector3.Distance(gameObject.transform.position, agent.destination) <= minDistance && Vector3.Distance(gameObject.transform.position, target.transform.position) < 5.0f)
-                if (dist <= minDistance && Physics.Linecast(transform.position, target.transform.position))
+            Vector3 offset = new Vector3(0, 0.5f, 0);
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position + offset, (target.transform.position + offset - (transform.position + offset)).normalized, out hit, minDistance))
+            {
+                if (hit.transform.gameObject.GetHashCode() == target.GetHashCode())
+                {
+                    //if (targetIsPoint && Vector3.Distance(gameObject.transform.position, agent.destination) <= minDistance && dist < 5.0f)
+                    //    reachDest = true;
                     reachDest = true;
+                }
+            }
             // Or collisions touch each other
             if (colliderCheck && GetComponent<Collider>().bounds.Intersects(target.GetComponent<Collider>().bounds))
                 reachDest = true;
-
-            float magnitDistance = 2.0f;
-            if (targetBuildingBehavior != null)
-                magnitDistance = targetBuildingBehavior.magnitDistance;
-
-            if (false)
-            {
-                if (dist <= magnitDistance && Physics.Linecast(transform.position, target.transform.position + new Vector3(0, 1, 0)))
-                {
-                    SetAgentStopped(true);
-                    Vector3 targetPosition = new Vector3(target.transform.position.x, transform.position.y, target.transform.position.z);
-                    transform.position = Vector3.MoveTowards(transform.position, targetPosition, agent.speed * 0.9f * Time.deltaTime);
-                    transform.LookAt(targetPosition);
-                }
-                else
-                    SetAgentStopped(false);
-            }
 
             if (reachDest)
             {
@@ -599,11 +557,7 @@ public class UnitBehavior : BaseBehavior
         {
             UnitBehavior workerUnitBehavior = unit.GetComponent<UnitBehavior>();
             if (workerUnitBehavior.interactObject == farm && unit != gameObject)
-            {
-                UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-                cameraUIBaseScript.DisplayMessage("Only one worker can work in farm", 1500, "farmError");
                 return false;
-            }
         }
         return true;
     }
@@ -682,28 +636,36 @@ public class UnitBehavior : BaseBehavior
         objects.Clear();
         UnityEngine.Profiling.Profiler.BeginSample("p GetObjectToInteract"); // Profiler
         GetObjectsInRange(ref allObjects, transform.position, 15.0f, team: -1);
-        foreach (GameObject oneObject in allObjects.Concat(GameObject.FindGameObjectsWithTag("Ambient")))
+        foreach (GameObject objectToInteract in allObjects.Concat(GameObject.FindGameObjectsWithTag("Ambient")))
         {
-            BaseBehavior oneObjectBaseBehavior = oneObject.GetComponent<BaseBehavior>();
-            float distance = Vector3.Distance(gameObject.transform.position, oneObject.transform.position);
-            if (distance > 15.0f && (oneObjectBaseBehavior.team == team))
+            BaseBehavior objectToInteractBaseBehavior = objectToInteract.GetComponent<BaseBehavior>();
+            float distance = Vector3.Distance(gameObject.transform.position, objectToInteract.transform.position);
+            if (distance > 15.0f && (objectToInteractBaseBehavior.team == team))
                 continue;
 
             if (type == InteractigType.Bulding)
             {
-                BuildingBehavior oneObjectBuildingBehavior = oneObject.GetComponent<BuildingBehavior>();
+                BuildingBehavior oneObjectBuildingBehavior = objectToInteract.GetComponent<BuildingBehavior>();
                 if (oneObjectBuildingBehavior != null &&
                     (oneObjectBuildingBehavior.state == BuildingBehavior.BuildingState.Building ||
                         oneObjectBuildingBehavior.state == BuildingBehavior.BuildingState.Project))
-                    if(!objects.ContainsKey(oneObject))
-                        objects.Add(oneObject, distance);
+                    if(!objects.ContainsKey(objectToInteract))
+                        objects.Add(objectToInteract, distance);
             }
             else if(type != InteractigType.None)
             {
-                if (oneObjectBaseBehavior.resourceCapacityType == resourceType && 
-                    (oneObjectBaseBehavior.resourceCapacity > 0 || oneObjectBaseBehavior.resourceEndless))
-                    if (!objects.ContainsKey(oneObject))
-                        objects.Add(oneObject, distance);
+                if (objectToInteractBaseBehavior.resourceCapacityType == resourceType && 
+                    (objectToInteractBaseBehavior.resourceCapacity > 0 || objectToInteractBaseBehavior.resourceEndless))
+                    if (!objects.ContainsKey(objectToInteract))
+                    {
+                        if(objectToInteractBaseBehavior.sourceType == SourceType.Farm)
+                        {
+                            if(IsCanWorkOnFarm(objectToInteract))
+                                objects.Add(objectToInteract, distance);
+                        }
+                        else
+                            objects.Add(objectToInteract, distance);
+                    }
             }
         }
         if (objects.Count > 0)
@@ -715,7 +677,7 @@ public class UnitBehavior : BaseBehavior
         return null;
     }
 
-    public void ActionIsDone(InteractigType stopActionType = InteractigType.None)
+    public override void ActionIsDone(InteractigType stopActionType = InteractigType.None)
     {
         SetAgentStopped(true);
         Destroy(pointMarker);
@@ -775,10 +737,7 @@ public class UnitBehavior : BaseBehavior
                 bool canBuild = targetBuildingBehavior.IsUnitCanBuild(gameObject);
                 if (canBuild)
                 {
-                    if (PhotonNetwork.InRoom)
-                        targetObject.GetComponent<PhotonView>().RPC("SetAsBuilding", PhotonTargets.All, targetObject.transform.position);
-                    else
-                        targetBuildingBehavior.SetAsBuilding(newPosition: targetObject.transform.position);
+                    targetBuildingBehavior.state = BuildingBehavior.BuildingState.Building;
 
                     interactTimer = 1.0f;
                     transform.LookAt(targetObject.transform.position);
@@ -933,23 +892,17 @@ public class UnitBehavior : BaseBehavior
         return false;
     }
 
-    public void Attack(GameObject target)
+    public override void Attack(GameObject target)
     {
         if (!live)
             return;
 
-        SendSoundEvent(SoundEventType.Attack);
+        base.Attack(target);
 
-        SetAgentStopped(true);
-        UnitStatistic statisic = GetStatisticsInfo();
-
-        attacked = false;
         transform.LookAt(target.transform.position);
+        SetAgentStopped(true);
         anim.Rebind();
         anim.SetTrigger("Attack");
-        attackTimer = statisic.attackTime;
-        attackDelayTimer = statisic.attackDelay;
-        interactType = InteractigType.Attacking;
     }
 
     public override void AlertAttacking(GameObject attacker)
@@ -1009,7 +962,7 @@ public class UnitBehavior : BaseBehavior
         {
             BecomeDead();
 
-            UnitBehavior attackerBehaviorComponent = attacker.GetComponent<UnitBehavior>();
+            BaseBehavior attackerBehaviorComponent = attacker.GetComponent<BaseBehavior>();
             attackerBehaviorComponent.ActionIsDone();
         }
         else

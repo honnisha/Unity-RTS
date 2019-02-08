@@ -336,8 +336,6 @@ GameObject:
   - component: {fileID: 114109881253500866}
   - component: {fileID: 114574785616756634}
   - component: {fileID: 208687129007450452}
-  - component: {fileID: 2923045895709666377}
-  - component: {fileID: 8964997363262689653}
   - component: {fileID: 394392352842859905}
   m_Layer: 14
   m_Name: mine
@@ -467,6 +465,8 @@ MonoBehaviour:
   _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
   uniqueId: -1
+  interactObject: {fileID: 0}
+  interactObjectUniqueId: -1
   interactType: 0
   attackTimer: 0
   attackDelayTimer: 0
@@ -502,15 +502,16 @@ MonoBehaviour:
   obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
+  targetUniqueId: -1
   tempDestinationPoint: {x: 0, y: 0, z: 0}
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
   cameraController: {fileID: 0}
+  cameraUIBaseScript: {fileID: 0}
   skillList: []
   producedUnits: []
   spawnPoint: {fileID: 0}
   spawnTarget: {x: 0, y: 0, z: 0}
-  spawnTargetObject: {fileID: 0}
   buildTimer: 0
   productionQuery: []
   HTMLHealthFile: {fileID: 0}
@@ -533,6 +534,7 @@ MonoBehaviour:
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
   allOutlines: []
+  prefabName: 
   resourceCapacityType: 2
   resourceCapacity: 1000
   resourceEndless: 0
@@ -542,8 +544,8 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
+  allObjects: []
   statisticStrings: []
-  state: 3
   magnitDistance: 2
   tempMaterialsMode: 
   placeConditions: []
@@ -586,43 +588,6 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0.018000001, y: 0.0050000004, z: -0.004}
   m_TimeToStationary: 0.5
---- !u!114 &2923045895709666377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1517551109366952}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  ObservedComponents:
-  - {fileID: 8964997363262689653}
-  viewIdField: 0
-  InstantiationId: 27
-  isRuntimeInstantiated: 0
---- !u!114 &8964997363262689653
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1517551109366952}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
 --- !u!114 &394392352842859905
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -234,14 +234,15 @@ MonoBehaviour:
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
   cameraController: {fileID: 0}
+  cameraUIBaseScript: {fileID: 0}
   skillList:
   - {fileID: 2023189790452245048, guid: df8d927a3b531654ea22978b99914068, type: 3}
+  - {fileID: 2023189790452245048, guid: aa111bc635d27fe43bca5e81bcd4fd1e, type: 3}
   producedUnits:
   - {fileID: 660, guid: 4a6ee9ce4e0ee7f46943f0549a572d01, type: 3}
   - {fileID: 832, guid: b3f0a9c0697dc714096347b3af4d8f46, type: 3}
   spawnPoint: {fileID: 592}
   spawnTarget: {x: 0, y: 0, z: 0}
-  spawnTargetObject: {fileID: 0}
   buildTimer: 0
   productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
@@ -282,7 +283,6 @@ MonoBehaviour:
   - 'Cutting resist: 80%'
   - 'Biting resist: 30%'
   - 'Magic resist: 30%'
-  state: 3
   magnitDistance: 5
   tempMaterialsMode: 
   placeConditions:

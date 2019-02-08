@@ -12,9 +12,9 @@ using UISpace;
 using CI.QuickSave;
 using UnityEditor;
 
-public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInterface
+public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
 {
-    static readonly string[] savedFields = new string[] { "health", "live", "uniqueId", "tear", "resourceCapacity", "resourceHold", "resourceType" };
+    static readonly string[] savedFields = new string[] { "health", "live", "uniqueId", "tear", "resourceCapacity", "resourceHold", "resourceType", "buildTimer" };
 
     #region Unit info
 
@@ -141,7 +141,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public float curSpeed;
     [HideInInspector]
     public CameraController cameraController;
-    UIBaseScript cameraUIBaseScript;
+    [HideInInspector]
+    public UIBaseScript cameraUIBaseScript;
 
     #endregion
 
@@ -159,8 +160,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public GameObject spawnPoint;
     [HideInInspector]
     public Vector3 spawnTarget = Vector3.zero;
-    [HideInInspector]
-    public GameObject spawnTargetObject;
     [HideInInspector]
     public float buildTimer = 0.0f;
     [HideInInspector]
@@ -226,22 +225,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
     public float resourceHold = 0.0f;
     [HideInInspector]
     public ResourceType resourceType = ResourceType.None;
-
-    #endregion
-
-    #region Photon
-
-    void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.IsWriting)
-        {
-            stream.SendNext(this.interactType);
-        }
-        else
-        {
-            this.interactType = (InteractigType)stream.ReceiveNext();
-        }
-    }
 
     #endregion
 
@@ -391,6 +374,67 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
+    public virtual void Attack(GameObject target)
+    {
+        if (!live)
+            return;
+
+        SendSoundEvent(SoundEventType.Attack);
+
+        UnitStatistic statisic = GetStatisticsInfo();
+
+        attacked = false;
+        attackTimer = statisic.attackTime;
+        attackDelayTimer = statisic.attackDelay;
+        interactType = InteractigType.Attacking;
+    }
+
+    public void DoAttack()
+    {
+        if (interactType == InteractigType.Attacking && target != null)
+        {
+            UnitStatistic statisic = GetStatisticsInfo();
+            BaseBehavior targetBaseBehavior = null;
+            if (target != null)
+                targetBaseBehavior = target.GetComponent<BaseBehavior>();
+
+            if (IsTeamEnemy(targetBaseBehavior.team))
+            {
+                attackDelayTimer -= Time.deltaTime;
+                if (!attacked && attackDelayTimer <= 0.0f && target != null)
+                {
+                    // Damage deal
+                    attacked = true;
+                    if (statisic.damageAfterTimer)
+                        targetBaseBehavior.TakeDamage(statisic.damage, gameObject);
+                    if (actionEffect != null)
+                    {
+                        ActionEffect unitActionEffect = actionEffect.transform.gameObject.GetComponent<ActionEffect>();
+                        unitActionEffect.activate(gameObject, target, statisic.damage);
+                    }
+                }
+                attackTimer -= Time.deltaTime;
+                if (attackTimer <= 0.0f)
+                {
+                    interactType = InteractigType.None;
+                    if (!targetBaseBehavior.live || tempDestinationPoint != Vector3.zero)
+                    {
+                        ActionIsDone();
+
+                        StartInteract(target);
+                    }
+                    else
+                    {
+                        ActionIsDone();
+                        // SetAgentStopped(false);
+                    }
+                }
+            }
+        }
+    }
+
+    public virtual void ActionIsDone(InteractigType stopActionType = InteractigType.None) { return; }
+
     public List<GameObject> ProduceUnit(string createdPrefabName)
     {
         return ProduceUnit(createdPrefabName, 1, 0.0f);
@@ -418,8 +462,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             else
                 createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
 
-            if (spawnTargetObject != null)
-                createdObjectBehaviorComponent.GiveOrder(spawnTargetObject, true, false);
+            if (target != null)
+                createdObjectBehaviorComponent.GiveOrder(target, true, false);
             else
                 createdObjectBehaviorComponent.GiveOrder(GetRandomPoint(spawnTarget + dirToTarget * distance, 2.0f), true, false);
             createdObjects.Add(createdObject);
@@ -675,7 +719,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         pointMarker = null;
     }
 
-    public static void GetObjectsInRange(ref List<GameObject> objects, Vector3 position, float radius, bool live = true, int team = -1, bool units = true, bool buildings = true, bool ambient = true, int teamException = -1)
+    public static void GetObjectsInRange(
+        ref List<GameObject> objects, Vector3 position, float radius, bool live = true, int team = -1, 
+        bool units = true, bool buildings = true, bool ambient = true, int teamException = -1, int teamGT = -100)
     {
         objects.Clear();
         int unitsMask = 1 << LayerMask.NameToLayer("Unit");
@@ -696,6 +742,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             BaseBehavior unitBaseBehavior = collider.gameObject.GetComponent<BaseBehavior>();
             if (team != -1 && unitBaseBehavior.team != team)
                 continue;
+            if (unitBaseBehavior.team <= teamGT)
+                continue;
             if (unitBaseBehavior.live != live)
                 continue;
             if (teamException != -1 && unitBaseBehavior.team == teamException)
@@ -707,7 +755,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
     [HideInInspector]
     public List<GameObject> allObjects = new List<GameObject>();
-    public bool AttackNearEnemies(Vector3 centerOfSearch, float range, int attackTeam = -1, float randomRange = 0.0f)
+    public bool AttackNearEnemies(Vector3 centerOfSearch, float range, int attackTeam = -1, float randomRange = 0.0f, bool buildings = false)
     {
         UnitStatistic statisic = GetStatisticsInfo();
         if (statisic.attackType == AttackType.None && interactType != InteractigType.Attacking)
@@ -715,7 +763,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
         if (behaviorType == BehaviorType.Counterattack || behaviorType == BehaviorType.Aggressive)
         {
-            GetObjectsInRange(ref allObjects, transform.position, range, team: attackTeam, buildings: false, teamException: team);
+            GetObjectsInRange(ref allObjects, transform.position, range, team: attackTeam, buildings: buildings, teamException: team, teamGT: 0);
             if (allObjects.Count <= 0)
                 return false;
 
@@ -734,7 +782,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             if (randomRange != 0.0f)
             {
                 // Get random target
-                GetObjectsInRange(ref allObjects, targetUnit.transform.position, randomRange, team: attackTeam, teamException: team);
+                GetObjectsInRange(ref allObjects, targetUnit.transform.position, randomRange, team: attackTeam, buildings: buildings, teamException: team, teamGT: 0);
                 if (allObjects.Count > 0)
                     targetUnit = allObjects[UnityEngine.Random.Range(0, allObjects.Count - 1)];
             }
@@ -955,7 +1003,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         if (unit != null)
             _GiveOrder(unit, displayMarker, overrideQueueCommands, speed);
     }
-    public GameObject GetObjectByUniqueId(int targetUniqueId)
+    public static GameObject GetObjectByUniqueId(int targetUniqueId)
     {
         foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Ambient")).Concat(GameObject.FindGameObjectsWithTag("Unit")))
         {
@@ -1082,9 +1130,19 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
         saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "resourceType").ToString(), (int)resourceType);
 
         if (agent != null && target == null && agent.destination != null && agent.hasPath)
-            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "agentDestination").ToString(), agent.destination);
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "targetDestination").ToString(), agent.destination);
+        else if(spawnTarget != Vector3.zero)
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "targetDestination").ToString(), spawnTarget);
         else
-            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "agentDestination").ToString(), Vector3.zero);
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "targetDestination").ToString(), Vector3.zero);
+
+        int productionCount = productionQuery.Count;
+        saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", index, "production").ToString(), productionCount);
+        for (int i = 0; i < productionCount; i++)
+        {
+            BaseBehavior productionBehaviorComponent = productionQuery[i].GetComponent<BaseBehavior>();
+            saveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}_{2}", index, i, "production").ToString(), productionBehaviorComponent.skillInfo.uniqueName);
+        }
 
         if (target != null)
         {
@@ -1110,58 +1168,81 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
 
     public static void Load(ref QuickSaveReader saveReader, int index)
     {
-        string prefabName = saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "path").ToString());
-        if (prefabName == "")
-            return;
-
-        Vector3 position = saveReader.Read<Vector3>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "position").ToString());
-        Vector3 localScale = saveReader.Read<Vector3>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "localScale").ToString());
-        Quaternion rotation = saveReader.Read<Quaternion>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "rotation").ToString());
-        GameObject newObject = PhotonNetwork.Instantiate(prefabName, position, rotation);
-        newObject.transform.localScale = localScale;
-
-        BaseBehavior baseBehaviorComponent = newObject.GetComponent<BaseBehavior>();
-        baseBehaviorComponent.prefabName = prefabName;
-
-        baseBehaviorComponent.targetUniqueId = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "targetUniqueId").ToString());
-        baseBehaviorComponent.interactObjectUniqueId = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "interactObjectUniqueId").ToString());
-
-        Vector3 targetPosition = saveReader.Read<Vector3>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "agentDestination").ToString());
-        if (targetPosition != Vector3.zero)
-            baseBehaviorComponent.GiveOrder(targetPosition, false, false);
-
-        int newTeam = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "team").ToString());
-        string newOwner = saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "ownerId").ToString());
-        
-        baseBehaviorComponent.ChangeOwner(newOwner, newTeam);
-
-        foreach (string valueName in savedFields)
+        try
         {
+            string prefabName = saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "path").ToString());
+            if (prefabName == "")
+                return;
+
+            Vector3 position = saveReader.Read<Vector3>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "position").ToString());
+            Vector3 localScale = saveReader.Read<Vector3>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "localScale").ToString());
+            Quaternion rotation = saveReader.Read<Quaternion>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "rotation").ToString());
+            GameObject newObject = PhotonNetwork.Instantiate(prefabName, position, rotation);
+            newObject.transform.localScale = localScale;
+
+            BaseBehavior baseBehaviorComponent = newObject.GetComponent<BaseBehavior>();
+            baseBehaviorComponent.prefabName = prefabName;
+
+            baseBehaviorComponent.targetUniqueId = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "targetUniqueId").ToString());
+            baseBehaviorComponent.interactObjectUniqueId = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "interactObjectUniqueId").ToString());
+
+            Vector3 targetDestination = saveReader.Read<Vector3>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "targetDestination").ToString());
+            if (targetDestination != Vector3.zero)
+                baseBehaviorComponent.GiveOrder(targetDestination, false, false);
+
+            int newTeam = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "team").ToString());
+            string newOwner = saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "ownerId").ToString());
+
+            baseBehaviorComponent.ChangeOwner(newOwner, newTeam);
+
             try
             {
-                var info = baseBehaviorComponent.GetType().GetField(valueName).GetValue(baseBehaviorComponent);
-                Type fieldType = baseBehaviorComponent.GetType().GetField(valueName).FieldType;
-                object value = saveReader.Read<object>(new StringBuilder(15).AppendFormat("{0}_{1}", index, valueName).ToString());
-                if (fieldType.IsEnum)
-                    baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, Enum.Parse(fieldType, (string)value));
-                else
-                    baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, value);
+                int productionCount = saveReader.Read<int>(new StringBuilder(15).AppendFormat("{0}_{1}", index, "production").ToString());
+                for (int i = 0; i < productionCount; i++)
+                {
+                    string productionUniqueName = saveReader.Read<string>(new StringBuilder(15).AppendFormat("{0}_{1}_{2}", index, i, "production").ToString());
+                    foreach (GameObject producedUnit in baseBehaviorComponent.skillList.Concat(baseBehaviorComponent.producedUnits))
+                    {
+                        BaseBehavior producedUnitBehaviorComponent = producedUnit.GetComponent<BaseBehavior>();
+                        if (producedUnitBehaviorComponent.skillInfo.uniqueName == productionUniqueName)
+                            baseBehaviorComponent.productionQuery.Add(producedUnit);
+                    }
+                }
             }
-            catch (ArgumentException e)
+            catch (Exception e)
             {
-                Debug.LogError(new StringBuilder().AppendFormat(
-                    "Error for restore {0}_{1} value for {2}: {3}", index, valueName, baseBehaviorComponent.skillInfo.uniqueName, e.Message).ToString());
             }
-            catch (QuickSaveException e)
-            {
-                Debug.LogError(new StringBuilder().AppendFormat(
-                    "QuickSaveException {0}_{1} value for {2}: {3}", index, valueName, baseBehaviorComponent.skillInfo.uniqueName, e.Message).ToString());
-            }
-        }
 
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        if (baseBehaviorComponent.uniqueId > cameraController.uniqueIdIndex)
-            cameraController.uniqueIdIndex = baseBehaviorComponent.uniqueId + 1;
+            foreach (string valueName in savedFields)
+            {
+                try
+                {
+                    var info = baseBehaviorComponent.GetType().GetField(valueName).GetValue(baseBehaviorComponent);
+                    Type fieldType = baseBehaviorComponent.GetType().GetField(valueName).FieldType;
+                    object value = saveReader.Read<object>(new StringBuilder(15).AppendFormat("{0}_{1}", index, valueName).ToString());
+                    if (fieldType.IsEnum)
+                        baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, Enum.Parse(fieldType, (string)value));
+                    else
+                        baseBehaviorComponent.GetType().GetField(valueName).SetValue(baseBehaviorComponent, Convert.ChangeType(value, fieldType));
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(new StringBuilder().AppendFormat(
+                        "Error for restore {0}_{1} value for {2}: {3}", index, valueName, baseBehaviorComponent.skillInfo.uniqueName, e.Message).ToString());
+                }
+            }
+
+            CameraController cameraController = Camera.main.GetComponent<CameraController>();
+            if (baseBehaviorComponent.uniqueId > cameraController.uniqueIdIndex)
+                cameraController.uniqueIdIndex = baseBehaviorComponent.uniqueId + 1;
+
+            baseBehaviorComponent.UpdateTearDisplay();
+        }
+        catch (QuickSaveException e)
+        {
+            Debug.LogError(new StringBuilder().AppendFormat(
+                "QuickSaveException {0}: {1}", index, e.Message).ToString());
+        }
     }
 
     public void RestoreBehavior()
@@ -1176,7 +1257,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, IPunObservable, ISkillInt
             GiveOrderUniqueID(interactObjectUniqueId);
             interactObjectUniqueId = -1;
         }
-        if (!live)
+        if (!live && anim != null)
             anim.SetTrigger("Die");
     }
 }

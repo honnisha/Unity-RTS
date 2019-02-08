@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -85,6 +86,29 @@ namespace GangaGame
             }
             quickSaveWriter.Write("indexCount", index);
 
+            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
+
+            // Blind texture
+            Color[] colors = terrainGenerator.blindTexture2D.GetPixels();
+            int[] blindInfo = new int[colors.Length];
+            for (int i = 0; i < colors.Length; i++)
+                blindInfo[i] = colors[i] == Color.black ? 1 : 0;
+            quickSaveWriter.Write("blindTextureData", blindInfo);
+
+            // Binds
+            for (int number = 1; number <= 9; number++)
+            {
+                int[] binds = new int[cameraController.unitsBinds[KeyCode.Alpha0 + number].Count];
+                int i = 0;
+                foreach(GameObject bindObject in cameraController.unitsBinds[KeyCode.Alpha0 + number])
+                {
+                    BaseBehavior bindObjectBaseBehavior = bindObject.GetComponent<BaseBehavior>();
+                    binds[i] = bindObjectBaseBehavior.uniqueId;
+                    i++;
+                }
+                quickSaveWriter.Write(new StringBuilder(15).AppendFormat("{0}_{1}", number, "bind").ToString(), binds);
+            }
+
             quickSaveWriter.Commit();
             
             return saveName;
@@ -114,6 +138,36 @@ namespace GangaGame
             cameraController.gold = saveReader.Read<float>("gold");
             cameraController.wood = saveReader.Read<float>("wood");
             cameraController.food = saveReader.Read<float>("food");
+          
+            // Blind texture
+            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
+            Color[] colors = terrainGenerator.blindTexture2D.GetPixels();
+            int[] blindInfo = saveReader.Read<int[]>("blindTextureData");
+            Color newColor = Color.white;
+            newColor.a = 0;
+            for (int i = 0; i < colors.Length; i++)
+                colors[i] = blindInfo[i] == 1 ? Color.black : newColor;
+            terrainGenerator.blindTexture2D.SetPixels(colors);
+            terrainGenerator.blindTexture2D.Apply();
+            Graphics.Blit(terrainGenerator.blindTexture2D, terrainGenerator.blindTexture);
+            terrainGenerator.initBlindTexture = true;
+
+            try
+            {
+                // Binds
+                for (int number = 1; number <= 9; number++)
+                {
+                    int[] binds = saveReader.Read<int[]>(new StringBuilder(15).AppendFormat("{0}_{1}", number, "bind").ToString());
+                    int i = 0;
+                    foreach (int bindObjectUniueId in binds)
+                    {
+                        cameraController.unitsBinds[KeyCode.Alpha0 + number].Add(BaseBehavior.GetObjectByUniqueId(bindObjectUniueId));
+                        i++;
+                    }
+                }
+            }
+            catch (Exception e)
+            { }
 
             selectedFile = "";
         }

@@ -109,7 +109,7 @@ Material:
     - _Blend: 0
     - _BlendAlpha: 0
     - _BumpScale: 1
-    - _Cutoff: 0.904
+    - _Cutoff: 0.464
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EnableExternalAlpha: 0

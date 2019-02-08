@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2285}
   - component: {fileID: 3277}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Projector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -59,7 +59,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2040}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: DestroyEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 3451}
   - component: {fileID: 3489}
   - component: {fileID: 3521}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: storage wg
   m_TagString: Building
   m_Icon: {fileID: 0}
@@ -233,6 +233,8 @@ MonoBehaviour:
   _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
   uniqueId: -1
+  interactObject: {fileID: 0}
+  interactObjectUniqueId: -1
   interactType: 0
   attackTimer: 0
   attackDelayTimer: 0
@@ -251,7 +253,7 @@ MonoBehaviour:
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
-  behaviorType: 1
+  behaviorType: 4
   bloodEffect: {fileID: 0}
   bloodOnBroundEffects: []
   destroyEffectPrefab: {fileID: 100000, guid: 5d62873197ce78641a860d3758f2496b, type: 3}
@@ -268,15 +270,16 @@ MonoBehaviour:
   obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
+  targetUniqueId: -1
   tempDestinationPoint: {x: 0, y: 0, z: 0}
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
   cameraController: {fileID: 0}
+  cameraUIBaseScript: {fileID: 0}
   skillList: []
   producedUnits: []
   spawnPoint: {fileID: 0}
   spawnTarget: {x: 0, y: 0, z: 0}
-  spawnTargetObject: {fileID: 0}
   buildTimer: 0
   productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
@@ -300,6 +303,7 @@ MonoBehaviour:
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
   allOutlines: []
+  prefabName: 
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -315,7 +319,6 @@ MonoBehaviour:
   - 'Cutting resist: 60%'
   - 'Biting resist: 20%'
   - 'Magic resist: 20%'
-  state: 3
   magnitDistance: 4
   tempMaterialsMode: 
   placeConditions: []
@@ -406,6 +409,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: gold
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 11af9936a843a44488b5e88b5cb11581, type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 11af9936a843a44488b5e88b5cb11581, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.0164
@@ -480,6 +487,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 7173c2ccddc9b8b45b46f613abf5018c, type: 3}
       propertyPath: m_Name
       value: sawmill
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 7173c2ccddc9b8b45b46f613abf5018c, type: 3}
+      propertyPath: m_Layer
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 7173c2ccddc9b8b45b46f613abf5018c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -556,6 +567,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WheelBarrow
       objectReference: {fileID: 0}
+    - target: {fileID: 1296654048059936, guid: 555aeb013d726af409783ebf11502a9c, type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 4041826923369534, guid: 555aeb013d726af409783ebf11502a9c, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.0107
@@ -630,6 +645,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 11af9936a843a44488b5e88b5cb11581, type: 3}
       propertyPath: m_Name
       value: gold (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 11af9936a843a44488b5e88b5cb11581, type: 3}
+      propertyPath: m_Layer
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 11af9936a843a44488b5e88b5cb11581, type: 3}
       propertyPath: m_LocalPosition.x

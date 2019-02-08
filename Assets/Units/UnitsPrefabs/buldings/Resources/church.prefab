@@ -193,6 +193,8 @@ MonoBehaviour:
     notDisplayWhenFalse: 0
   unitPosition: {x: 0, y: 0, z: 0}
   uniqueId: -1
+  interactObject: {fileID: 0}
+  interactObjectUniqueId: -1
   interactType: 0
   attackTimer: 0
   attackDelayTimer: 0
@@ -228,15 +230,16 @@ MonoBehaviour:
   obstacle: {fileID: 0}
   anim: {fileID: 0}
   target: {fileID: 0}
+  targetUniqueId: -1
   tempDestinationPoint: {x: 0, y: 0, z: 0}
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
   cameraController: {fileID: 0}
+  cameraUIBaseScript: {fileID: 0}
   skillList: []
   producedUnits: []
   spawnPoint: {fileID: 1353}
   spawnTarget: {x: 0, y: 0, z: 0}
-  spawnTargetObject: {fileID: 0}
   buildTimer: 0
   productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
@@ -261,6 +264,7 @@ MonoBehaviour:
   visionTool: {fileID: 0}
   unitSelectionComponent: {fileID: 0}
   allOutlines: []
+  prefabName: 
   resourceCapacityType: 0
   resourceCapacity: 0
   resourceEndless: 0
@@ -270,8 +274,12 @@ MonoBehaviour:
   resourceType: 0
   soundsInfo: []
   isInCameraView: 0
-  statisticStrings: []
-  state: 3
+  allObjects: []
+  statisticStrings:
+  - 'Stabbing resist: 40%'
+  - 'Cutting resist: 80%'
+  - 'Biting resist: 40%'
+  - 'Magic resist: 40%'
   magnitDistance: 5
   tempMaterialsMode: 
   placeConditions: []
@@ -317,8 +325,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2839}
-  viewIdField: 0
-  InstantiationId: 3
+  viewIdField: 2
+  InstantiationId: 2
   isRuntimeInstantiated: 0
 --- !u!114 &2839
 MonoBehaviour:

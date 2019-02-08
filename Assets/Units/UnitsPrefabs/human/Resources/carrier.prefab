@@ -2498,10 +2498,10 @@ MonoBehaviour:
     attackDelay: 0.5
     damageAfterTimer: 1
     attackType: 4
-    stabbingResist: 0
-    cuttingResist: 0
-    bitingResist: 0
-    magicResist: 0
+    stabbingResist: 20
+    cuttingResist: 20
+    bitingResist: 20
+    magicResist: 20
     agrRange: 20
     alertRange: 10
   actionEffect: {fileID: 0}
@@ -2528,11 +2528,11 @@ MonoBehaviour:
   previousPosition: {x: 0, y: 0, z: 0}
   curSpeed: 0
   cameraController: {fileID: 0}
+  cameraUIBaseScript: {fileID: 0}
   skillList: []
   producedUnits: []
   spawnPoint: {fileID: 0}
   spawnTarget: {x: 0, y: 0, z: 0}
-  spawnTargetObject: {fileID: 0}
   buildTimer: 0
   productionQuery: []
   HTMLHealthFile: {fileID: 4900000, guid: e50f3066b80392041b07e41547bc36cb, type: 3}
@@ -2569,10 +2569,10 @@ MonoBehaviour:
   isInCameraView: 0
   allObjects: []
   statisticStrings:
-  - 'Stabbing resist: 0%'
-  - 'Cutting resist: 0%'
-  - 'Biting resist: 0%'
-  - 'Magic resist: 0%'
+  - 'Stabbing resist: 20%'
+  - 'Cutting resist: 20%'
+  - 'Biting resist: 20%'
+  - 'Magic resist: 20%'
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}
@@ -2622,8 +2622,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3391}
-  viewIdField: 11
-  InstantiationId: 11
+  viewIdField: 4
+  InstantiationId: 4
   isRuntimeInstantiated: 0
 --- !u!114 &3391
 MonoBehaviour:

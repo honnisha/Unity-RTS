@@ -103,7 +103,8 @@ namespace GangaGame
         [HideInInspector]
         public List<GameObject> selectedObjects = new List<GameObject>();
 
-        private Dictionary<KeyCode, List<GameObject>> unitsBinds = new Dictionary<KeyCode, List<GameObject>>();
+        [HideInInspector]
+        public Dictionary<KeyCode, List<GameObject>> unitsBinds = new Dictionary<KeyCode, List<GameObject>>();
         private KeyCode tempKey;
         private float keyTimer = 0.0f;
         private int keyPressed;
@@ -181,12 +182,12 @@ namespace GangaGame
                 UpdateViewChunks();
                 spawnData = terrainGenerator.GetSpawnData(
                     spawnCount: playerCount + GameInfo.GetNPCInfo().Count, maxTrees: 1000 * mapSize,
-                    goldCountOnRow: 4 * mapSize, goldRows: mapSize,
+                    goldCountOnRow: 5 * mapSize, goldRows: mapSize,
                     animalsCountOnRow: 5 * mapSize, animalsRows: mapSize);
                 
                 LoadLevel(mapSize, playerCount);
 
-                if (!GameInfo.playerSpectate)
+                if (!GameInfo.playerSpectate && !terrainGenerator.initBlindTexture)
                     terrainGenerator.UpdateBlindTexture(init: true);
 
                 if (PhotonNetwork.InRoom)
@@ -213,7 +214,7 @@ namespace GangaGame
             if (LoadSaveScript.selectedFile != "")
             {
                 InstantiateObjects(
-                    spawnData, maxTrees: 1000 * mapSize,
+                    spawnData, maxTrees: 1250 * mapSize,
                     treePrefabs: terrainGenerator.treePrefabs, goldPrefabs: terrainGenerator.goldPrefabs);
 
                 LoadSaveScript.RestoreGame();
@@ -222,7 +223,7 @@ namespace GangaGame
             else
             {
                 InstantiateObjects(
-                    spawnData, maxTrees: 1000 * mapSize,
+                    spawnData, maxTrees: 1250 * mapSize,
                     treePrefabs: terrainGenerator.treePrefabs, goldPrefabs: terrainGenerator.goldPrefabs, animalPrefabs: terrainGenerator.animalsPrefabs);
 
                 // Create bots
@@ -254,9 +255,9 @@ namespace GangaGame
         {
             if (clickLoadTimer > 0.0f && LoadSaveScript.selectedFile == mouseEvent.srcElement.id)
             {
+                UI.document.Run("CreateLoadingScreen", "Loading: " + LoadSaveScript.selectedFile);
                 LoadSaveScript.LoadFileSettings();
 
-                UI.document.Run("CreateLoadingScreen", "Loading: " + LoadSaveScript.selectedFile);
                 LoadSaveScript.loadLevelTimer = 0.5f;
                 LoadSaveScript.loadLevel = "Levels/Map1";
             }
@@ -833,6 +834,8 @@ namespace GangaGame
                         {
                             selectedObject = PhotonNetwork.Instantiate(buildedObject.name, hit.point, buildedObject.transform.rotation);
                             buildedObjectBuildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
+                            buildedObjectBuildingBehavior.uniqueId = uniqueIdIndex++;
+                            buildedObjectBuildingBehavior.prefabName = buildedObject.name;
 
                             // Set owner
                             if (PhotonNetwork.InRoom)
@@ -841,10 +844,7 @@ namespace GangaGame
                                 buildedObjectBuildingBehavior.ChangeOwner(userId, team);
 
                             // Set building as selected
-                            if (PhotonNetwork.InRoom)
-                                selectedObject.GetComponent<PhotonView>().RPC("SetAsSelected", PhotonTargets.All);
-                            else
-                                buildedObjectBuildingBehavior.SetAsSelected();
+                            buildedObjectBuildingBehavior.state = BuildingBehavior.BuildingState.Selected;
                         }
                         BuildingBehavior buildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
                         selectedObject.transform.position = hit.point;
@@ -901,7 +901,7 @@ namespace GangaGame
                                 DestyoyRanges(storeDict: ref greenProjectors);
 
                                 // Create building in project state
-                                buildedObjectBuildingBehavior.SetAsProject();
+                                buildedObjectBuildingBehavior.state = BuildingBehavior.BuildingState.Project;
 
                                 foreach (GameObject unit in selectedObjects)
                                 {
@@ -1090,6 +1090,7 @@ namespace GangaGame
             cacheMapsCount = mapCache.Count;
         }
 
+        List<GameObject> units = new List<GameObject>();
         public void UpdateStatistic()
         {
             UnityEngine.Profiling.Profiler.BeginSample("p UpdateMapsAndStatistic"); // Profiler
@@ -1133,16 +1134,17 @@ namespace GangaGame
             // Display binds
             for (int number = 1; number <= 9; number++)
             {
-                var units = unitsBinds[KeyCode.Alpha0 + number];
+                units.Clear();
+                units.AddRange(unitsBinds[KeyCode.Alpha0 + number]);
 
                 foreach (GameObject unit in units)
                 {
                     if (unit == null)
-                        units.Remove(unit);
+                        unitsBinds[KeyCode.Alpha0 + number].Remove(unit);
 
                     BaseBehavior unitBehaviorComponent = unit.GetComponent<BaseBehavior>();
                     if (!unitBehaviorComponent.live)
-                        units.Remove(unit);
+                        unitsBinds[KeyCode.Alpha0 + number].Remove(unit);
                 }
                 if (units.Count > 0)
                 {

@@ -69,7 +69,8 @@ public class TerrainGenerator : MonoBehaviour
     }
 
     Color[] newPixels;
-    bool initBlindTexture = false;
+    [HideInInspector]
+    public bool initBlindTexture = false;
     public void UpdateBlindTexture(bool init = false)
     {
         if (init)

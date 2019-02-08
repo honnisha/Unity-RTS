@@ -326,6 +326,17 @@ namespace GangaGame
                     soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
                     UpdateLobbyListView();
                 }
+                else if (className.Contains("restoreSettings") && UnityEngine.Input.GetMouseButtonUp(0))
+                {
+                    soundsSource.PlayOneShot(clickSound, PlayerPrefs.GetFloat("interfaceVolume"));
+                    SettingsScript.SetDefaultSettingsIfNotSetted(force: true);
+                    SettingsScript.CreateSettings("settingsContainer", true);
+                    musicSource.volume = PlayerPrefs.GetFloat("musicMenuVolume");
+                    var messageDiv = UI.document.getElementsByClassName("messageSettings")[0];
+                    messageDiv.innerHTML = "Default settings are set!";
+                    messageDiv.style.color = "green";
+                    return;
+                }
 
                 else if (className.Contains("createRoomDialog") && UnityEngine.Input.GetMouseButtonUp(0))
                 {
@@ -779,7 +790,7 @@ namespace GangaGame
             }
             else
             {
-                AddInfo(String.Format("Map size: {0}", mapNames[GameInfo.mapSize]));
+                AddInfo(String.Format("Map size: {0}", mapNames[GameInfo.mapSize - 1]));
             }
         }
 

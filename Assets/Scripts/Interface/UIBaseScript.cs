@@ -44,19 +44,30 @@ namespace UISpace
 
             UI.document.Run("ClearInfo");
 
+            bool userObjects = false;
+            if (cameraController.selectedObjects.Count > 0)
+            {
+                unitBaseBehaviorComponent = cameraController.selectedObjects[0].GetComponent<BaseBehavior>();
+                userObjects = unitBaseBehaviorComponent.team == cameraController.team && unitBaseBehaviorComponent.ownerId == cameraController.userId;
+            }
+
             DisplayObjectsInfo(cameraController.selectedObjects);
+            if (userObjects)
+            {
+                DisplayCommands(cameraController.selectedObjects);
+
+                DisplaySkillsInfo(cameraController.selectedObjects);
+            }
 
             if (cameraController.selectedObjects.Count == 1)
             {
                 DisplayDetailInfo(cameraController.selectedObjects[0]);
-                UpdateQueue(cameraController.selectedObjects[0]);
+                if (userObjects)
+                    UpdateQueue(cameraController.selectedObjects[0]);
             }
             else
-                UpdateQueue();
-
-            DisplayCommands(cameraController.selectedObjects);
-
-            DisplaySkillsInfo(cameraController.selectedObjects);
+                if(userObjects)
+                    UpdateQueue();
 
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
