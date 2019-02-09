@@ -90,7 +90,7 @@ namespace GangaGame
         public Texture mapTexture;
 
         Dictionary<string, List<Vector3>> spawnData;
-        bool[,] chanksView = new bool[0, 0];
+        static bool[,] chanksView = new bool[0, 0];
         float chunkSize = 11.0f;
         public bool debugVisionGrid = false;
         [HideInInspector]
@@ -110,18 +110,24 @@ namespace GangaGame
         private int keyPressed;
 
         UIBaseScript cameraUIBaseScript;
-        TerrainGenerator terrainGenerator;
+        [HideInInspector]
+        public TerrainGenerator terrainGenerator;
         public static float clickLoadTimer = 0.0f;
 
         RTS_Cam.RTS_Camera RTS_Camera;
+        HtmlElement gameInfoBlock;
 
         void Start()
         {
+            gameInfoBlock = (HtmlElement)UI.document.getElementsByClassName("gameInfo")[0];
+
             terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
             RTS_Camera = GetComponent<RTS_Cam.RTS_Camera>();
             cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
             audioSource = GetComponent<AudioSource>();
             interfaceSource = GetComponentInChildren<AudioSource>();
+
+            MapScript.CreateOrUpdateMaps(ref mapCache, update: true);
 
             UI.document.Run("CreateLoadingScreen", "Retrieving data");
 
@@ -279,9 +285,16 @@ namespace GangaGame
         private float countWorkersTimer = 0.0f;
         bool selectedObjectsChanged = false;
         Quaternion cameraRotation;
+        public static bool isHotkeysBlocked = false;
         // Update is called once per frame
         void Update()
         {
+            isHotkeysBlocked = false;
+            if (UI.document.getElementsByClassName("chatInput").length > 0)
+                isHotkeysBlocked = true;
+            else if (GameMenuBehavior.selectedWindowType != GameMenuBehavior.WindowType.None)
+                isHotkeysBlocked = true;
+
             activeOver = InputPointer.All[0].ActiveOver;
 
             if (activeOver != null && activeOver.className.Contains("units"))
@@ -296,27 +309,32 @@ namespace GangaGame
             if (viewCameraPosition.x != newViewCameraPosition.x && viewCameraPosition.y != newViewCameraPosition.y)
             {
                 viewCameraPosition = newViewCameraPosition;
+                UnityEngine.Profiling.Profiler.BeginSample("p UpdateVisionChunks"); // Profiler
                 UpdateVisionChunks();
+                UnityEngine.Profiling.Profiler.EndSample(); // Profiler
             }
 
             countWorkersTimer -= Time.deltaTime;
             if (countWorkersTimer <= 0)
             {
+                UnityEngine.Profiling.Profiler.BeginSample("p CreateOrUpdateMaps"); // Profiler
                 MapScript.CreateOrUpdateMaps(ref mapCache);
+                UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
                 UpdateStatistic();
                 countWorkersTimer = 1.0f;
             }
             UpdateMapsCamera();
 
+            UnityEngine.Profiling.Profiler.BeginSample("p Update resources stats"); // Profiler
             if (Time.frameCount % 15 == 0)
             {
-                UI.Variables["food"] = String.Format("{0:F0}", food);
-                if (workedOnFood > 0) UI.Variables["food"] += String.Format(" ({0})", workedOnFood);
-                UI.Variables["gold"] = String.Format("{0:F0}", gold);
-                if (workedOnGold > 0) UI.Variables["gold"] += String.Format(" ({0})", workedOnGold);
-                UI.Variables["wood"] = String.Format("{0:F0}", wood);
-                if (workedOnWood > 0) UI.Variables["wood"] += String.Format(" ({0})", workedOnWood);
+                UI.Variables["food"] = new StringBuilder().AppendFormat("{0:F0} ({1})", food, workedOnFood).ToString();
+                UI.Variables["gold"] = new StringBuilder().AppendFormat("{0:F0} ({1})", gold, workedOnGold).ToString();
+                UI.Variables["wood"] = new StringBuilder().AppendFormat("{0:F0} ({1})", wood, workedOnWood).ToString();
             }
+            UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
             UnityEngine.Profiling.Profiler.BeginSample("p Update events"); // Profiler
@@ -359,15 +377,6 @@ namespace GangaGame
             }
 
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
-        }
-
-        public bool IsHotkeysBlocked()
-        {
-            if (UI.document.getElementsByClassName("chatInput").length > 0)
-                return true;
-            else if (GetComponent<GameMenuBehavior>().selectedWindowType != GameMenuBehavior.WindowType.None)
-                return true;
-            return false;
         }
 
         private MusicType targetMusicType;
@@ -532,7 +541,7 @@ namespace GangaGame
             return new Vector3(x * chunkSize, 0, y * chunkSize);
         }
 
-        public Vector2 GetChunkByPosition(Vector3 position)
+        public static Vector2 GetChunkByPosition(Vector3 position)
         {
             if (position == null)
                 return new Vector2(0, 0);
@@ -550,7 +559,7 @@ namespace GangaGame
             return new Vector2(x, y);
         }
 
-        public bool IsInCameraView(Vector3 position)
+        public static bool IsInCameraView(Vector3 position)
         {
             Vector2 viewPosition = GetChunkByPosition(position);
             return chanksView[(int)viewPosition.x, (int)viewPosition.y];
@@ -618,7 +627,7 @@ namespace GangaGame
             {
                 if (maxTrees > 0 && index > maxTrees)
                 {
-                    Debug.Log(String.Format("Trees limit reached: {0} ({1})", maxTrees, newSpawnData["trees"].Count));
+                    Debug.Log(new StringBuilder(50).AppendFormat("Trees limit reached: {0} ({1})", maxTrees, newSpawnData["trees"].Count).ToString());
                     break;
                 }
 
@@ -694,12 +703,12 @@ namespace GangaGame
         }
 
         GameObject objectUnderMouse;
+        RaycastHit hit;
         public void SelectUnitsUpdate(bool isClickGUI)
         {
             UnityEngine.Profiling.Profiler.BeginSample("p SelectUnitsUpdate"); // Profiler
             clickTimer -= Time.deltaTime;
             bool selectObject = false;
-            RaycastHit hit;
             bool raycast = Physics.Raycast(Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition), out hit, 100);
             if (raycast)
             {
@@ -721,6 +730,7 @@ namespace GangaGame
             {
                 if (!isClickGUI && raycast)
                 {
+                    UnityEngine.Profiling.Profiler.BeginSample("p Left click select"); // Profiler
                     if (UnityEngine.Input.GetMouseButtonUp(0))
                         if (Vector3.Distance(mousePosition1, UnityEngine.Input.mousePosition) < 0.5)
                             if (hit.collider != null && tagsToSelect.Exists(x => (x.name == hit.transform.gameObject.tag)))
@@ -757,7 +767,9 @@ namespace GangaGame
                                     isSelecting = false;
                                 }
                             }
+                    UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
+                    UnityEngine.Profiling.Profiler.BeginSample("p Right click"); // Profiler
                     if (UnityEngine.Input.GetMouseButtonDown(1))
                     {
                         bool sendToQueue = UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift);
@@ -793,9 +805,11 @@ namespace GangaGame
                         }
                         SetOrderInFormation(formationList, hit.point, 1.3f, sendToQueue);
                     }
+                    UnityEngine.Profiling.Profiler.EndSample(); // Profiler
                 }
             }
 
+            UnityEngine.Profiling.Profiler.BeginSample("p Post update"); // Profiler
             // If we press the left mouse button, save mouse location and begin selection
             if (UnityEngine.Input.GetMouseButtonDown(0) && !UnityEngine.Input.GetKey(KeyCode.LeftAlt) && !selectObject && !isClickGUI)
             {
@@ -819,6 +833,8 @@ namespace GangaGame
                     }
                 }
             }
+            UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
 
@@ -1053,7 +1069,7 @@ namespace GangaGame
                                 MapScript.MoveCameraToPoint(GetCenterOfObjects(units));
                             tempKey = key;
                             keyPressed = number;
-                            keyTimer = 0.4f;
+                            keyTimer = 0.6f;
                         }
                     }
                 }
@@ -1081,6 +1097,7 @@ namespace GangaGame
         public Dictionary<HtmlElement, HtmlElement> mapCache = new Dictionary<HtmlElement, HtmlElement>();
         public void UpdateMapsCamera(bool force = false)
         {
+            UnityEngine.Profiling.Profiler.BeginSample("p UpdateMapsCamera"); // Profiler
             foreach (var mapInfo in mapCache)
             {
                 bool cameraMoved = (cameraRotation != mapcameraRotation || cameraPositionX != mapCameraPositionX && cameraPositionZ != mapCameraPositionZ);
@@ -1091,68 +1108,87 @@ namespace GangaGame
             mapCameraPositionZ = transform.position.z;
             mapcameraRotation = transform.rotation;
             cacheMapsCount = mapCache.Count;
+            UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
 
         List<GameObject> units = new List<GameObject>();
+        List<GameObject> freeWorkers = new List<GameObject>();
+        UnitBehavior unitUnitBehavior;
+        int[] cacheInfoButtons = new int[11];
+        HtmlElement[] cacheInfoButtonElements = new HtmlElement[11];
         public void UpdateStatistic()
         {
-            UnityEngine.Profiling.Profiler.BeginSample("p UpdateMapsAndStatistic"); // Profiler
+            UnityEngine.Profiling.Profiler.BeginSample("p Update free workers"); // Profiler
             bool workersCalculated = false;
-            List<GameObject> freeWorkers = new List<GameObject>();
+            freeWorkers.Clear();
 
             workedOnFood = 0; workedOnGold = 0; workedOnWood = 0;
             // Calculate statistic
             foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
             {
-                BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
                 if (!workersCalculated)
                 {
-                    UnitBehavior unitUnitBehavior = unit.GetComponent<UnitBehavior>();
+                    unitUnitBehavior = unit.GetComponent<UnitBehavior>();
                     if (unitUnitBehavior.interactObject != null)
                     {
-                        BaseBehavior interactObjectBehaviorComponent = unitUnitBehavior.interactObject.GetComponent<BaseBehavior>();
                         if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId)
                         {
-                            if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Food)
+                            BaseBehavior.ResourceType type = unitUnitBehavior.interactObject.GetComponent<BaseBehavior>().resourceCapacityType;
+                            if (type == BaseBehavior.ResourceType.Food)
                                 workedOnFood += 1;
-                            if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Gold)
+                            if (type == BaseBehavior.ResourceType.Gold)
                                 workedOnGold += 1;
-                            if (interactObjectBehaviorComponent.resourceCapacityType == BaseBehavior.ResourceType.Wood)
+                            if (type == BaseBehavior.ResourceType.Wood)
                                 workedOnWood += 1;
                         }
                     }
-                    if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId && unitUnitBehavior.resourceGatherInfo.Count > 0 && unitBaseBehavior.IsIdle())
+                    if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId && unitUnitBehavior.resourceGatherInfo.Count > 0 && unit.GetComponent<BaseBehavior>().IsIdle())
                         freeWorkers.Add(unit);
                 }
             }
             workersCalculated = true;
 
-            var gameInfoBlock = (HtmlElement)UI.document.getElementsByClassName("gameInfo")[0];
-            gameInfoBlock.innerHTML = "";
-
             // Display free workers
-            if (freeWorkers.Count > 0)
-                UIBaseScript.CreateInfoButton("workers", freeWorkers.Count, "F1", "");
+            if (cacheInfoButtons[10] != freeWorkers.Count && cacheInfoButtonElements[10] != null)
+            {
+                cacheInfoButtonElements[10].remove();
+                cacheInfoButtonElements[10] = null;
+                cacheInfoButtons[10] = 0;
+            }
+            if (freeWorkers.Count > 0 && cacheInfoButtons[10] != freeWorkers.Count)
+            {
+                cacheInfoButtonElements[10] = UIBaseScript.CreateInfoButton("workers", freeWorkers.Count, "F1", "");
+                cacheInfoButtons[10] = freeWorkers.Count;
+            }
+
+            UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
+            UnityEngine.Profiling.Profiler.BeginSample("p Update binds display"); // Profiler
 
             // Display binds
-            for (int number = 1; number <= 9; number++)
+            for (int i = 1; i <= 9; i++)
             {
                 units.Clear();
-                units.AddRange(unitsBinds[KeyCode.Alpha0 + number]);
+                units.AddRange(unitsBinds[KeyCode.Alpha0 + i]);
 
                 foreach (GameObject unit in units)
-                {
-                    if (unit == null)
-                        unitsBinds[KeyCode.Alpha0 + number].Remove(unit);
+                    if (unit == null || !unit.GetComponent<BaseBehavior>().live)
+                        unitsBinds[KeyCode.Alpha0 + i].Remove(unit);
 
-                    BaseBehavior unitBehaviorComponent = unit.GetComponent<BaseBehavior>();
-                    if (!unitBehaviorComponent.live)
-                        unitsBinds[KeyCode.Alpha0 + number].Remove(unit);
-                }
-                if (units.Count > 0)
+                UnityEngine.Profiling.Profiler.BeginSample("p CreateInfoButton"); // Profiler
+                if (cacheInfoButtons[i - 1] != units.Count && cacheInfoButtonElements[i - 1] != null)
                 {
-                    UIBaseScript.CreateInfoButton("solders", units.Count, number.ToString(), units[0].GetComponent<BaseBehavior>().skillInfo.imagePath);
+                    UI.document.removeChild(cacheInfoButtonElements[i - 1]);
+                    cacheInfoButtonElements[i - 1] = null;
+                    cacheInfoButtons[i - 1] = 0;
                 }
+
+                if (units.Count > 0 && cacheInfoButtons[i - 1] != units.Count)
+                {
+                    cacheInfoButtonElements[i - 1] = UIBaseScript.CreateInfoButton("solders", units.Count, i.ToString(), units[0].GetComponent<BaseBehavior>().skillInfo.imagePath);
+                    cacheInfoButtons[i - 1] = units.Count;
+                }
+                UnityEngine.Profiling.Profiler.EndSample(); // Profiler
             }
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
@@ -1479,6 +1515,50 @@ namespace GangaGame
                     selectedObjectsChanged = true;
                 }
             }
+        }
+
+        public static Dictionary<string, Dictionary<BaseSkillScript.UpgradeType, int>> playersUpgrades = new Dictionary<string, Dictionary<BaseSkillScript.UpgradeType, int>>();
+        [PunRPC]
+        public static void _AddUpgrade(string userId, BaseSkillScript.UpgradeType upgradeType)
+        {
+            if (!playersUpgrades.ContainsKey(userId))
+                playersUpgrades[userId] = new Dictionary<BaseSkillScript.UpgradeType, int>();
+
+            if(!playersUpgrades[userId].ContainsKey(upgradeType))
+                playersUpgrades[userId][upgradeType] = 1;
+            else
+                playersUpgrades[userId][upgradeType] += 1;
+        }
+        public void AddUpgrade(string userId, BaseSkillScript.UpgradeType upgradeType)
+        {
+            if (PhotonNetwork.InRoom)
+                photonView.RPC("_AddUpgrade", PhotonTargets.All, userId, upgradeType);
+            else
+                _AddUpgrade(userId, upgradeType);
+        }
+        public static Dictionary<BaseSkillScript.UpgradeType, int> GetUpgrades(string userId)
+        {
+            if (!playersUpgrades.ContainsKey(userId))
+                return new Dictionary<BaseSkillScript.UpgradeType, int>();
+
+            return playersUpgrades[userId];
+        }
+        public static int GetUpgradeLevel(string userId, BaseSkillScript.UpgradeType upgradeType)
+        {
+            if (!playersUpgrades.ContainsKey(userId))
+                return 0;
+            if (!playersUpgrades[userId].ContainsKey(upgradeType))
+                return 0;
+            return playersUpgrades[userId][upgradeType];
+        }
+
+        public static bool GlobalUpgradeCheck(string unitName, int min, int max, BaseSkillScript.UpgradeType upgradeType, string ownerId)
+        {
+            int upgradeLevel = GetUpgradeLevel(ownerId, upgradeType);
+
+            if (upgradeLevel >= min && (upgradeLevel <= max || max == -1))
+                return true;
+            return false;
         }
     }
 }

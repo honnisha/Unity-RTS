@@ -31,7 +31,7 @@ namespace GangaGame
         public SkillType skillType = SkillType.Skill;
     }
 
-    public enum SkillConditionType { None, TearCheck, OnlyOneAtAQueue, OnlyOne,  };
+    public enum SkillConditionType { None, TearCheck, OnlyOneAtAQueue, OnlyOne, GlobalUpgradeCheck };
     [System.Serializable]
     public class SkillCondition
     {
@@ -65,16 +65,21 @@ namespace GangaGame
         public List<SkillCondition> _skillConditions;
         public List<SkillCondition> skillConditions { get { return _skillConditions; } set { _skillConditions = value; } }
         
-        public enum SkillActionType { None, UpgradeTear, };
-        public SkillActionType skillActionType = SkillActionType.None;
+        public enum UpgradeType { None, UpgradeTear, Food, Gold, Wood, Farm };
+        public UpgradeType upgradeType = UpgradeType.None;
 
         public virtual bool Activate(GameObject sender)
         {
-            if (skillActionType == SkillActionType.UpgradeTear)
+            if (upgradeType == UpgradeType.UpgradeTear)
             {
                 BaseBehavior baseBehaviorComponent = sender.GetComponent<BaseBehavior>();
                 baseBehaviorComponent.tear += 1;
                 baseBehaviorComponent.UpdateTearDisplay();
+            }
+            if (upgradeType != UpgradeType.None)
+            {
+                CameraController cameraController = Camera.main.GetComponent<CameraController>();
+                cameraController.AddUpgrade(cameraController.userId, upgradeType);
             }
             return true;
         }
@@ -99,7 +104,7 @@ namespace GangaGame
                 skillInfo = senderBaseBehaviorComponent.skillInfo;
             }
             
-            object[] errorInfo = BaseSkillScript.GetSkillErrors(
+            object[] errorInfo = GetSkillErrors(
                 condList: skillConditions, team: baseBehaviorComponent.team,
                 skillName: skillInfo.uniqueName, skillObject: skillObject, skillSender: sender);
             SkillCondition skillCondition = (SkillCondition)errorInfo[0];
@@ -117,29 +122,43 @@ namespace GangaGame
         }
 
         public static bool IsHasUnitWithTear(
-            string unitName, int minTear, int maxTear, int TCTeam, GameObject skillSender = null, GameObject skillObject = null)
+            string unitName, int minTear, int maxTear, GameObject skillSender = null, GameObject skillObject = null)
         {
             BaseBehavior baseBehaviorComponent = skillSender.GetComponent<BaseBehavior>();
-            if (baseBehaviorComponent.tear >= minTear && (baseBehaviorComponent.tear <= maxTear || maxTear == -1))
-                return true;
+            if (unitName != "")
+            {
+                foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Building"))
+                {
+                    BaseBehavior unitBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                    if (unitBehaviorComponent != null && unitBehaviorComponent.skillInfo.uniqueName == unitName && unitBehaviorComponent.ownerId == baseBehaviorComponent.ownerId)
+                        if (unitBehaviorComponent.tear >= minTear && (unitBehaviorComponent.tear <= maxTear || maxTear == -1))
+                            return true;
+                }
+            }
+            else
+            {
+                if (baseBehaviorComponent.tear >= minTear && (baseBehaviorComponent.tear <= maxTear || maxTear == -1))
+                    return true;
+            }
             return false;
         }
         
-        public static bool IsQueueContain(GameObject skillSender, int team, string skillName)
+        public static bool IsQueueContain(GameObject skillSender, string userId, string skillName)
         {
             BaseBehavior baseBehaviorComponent = skillSender.GetComponent<BaseBehavior>();
-            if (baseBehaviorComponent != null)
+            if (baseBehaviorComponent != null && baseBehaviorComponent.ownerId == userId)
                 return baseBehaviorComponent.IsQueueContain(skillName);
             return false;
         }
 
-        public static bool IsAnyQueueContain(int team, string skillName)
+        public static bool IsAnyQueueContain(string userId, string skillName)
         {
             foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Building"))
             {
                 BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-                if (baseBehaviorComponent != null)
-                    return baseBehaviorComponent.IsQueueContain(skillName);   
+                if (baseBehaviorComponent != null && baseBehaviorComponent.ownerId == userId)
+                    if (baseBehaviorComponent.IsQueueContain(skillName))
+                        return true;
             }
             return false;
         }
@@ -154,26 +173,42 @@ namespace GangaGame
                 {
                     bool hasUnitWithTear = false;
                     if (skillObject.GetComponent<BaseBehavior>() != null)
-                        hasUnitWithTear = BaseBehavior.IsHasUnitWithTear(cond.name, cond.minValue, cond.maxValue, team, skillSender);
+                        hasUnitWithTear = BaseBehavior.IsHasUnitWithTear(cond.name, cond.minValue, cond.maxValue, skillSender);
                     if (skillObject.GetComponent<BaseSkillScript>() != null)
-                        hasUnitWithTear = BaseSkillScript.IsHasUnitWithTear(cond.name, cond.minValue, cond.maxValue, team, skillSender, skillObject);
+                        hasUnitWithTear = BaseSkillScript.IsHasUnitWithTear(cond.name, cond.minValue, cond.maxValue, skillSender, skillObject);
 
                     if (!hasUnitWithTear)
                     {
-                        string[] TCErrors = new string[] { "first", "second", "third", "fourth" };
                         errorInfo[0] = cond;
-                        errorInfo[1] = String.Format("You need to have at least one {1} with {0} upgrade", TCErrors[cond.maxValue], cond.readableName);
+                        string[] TCErrors = new string[] { "first", "second", "third", "fourth" };
+                        errorInfo[1] = String.Format("You need to have at least one {1} with {0} upgrade", TCErrors[cond.minValue], cond.readableName);
+                        return errorInfo;
+                    }
+                }
+                if(cond.type == SkillConditionType.GlobalUpgradeCheck)
+                {
+                    bool check = false;
+                    //if (skillObject.GetComponent<BaseBehavior>() != null)
+                    //    hasUnitWithTear = BaseBehavior.IsHasUnitWithTear(cond.name, cond.minValue, cond.maxValue, team, skillSender);
+                    if (skillObject.GetComponent<BaseSkillScript>() != null)
+                        check = CameraController.GlobalUpgradeCheck(
+                            cond.name, cond.minValue, cond.maxValue, upgradeType: skillObject.GetComponent<BaseSkillScript>().upgradeType, ownerId: skillSender.GetComponent<BaseBehavior>().ownerId);
+
+                    if (!check)
+                    {
+                        errorInfo[0] = cond;
+                        errorInfo[1] = "You already has this upgrade";
                         return errorInfo;
                     }
                 }
                 
-                if(cond.type == SkillConditionType.OnlyOneAtAQueue && IsQueueContain(skillSender, team, skillName))
+                if(cond.type == SkillConditionType.OnlyOneAtAQueue && IsQueueContain(skillSender, skillSender.GetComponent<BaseBehavior>().ownerId, skillName))
                 {
                     errorInfo[0] = cond;
                     errorInfo[1] = "This upgrade can be done in a single copy in one building";
                     return errorInfo;
                 }
-                if(cond.type == SkillConditionType.OnlyOne && IsAnyQueueContain(team, skillName))
+                if(cond.type == SkillConditionType.OnlyOne && IsAnyQueueContain(skillSender.GetComponent<BaseBehavior>().ownerId, skillName))
                 {
                     errorInfo[0] = cond;
                     errorInfo[1] = "This upgrade can be done in a single copy";

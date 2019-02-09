@@ -630,6 +630,8 @@ html {
         menuElement.className = "clckable hotkey info";
         menuElement.innerText = hotkey;
         elementHolder.appendChild(menuElement);
+
+		return elementHolder;
 	}
 	function DisplayBigMapWindow() {
         var htmlBlock = document.getElementsByTagName("html")[0];
@@ -638,13 +640,13 @@ html {
         windowBlock.className = "window";
         htmlBlock.appendChild(windowBlock);
 
-        var bapBlock = document.createElement("div");
-        bapBlock.className = "bigMap";
-        windowBlock.appendChild(bapBlock);
+        var holderBlock = document.createElement("div");
+        holderBlock.className = "bigMap";
+        windowBlock.appendChild(holderBlock);
 
         var mapBlock = document.createElement("div");
         mapBlock.className = "mapBlock";
-        bapBlock.appendChild(mapBlock);
+        holderBlock.appendChild(mapBlock);
 		
         var element = document.createElement("img");
         element.className = "mapVision clckable";
@@ -782,24 +784,25 @@ html {
         if (allElementsBlock.length > 0)
 			allElementsBlock[0].innerHTML = "";
 	}
+	var element;
+	var createdImage;
 	function DrawInfo(parentElementClass, blockImagesName, detailInfo, drawImage, dinamicInfo, uniqueName, readableName, readableDescription, errorMessage, imagePath, hotkey, costInfo, tableStatistics, drawHP, imageID) 
 	{
         var parentElement = document.getElementsByClassName(parentElementClass)[0];
-
         if (detailInfo)
         {
 			if (drawHP)
 			{
-				var healthDiv = document.createElement("div");
-				healthDiv.className = "healthback";
-				healthDiv.innerHTML = "<div class=\"health unitHealth\"></div>";
-				parentElement.appendChild(healthDiv);
+				element = document.createElement("div");
+				element.className = "healthback";
+				element.innerHTML = "<div class=\"health unitHealth\"></div>";
+				parentElement.appendChild(element);
 			}
 
-            var elementDiv = document.createElement("div");
-            elementDiv.className = "title";
-            elementDiv.innerHTML = readableName;
-            parentElement.appendChild(elementDiv);
+            element = document.createElement("div");
+            element.className = "title";
+            element.innerHTML = readableName;
+            parentElement.appendChild(element);
         }
 		
 		if (blockImagesName != "")
@@ -822,7 +825,6 @@ html {
 			parentElement = elementsBlock;
 		}
 
-		var createdImage;
         if (drawImage)
         {
             var elementContent = document.createElement("div");
@@ -839,10 +841,10 @@ html {
             elementContent.appendChild(createdImage);
             if(hotkey != "")
             {
-                var hotkeyDiv = document.createElement("div");
-                hotkeyDiv.className = "hotkey";
-                hotkeyDiv.innerHTML = hotkey;
-                elementContent.appendChild(hotkeyDiv);
+                element = document.createElement("div");
+                element.className = "hotkey";
+                element.innerHTML = hotkey;
+                elementContent.appendChild(element);
             }
         }
 
@@ -855,10 +857,10 @@ html {
             infoDiv.className = "infoBlock";
             parentElement.appendChild(infoDiv);
 
-            var statusticDiv = document.createElement("div");
-            statusticDiv.className = "description";
-            statusticDiv.innerHTML = readableDescription;
-            infoDiv.appendChild(statusticDiv);
+            element = document.createElement("div");
+            element.className = "description";
+            element.innerHTML = readableDescription;
+            infoDiv.appendChild(element);
 
             if (dinamicInfo)
             {
@@ -869,34 +871,34 @@ html {
 
             if (costInfo != null && costInfo.length > 0)
             {
-                var detailCostsDiv = document.createElement("div");
-                detailCostsDiv.className = "stats costs";
+                element = document.createElement("div");
+                element.className = "stats costs";
                 for (var index in costInfo)
                 {
                     var statsDiv = document.createElement("p");
                     statsDiv.innerHTML = costInfo[index];
-                    detailCostsDiv.appendChild(statsDiv);
+                    element.appendChild(statsDiv);
                 }
-                parentElement.appendChild(detailCostsDiv);
+                parentElement.appendChild(element);
             }
             if (errorMessage != "")
             {
-                var errorMessageDiv = document.createElement("div");
-                errorMessageDiv.className = "errorMessage";
-                errorMessageDiv.innerHTML = errorMessage;
-                parentElement.appendChild(errorMessageDiv);
+                element = document.createElement("div");
+                element.className = "errorMessage";
+                element.innerHTML = errorMessage;
+                parentElement.appendChild(element);
             }
             if (tableStatistics != null && tableStatistics.length > 0)
             {
-                var detailStatusticsDiv = document.createElement("div");
-                detailStatusticsDiv.className = "stats";
+                element = document.createElement("div");
+                element.className = "stats";
                 for (var index in tableStatistics)
                 {
                     var stats = document.createElement("p");
                     stats.innerHTML = tableStatistics[index];
-                    detailStatusticsDiv.appendChild(stats);
+                    element.appendChild(stats);
                 }
-                parentElement.appendChild(detailStatusticsDiv);
+                parentElement.appendChild(element);
             }
         }
 		return createdImage;
@@ -975,10 +977,10 @@ html {
 			<div class="mapBlock">
 				<img class="mapVision clckable">
 				</img>
-				<img class="mapHolder clckable">
-				</img>
-				<img class="blindFog clckable">
-				</img>
+				<div class="mapHolder clckable">
+				</div>
+				<div class="blindFog clckable">
+				</div>
 				<div class="units clckable">
 				</div>
 			</div>

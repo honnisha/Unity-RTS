@@ -68,7 +68,7 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
 
         base.Awake();
 
-        UpdateIsInCameraView(cameraController.IsInCameraView(transform.position));
+        UpdateIsInCameraView(CameraController.IsInCameraView(transform.position));
         UpdateVision();
 
         if (DisableUpdate())
@@ -83,7 +83,7 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
     }
 
     // Update is called once per frame
-    override public void Update()
+    public void Update()
     {
         UpdateDestroyBehavior();
         
@@ -103,9 +103,12 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
 
         UpdatePointMarker();
 
-        UpdateAttackBehavior();
+        if (state == BuildingState.Builded)
+        {
+            UpdateAttackBehavior();
 
-        DoAttack();
+            UpdateAttack();
+        }
     }
 
     void UpdateAttackBehavior()
@@ -129,6 +132,7 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
             {
                 if (hit.transform.gameObject.GetHashCode() == target.GetHashCode())
                 {
+                    interactType = InteractigType.Attacking;
                     Attack(target);
                 }
             }
@@ -137,6 +141,11 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
                 ActionIsDone();
             }
         }
+    }
+
+    public override void ActionIsDone(InteractigType stopActionType = InteractigType.None)
+    {
+        interactType = InteractigType.None;
     }
 
     public override void Attack(GameObject target)
@@ -309,7 +318,7 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
                 live = false;
                 gameObject.layer = LayerMask.NameToLayer("Project");
 
-                if (team == cameraController.team)
+                if (ownerId == cameraController.userId)
                 {
                     NavMeshObstacle navMesh = GetComponent<NavMeshObstacle>();
                     if (navMesh != null)
@@ -552,7 +561,7 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
         if (!unitSelectionComponent.isSelected)
             return result;
         
-        if (team != cameraController.team || cameraController.IsHotkeysBlocked())
+        if (team != cameraController.team || CameraController.isHotkeysBlocked)
             return result;
 
         bool[] skillResult = ActivateSkills(commandName);

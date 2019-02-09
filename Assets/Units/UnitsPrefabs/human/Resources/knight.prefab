@@ -811,6 +811,7 @@ MonoBehaviour:
   canBeSelected: 1
   isSelected: 0
   projector: {fileID: 1503838075641236}
+  intersection: 0
 --- !u!114 &114024932627925992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -966,7 +967,14 @@ MonoBehaviour:
     lastSoundIndex: 0
   isInCameraView: 0
   allObjects: []
-  statisticStrings: []
+  statisticStrings:
+  - 'Att. type: Cutting'
+  - 'Damage: 10'
+  - 'Attack speed: 2.0 sec'
+  - 'Stabbing resist: 40%'
+  - 'Cutting resist: 60%'
+  - 'Biting resist: 40%'
+  - 'Magic resist: 30%'
   buildHpPerSecond: 2.5
   buildingTool:
     prefab: {fileID: 0}
@@ -1001,8 +1009,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 240754948708690846}
-  viewIdField: 0
-  InstantiationId: 15
+  viewIdField: 12
+  InstantiationId: 12
   isRuntimeInstantiated: 0
 --- !u!114 &240754948708690846
 MonoBehaviour:

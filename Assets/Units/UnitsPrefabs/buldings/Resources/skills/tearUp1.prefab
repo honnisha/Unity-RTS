@@ -46,7 +46,7 @@ MonoBehaviour:
   _skillInfo:
     uniqueName: upgradeTear1
     readableName: Upgrade
-    readableDescription: Upgrade
+    readableDescription: Upgrade tear to level 2
     imagePath: skills/upgrade
     timeToBuild: 30
     costFood: 200
@@ -67,4 +67,4 @@ MonoBehaviour:
     maxValue: 0
     readableName: 
     notDisplayWhenFalse: 1
-  skillActionType: 1
+  upgradeType: 1

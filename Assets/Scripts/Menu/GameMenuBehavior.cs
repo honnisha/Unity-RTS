@@ -11,7 +11,7 @@ namespace GangaGame
     {
         public enum WindowType { None, MainMenu, BigMap, Settings, LoadSave };
         [HideInInspector]
-        public WindowType selectedWindowType = WindowType.None;
+        public static WindowType selectedWindowType = WindowType.None;
         public Dictionary<WindowType, List<object>> menuInfos = new Dictionary<WindowType, List<object>>();
 
         private void Start()
@@ -103,7 +103,7 @@ namespace GangaGame
             else if (windowType == WindowType.BigMap)
             {
                 UI.document.Run("DisplayBigMapWindow");
-                MapScript.CreateOrUpdateMaps(ref cameraController.mapCache);
+                MapScript.CreateOrUpdateMaps(ref cameraController.mapCache, update: true);
             }
             else if (windowType == WindowType.Settings)
             {
@@ -128,6 +128,9 @@ namespace GangaGame
                 
             if (UI.document.getElementsByClassName("secondWindow").length > 0)
                 UI.document.getElementsByClassName("secondWindow")[0].remove();
+
+            if (selectedWindowType == WindowType.BigMap)
+                MapScript.UpdateMaps();
         }
 
         void MenuUIClick(MouseEvent mouseEvent)

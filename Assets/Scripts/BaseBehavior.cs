@@ -191,7 +191,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     [HideInInspector]
     public int attackedTeam = 0;
     [HideInInspector]
-    public WorldUI objectUIInfo;
+    public WorldUI objectUIInfo = null;
     [HideInInspector]
     public GameObject pointMarker;
     [HideInInspector]
@@ -284,21 +284,6 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     public virtual void UpdateIsInCameraView(bool newState) { }
 
     private bool isRender = true;
-    virtual public void Update()
-    {
-        UpdateVision();
-
-        UpdateDestroyBehavior();
-
-        UpdateVisionTool();
-
-        UpdateHealth();
-
-        UpdateProductionQuery();
-
-        if (unitSelectionComponent.isSelected && UnityEngine.Input.anyKeyDown)
-            UICommand(null);
-    }
 
     public void SendSoundEvent(SoundEventType soundEventType, bool dropCount = false)
     {
@@ -389,7 +374,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         interactType = InteractigType.Attacking;
     }
 
-    public void DoAttack()
+    public void UpdateAttack()
     {
         if (interactType == InteractigType.Attacking && target != null)
         {
@@ -474,49 +459,41 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     public void UpdateHealth()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateHealth"); // Profiler
-        if (IsInCameraView() && HTMLHealthFile != null)
-        {
-            if (IsHealthVisible() && live && IsVisible() && IsInCameraView())
-            {
-                if (objectUIInfo == null && HTMLHealthFile != null)
-                {
-                    objectUIInfo = new WorldUI(HTMLHealthSize.x, HTMLHealthSize.y);
-                    objectUIInfo.FaceCamera(Camera.main);
-                    // objectUIInfo.ParentToOrigin(gameObject);
-                    objectUIInfo.PixelPerfect = true;
-                    objectUIInfo.transform.position = gameObject.transform.position;
-                    objectUIInfo.transform.position += InfoHTMLOffset;
-                    objectUIInfo.document.innerHTML = HTMLHealthFile.text;
-                    objectUIInfo.Layer = LayerMask.NameToLayer("HP");
+        if (HTMLHealthFile == null)
+            return;
 
-                    objectUIInfo.document.getElementById("health").style.background = GetDisplayColor(false);
-                    tempHealth = 0.0f;
-                }
-            }
-            else
+        if (IsInCameraView() && IsHealthVisible() && live && IsVisible())
+        {
+            if (objectUIInfo == null)
             {
-                if (objectUIInfo != null)
-                {
-                    objectUIInfo.Destroy();
-                    objectUIInfo = null;
-                }
+                UnityEngine.Profiling.Profiler.BeginSample("p Create"); // Profiler
+
+                objectUIInfo = new WorldUI(HTMLHealthSize.x, HTMLHealthSize.y);
+                objectUIInfo.FaceCamera(Camera.main);
+                // objectUIInfo.ParentToOrigin(gameObject);
+                objectUIInfo.PixelPerfect = true;
+                objectUIInfo.Layer = LayerMask.NameToLayer("HP");
+                objectUIInfo.document.innerHTML = HTMLHealthFile.text;
+
+                objectUIInfo.document.getElementById("health").style.background = GetDisplayColor(false);
+                tempHealth = 0.0f;
+
+                UnityEngine.Profiling.Profiler.EndSample(); // Profiler
             }
-            if (objectUIInfo != null)
+            if (!objectUIInfo.gameObject.activeSelf)
+                objectUIInfo.gameObject.SetActive(true);
+
+            objectUIInfo.transform.position = gameObject.transform.position + InfoHTMLOffset;
+            
+            if (tempHealth != health)
             {
-                objectUIInfo.transform.position = gameObject.transform.position;
-                objectUIInfo.transform.position += InfoHTMLOffset;
-                if (tempHealth != health)
-                {
-                    objectUIInfo.document.getElementById("health").style.width = String.Format("{0:F0}%", health / maxHealth * 100);
-                    tempHealth = health;
-                }
+                objectUIInfo.document.getElementById("health").style.width = new StringBuilder(5).AppendFormat("{0:F0}%", health / maxHealth * 100).ToString();
+                tempHealth = health;
             }
         }
         else if (objectUIInfo != null)
-        {
-            objectUIInfo.Destroy();
-            objectUIInfo = null;
-        }
+            objectUIInfo.gameObject.SetActive(false);
+
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
@@ -556,6 +533,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
             foreach (Renderer render in renders)
                 render.enabled = isRender;
 
+            UpdateHealth();
             // foreach (Collider collider in gameObject.GetComponents<Collider>().Concat(gameObject.GetComponentsInChildren<Collider>()).ToArray())
             //     collider.enabled = IsVisible() || beenSeen;
         }
@@ -723,6 +701,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         ref List<GameObject> objects, Vector3 position, float radius, bool live = true, int team = -1, 
         bool units = true, bool buildings = true, bool ambient = true, int teamException = -1, int teamGT = -100)
     {
+        UnityEngine.Profiling.Profiler.BeginSample("p GetObjectsInRange"); // Profiler
         objects.Clear();
         int unitsMask = 1 << LayerMask.NameToLayer("Unit");
         int buildingMask = 1 << LayerMask.NameToLayer("Building");
@@ -751,12 +730,14 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
 
             objects.Add(collider.gameObject);
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
     [HideInInspector]
     public List<GameObject> allObjects = new List<GameObject>();
     public bool AttackNearEnemies(Vector3 centerOfSearch, float range, int attackTeam = -1, float randomRange = 0.0f, bool buildings = false)
     {
+        allObjects.Clear();
         UnitStatistic statisic = GetStatisticsInfo();
         if (statisic.attackType == AttackType.None && interactType != InteractigType.Attacking)
             return false;
@@ -1045,11 +1026,11 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
             string notEnoughMessage = "Not enough resources!";
 
             if (cameraController.food < food)
-                notEnoughMessage = String.Format("{0} food: {1:F0}", notEnoughMessage, food - cameraController.food);
+                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} food: {1:F0}", notEnoughMessage, food - cameraController.food).ToString();
             if (cameraController.gold < gold)
-                notEnoughMessage = String.Format("{0} gold: {1:F0}", notEnoughMessage, gold - cameraController.gold);
+                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} gold: {1:F0}", notEnoughMessage, gold - cameraController.gold).ToString();
             if (cameraController.wood < wood)
-                notEnoughMessage = String.Format("{0} wood: {1:F0}", notEnoughMessage, wood - cameraController.wood);
+                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} wood: {1:F0}", notEnoughMessage, wood - cameraController.wood).ToString();
 
             cameraUIBaseScript.DisplayMessage(notEnoughMessage, 3000, "notEnoughResources");
             return false;
@@ -1060,12 +1041,13 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         return true;
     }
 
-    public static bool IsHasUnitWithTear(string unitName, int minTear, int maxTear, int TCTeam, GameObject skillSender = null)
+    public static bool IsHasUnitWithTear(string unitName, int minTear, int maxTear, GameObject skillSender = null)
     {
+        BaseBehavior skillSenderBehaviorComponent = skillSender.GetComponent<BaseBehavior>();
         foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Building"))
         {
             BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-            if (baseBehaviorComponent.skillInfo.uniqueName == unitName && baseBehaviorComponent.team == TCTeam &&
+            if (baseBehaviorComponent.skillInfo.uniqueName == unitName && baseBehaviorComponent.ownerId == skillSenderBehaviorComponent.ownerId &&
                 (baseBehaviorComponent.tear >= minTear && (baseBehaviorComponent.tear <= maxTear || maxTear == 0)))
                 return true;
         }

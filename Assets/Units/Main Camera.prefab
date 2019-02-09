@@ -187,9 +187,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d765c0035e3bfc84ca3e74a6b825f029, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  food: 240
-  gold: 200
-  wood: 200
+  food: 200
+  gold: 0
+  wood: 0
   soundsInfo:
   - type: 1
     soundList:
@@ -219,9 +219,11 @@ MonoBehaviour:
     distance: 2
   mapTexture: {fileID: 8400000, guid: 56adb43fe41a4764c9143e58c71146e9, type: 2}
   debugVisionGrid: 0
+  uniqueIdIndex: 0
   rangeProjector: {fileID: 7730875611660029107, guid: 1d527aad98412bd4f93c76f6d05dc889,
     type: 3}
   selectedObjects: []
+  terrainGenerator: {fileID: 0}
 --- !u!114 &114047147111761268
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -467,7 +469,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a7210a47ad01534691dbd08e511b511, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectedWindowType: 0
 --- !u!1 &1873556169503206
 GameObject:
   m_ObjectHideFlags: 0

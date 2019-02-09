@@ -313,6 +313,7 @@ MonoBehaviour:
   canBeSelected: 1
   isSelected: 0
   projector: {fileID: 593}
+  intersection: 0
 --- !u!114 &2998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -726,6 +727,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1965}
     m_Modifications:
+    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
+      propertyPath: m_Name
+      value: palisade
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.7766193
@@ -782,10 +787,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 95.637634
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
-      propertyPath: m_Name
-      value: palisade
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
 --- !u!1 &548174082999064699 stripped
@@ -807,6 +808,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2339}
     m_Modifications:
+    - target: {fileID: 100000, guid: 1de0483c1b19cfb4ea269abedf6c0e9c, type: 3}
+      propertyPath: m_Name
+      value: hut (1)
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1de0483c1b19cfb4ea269abedf6c0e9c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.1370083
@@ -863,10 +868,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 2.0892262
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 1de0483c1b19cfb4ea269abedf6c0e9c, type: 3}
-      propertyPath: m_Name
-      value: hut (1)
-      objectReference: {fileID: 0}
     - target: {fileID: 2300000, guid: 1de0483c1b19cfb4ea269abedf6c0e9c, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -904,6 +905,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2339}
     m_Modifications:
+    - target: {fileID: 100000, guid: 1de0483c1b19cfb4ea269abedf6c0e9c, type: 3}
+      propertyPath: m_Name
+      value: hut
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1de0483c1b19cfb4ea269abedf6c0e9c, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.1371644
@@ -960,10 +965,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 2.0892255
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 1de0483c1b19cfb4ea269abedf6c0e9c, type: 3}
-      propertyPath: m_Name
-      value: hut
-      objectReference: {fileID: 0}
     - target: {fileID: 2300000, guid: 1de0483c1b19cfb4ea269abedf6c0e9c, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -1001,6 +1002,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1965}
     m_Modifications:
+    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
+        type: 3}
+      propertyPath: m_Name
+      value: barrel_wood_01_a (1)
+      objectReference: {fileID: 0}
     - target: {fileID: 8416126871334850896, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1070,11 +1076,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 0.9351043
-      objectReference: {fileID: 0}
-    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
-        type: 3}
-      propertyPath: m_Name
-      value: barrel_wood_01_a (1)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ea189f7ca4849b8489ccf701f5a3b0e6, type: 3}
@@ -1241,6 +1242,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1965}
     m_Modifications:
+    - target: {fileID: 100000, guid: 51ef78bc95cd5de4ab16b553f7117a49, type: 3}
+      propertyPath: m_Name
+      value: tent
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 51ef78bc95cd5de4ab16b553f7117a49, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.2262172
@@ -1297,10 +1302,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.7004352
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 51ef78bc95cd5de4ab16b553f7117a49, type: 3}
-      propertyPath: m_Name
-      value: tent
-      objectReference: {fileID: 0}
     - target: {fileID: 2300000, guid: 51ef78bc95cd5de4ab16b553f7117a49, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -1330,6 +1331,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2339}
     m_Modifications:
+    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
+        type: 3}
+      propertyPath: m_Name
+      value: barrel_wood_01_a (2)
+      objectReference: {fileID: 0}
     - target: {fileID: 8416126871334850896, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1399,11 +1405,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 0.9351047
-      objectReference: {fileID: 0}
-    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
-        type: 3}
-      propertyPath: m_Name
-      value: barrel_wood_01_a (2)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ea189f7ca4849b8489ccf701f5a3b0e6, type: 3}
@@ -1495,6 +1496,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2339}
     m_Modifications:
+    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
+      propertyPath: m_Name
+      value: palisade (4)
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.89014095
@@ -1551,10 +1556,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 95.637634
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
-      propertyPath: m_Name
-      value: palisade (4)
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
 --- !u!1 &4236042655385596386 stripped
@@ -1576,6 +1577,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2339}
     m_Modifications:
+    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
+      propertyPath: m_Name
+      value: palisade (5)
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.0558105
@@ -1632,10 +1637,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 95.637634
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
-      propertyPath: m_Name
-      value: palisade (5)
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
 --- !u!4 &4575698214275910584 stripped
@@ -1657,6 +1658,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1965}
     m_Modifications:
+    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
+        type: 3}
+      propertyPath: m_Name
+      value: barrel_wood_01_a
+      objectReference: {fileID: 0}
     - target: {fileID: 8416126871334850896, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1726,11 +1732,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 0.9351043
-      objectReference: {fileID: 0}
-    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
-        type: 3}
-      propertyPath: m_Name
-      value: barrel_wood_01_a
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ea189f7ca4849b8489ccf701f5a3b0e6, type: 3}
@@ -1822,6 +1823,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2339}
     m_Modifications:
+    - target: {fileID: 1134878426108270, guid: c2b8560e254161b44b991e6766faecbf, type: 3}
+      propertyPath: m_Name
+      value: WoodenTower
+      objectReference: {fileID: 0}
     - target: {fileID: 4049070875499776, guid: c2b8560e254161b44b991e6766faecbf, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.645
@@ -1878,10 +1883,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.6037968
       objectReference: {fileID: 0}
-    - target: {fileID: 1134878426108270, guid: c2b8560e254161b44b991e6766faecbf, type: 3}
-      propertyPath: m_Name
-      value: WoodenTower
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c2b8560e254161b44b991e6766faecbf, type: 3}
 --- !u!4 &6136941375923668103 stripped
@@ -1897,6 +1898,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2339}
     m_Modifications:
+    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
+      propertyPath: m_Name
+      value: palisade (3)
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.7766193
@@ -1953,10 +1958,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 95.637634
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
-      propertyPath: m_Name
-      value: palisade (3)
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
 --- !u!4 &7297156971556090785 stripped
@@ -1978,6 +1979,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1965}
     m_Modifications:
+    - target: {fileID: 100000, guid: 51ef78bc95cd5de4ab16b553f7117a49, type: 3}
+      propertyPath: m_Name
+      value: tent (1)
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 51ef78bc95cd5de4ab16b553f7117a49, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.6937691
@@ -2034,10 +2039,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.70043486
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 51ef78bc95cd5de4ab16b553f7117a49, type: 3}
-      propertyPath: m_Name
-      value: tent (1)
-      objectReference: {fileID: 0}
     - target: {fileID: 2300000, guid: 51ef78bc95cd5de4ab16b553f7117a49, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -2067,6 +2068,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1965}
     m_Modifications:
+    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
+      propertyPath: m_Name
+      value: palisade (2)
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.0558105
@@ -2123,10 +2128,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 95.637634
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
-      propertyPath: m_Name
-      value: palisade (2)
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
 --- !u!4 &7707132570493698858 stripped
@@ -2148,6 +2149,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1965}
     m_Modifications:
+    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
+      propertyPath: m_Name
+      value: palisade (1)
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.89014095
@@ -2204,10 +2209,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 95.637634
       objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
-      propertyPath: m_Name
-      value: palisade (1)
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
 --- !u!4 &8249514148565200955 stripped
@@ -2229,6 +2230,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2339}
     m_Modifications:
+    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
+        type: 3}
+      propertyPath: m_Name
+      value: barrel_wood_01_a (3)
+      objectReference: {fileID: 0}
     - target: {fileID: 8416126871334850896, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2299,11 +2305,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.9351047
       objectReference: {fileID: 0}
-    - target: {fileID: 8416126871335275888, guid: ea189f7ca4849b8489ccf701f5a3b0e6,
-        type: 3}
-      propertyPath: m_Name
-      value: barrel_wood_01_a (3)
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ea189f7ca4849b8489ccf701f5a3b0e6, type: 3}
 --- !u!4 &258615503888424558 stripped
@@ -2319,6 +2320,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2339}
     m_Modifications:
+    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
+      propertyPath: m_Name
+      value: palisade (6)
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.147
@@ -2374,10 +2379,6 @@ PrefabInstance:
     - target: {fileID: 400000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
       propertyPath: m_LocalScale.z
       value: 95.637634
-      objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}
-      propertyPath: m_Name
-      value: palisade (6)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b0df067d8acef346aae1d839098fcbb, type: 3}

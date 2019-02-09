@@ -216,7 +216,7 @@ namespace GangaGame
 
                     UI.document.Run("CreateLoadingScreen", "Level initialization");
                     LoadSaveScript.loadLevel = "Levels/Map1";
-                    LoadSaveScript.loadLevelTimer = 0.5f;
+                    LoadSaveScript.loadLevelTimer = 0.7f;
                     return;
                 }
             }

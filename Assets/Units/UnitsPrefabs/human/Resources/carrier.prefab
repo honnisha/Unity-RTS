@@ -2603,6 +2603,7 @@ MonoBehaviour:
   canBeSelected: 1
   isSelected: 0
   projector: {fileID: 833}
+  intersection: 0
 --- !u!114 &3383
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -340,6 +340,7 @@ MonoBehaviour:
   canBeSelected: 1
   isSelected: 0
   projector: {fileID: 1115}
+  intersection: 0
 --- !u!114 &3525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,6 +385,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2190}
     m_Modifications:
+    - target: {fileID: 100000, guid: 8e087afc636a7f643a64e9a824233e88, type: 3}
+      propertyPath: m_Name
+      value: smith
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 8e087afc636a7f643a64e9a824233e88, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.000000013411045
@@ -439,10 +444,6 @@ PrefabInstance:
     - target: {fileID: 400000, guid: 8e087afc636a7f643a64e9a824233e88, type: 3}
       propertyPath: m_LocalScale.z
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 8e087afc636a7f643a64e9a824233e88, type: 3}
-      propertyPath: m_Name
-      value: smith
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8e087afc636a7f643a64e9a824233e88, type: 3}

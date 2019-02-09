@@ -25,6 +25,11 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         public float maximumCapacity = 10.0f;
         public ToolInfo carryObject;
         public ToolInfo toolObject;
+
+        internal ResourceGatherInfo Clone()
+        {
+            return (ResourceGatherInfo)this.MemberwiseClone();
+        }
     }
 
     #endregion
@@ -72,18 +77,33 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
         tempSpeed = agent.speed;
         resourceType = ResourceType.None;
+
+        UpdateVisionTool();
     }
 
     float newIntersectionTimer = 0.0f;
-    override public void Update()
+    public void Update()
     {
-        UnityEngine.Profiling.Profiler.BeginSample("p UserUpdate"); // Profiler
-
-        UpdateIsInCameraView(cameraController.IsInCameraView(transform.position));
-
-        base.Update();
+        UnityEngine.Profiling.Profiler.BeginSample("p Base Update"); // Profiler
         if (!live)
             return;
+
+        UpdateIsInCameraView();
+
+        UpdateVision();
+
+        UpdateHealth();
+
+        UpdateDestroyBehavior();
+        
+        UpdateProductionQuery();
+
+        if (unitSelectionComponent.isSelected && UnityEngine.Input.anyKeyDown)
+            UICommand(null);
+
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
+        UnityEngine.Profiling.Profiler.BeginSample("p UserUpdate"); // Profiler
 
         #region Animations
         Vector3 curMove = transform.position - previousPosition;
@@ -151,10 +171,9 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         if (interrupt)
             return;
 
+        CheckTargetReached();
 
-        MoveToTarget();
-
-        DoAttack();
+        UpdateAttack();
 
         if (isWalkAround && GameInfo.IsMasterClient() && target == null)
             WalkAround();
@@ -171,27 +190,20 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             agent.destination = newAgentDestination;
             newAgentDestination = new Vector3();
         }
-        if (isAgentStopped)
+        if (isAgentStopped && agent.enabled)
         {
-            if (agent.enabled)
-            {
-                agent.ResetPath();
-                base.agent.isStopped = true;
-                agent.enabled = false;
-                if (obstacle != null)
-                    obstacle.enabled = true;
-            }
+            agent.ResetPath();
+            base.agent.isStopped = true;
+            agent.enabled = false;
+            if (obstacle != null)
+                obstacle.enabled = true;
         }
-        if (!isAgentStopped)
+        if (!isAgentStopped && !agent.enabled)
         {
-            if (!agent.enabled)
-            {
-                if (obstacle != null)
-                    obstacle.enabled = false;
-            }
+            if (obstacle != null)
+                obstacle.enabled = false;
         }
-
-
+        
         newIntersectionTimer += Time.fixedDeltaTime;
         if (toolInHandTimer > 1.0f)
         {
@@ -209,12 +221,19 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             }
             newIntersectionTimer = 0.0f;
         }
+
+        if (tempDestinationPoint != Vector3.zero && target == null)
+        {
+            SetAgentStopped(false);
+            SetAgentDestination(tempDestinationPoint);
+            tempDestinationPoint = Vector3.zero;
+        }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
-    public override void UpdateIsInCameraView(bool newState)
+    public override void UpdateIsInCameraView(bool newState = false)
     {
-        isInCameraView = newState;
+        isInCameraView = CameraController.IsInCameraView(transform.position);
     }
 
     public override void StartVisible(BaseBehavior senderBaseBehaviorComponent)
@@ -271,9 +290,10 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
     private void UnitStuck()
     {
+        InteractigType interactTypeTemp = interactType;
         stucked = true;
         StopAction(false, SendRPC: true);
-        ActionIsDone(stopActionType: interactType);
+        ActionIsDone(stopActionType: interactTypeTemp);
         interactObject = null;
     }
 
@@ -291,67 +311,24 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         }
     }
 
-    public void MoveToTarget()
+    float minDistance = 0.0f;
+    bool colliderCheck = true;
+    bool attackTarget = false;
+    RaycastHit hit;
+    Vector3 offset = new Vector3(0, 0.5f, 0);
+    public void CheckTargetReached()
     {
-        UnityEngine.Profiling.Profiler.BeginSample("p MoveToTarget"); // Profiler
+        UnityEngine.Profiling.Profiler.BeginSample("p CheckTargetReached"); // Profiler
         if (interactType == InteractigType.None && target != null)
         {
-            UnitStatistic statisic = GetStatisticsInfo();
-
-            BaseBehavior targetBaseBehavior = target.GetComponent<BaseBehavior>();
-            bool isBuilding = target.GetComponent<BuildingBehavior>() != null;
-            BuildingBehavior targetBuildingBehavior = null;
-            if (isBuilding)
-                targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
-
-            if (isBuilding && targetBuildingBehavior.sourceType == SourceType.Farm)
-            {
-                if (targetBuildingBehavior.state == BuildingBehavior.BuildingState.Builded && !IsCanWorkOnFarm(target))
-                {
-                    UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-                    cameraUIBaseScript.DisplayMessage("Only one worker can work in farm", 1500, "farmError");
-
-                    StopAction(true);
-                    ActionIsDone(InteractigType.Farming);
-                    return;
-                }
-                interactObject = target;
-                SetAgentDestination(GetRandomPoint(target.transform.position, 3.0f));
-                target = null;
-                return;
-            }
-
-            // Reset path if target moved
-            var targetPoint = target.transform.position;
-            if (targetBaseBehavior.pointToInteract != null)
-                targetPoint = targetBaseBehavior.pointToInteract.transform.position;
-            SetAgentDestination(GetClosestPositionToTarget(targetPoint));
-
-            float minDistance = minDistanceToInteract;
             bool reachDest = false;
-
-            if (IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live)
-                minDistance = statisic.rangeAttack;
-            
-            bool colliderCheck = true;
-            if (isBuilding)
-            {
-                targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
-                if (targetBuildingBehavior.sourceType == SourceType.Farm)
-                    colliderCheck = false;
-            }
-
-            // float dist = Vector3.Distance(gameObject.transform.position, target.transform.position);
             // If unit and target close enough
-            Vector3 offset = new Vector3(0, 0.5f, 0);
-            RaycastHit hit;
             if (Physics.Raycast(transform.position + offset, (target.transform.position + offset - (transform.position + offset)).normalized, out hit, minDistance))
             {
                 if (hit.transform.gameObject.GetHashCode() == target.GetHashCode())
                 {
-                    //if (targetIsPoint && Vector3.Distance(gameObject.transform.position, agent.destination) <= minDistance && dist < 5.0f)
-                    //    reachDest = true;
-                    reachDest = true;
+                    if (Vector3.Distance(gameObject.transform.position, target.transform.position) < 5.0f)
+                        reachDest = true;
                 }
             }
             // Or collisions touch each other
@@ -361,15 +338,10 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             if (reachDest)
             {
                 // Attack it target if target is enemy or stop
-                if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live)
-                {
-                    if (statisic.attackType != AttackType.None)
-                        Attack(target);
-                }
+                if (attackTarget)
+                    Attack(target);
                 else
-                {
                     StartInteract(target);
-                }
             }
         }
         else if (target == null && !IsStopped() && Vector3.Distance(gameObject.transform.position, base.agent.destination) <= 0.5f)
@@ -383,12 +355,6 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                 target = null;
                 ActionIsDone();
             }
-        }
-        if (tempDestinationPoint != Vector3.zero && target == null)
-        {
-            SetAgentStopped(false);
-            SetAgentDestination(tempDestinationPoint);
-            tempDestinationPoint = Vector3.zero;
         }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
@@ -427,10 +393,10 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                             ResourceGatherInfo resourceInfo = new ResourceGatherInfo();
                             var objectResourceType = baseObjectBehaviorComponent.resourceCapacityType;
                             if (baseObjectBehaviorComponent.sourceType == SourceType.Farm)
-                                resourceInfo = farmInfo;
+                                resourceInfo = GetResourceFarmInfo(sourceType: SourceType.Farm);
                             else
                             {
-                                resourceInfo = resourceGatherInfo.Find(x => x.type == objectResourceType);
+                                resourceInfo = GetResourceFarmInfo(resourceType: objectResourceType);
                                 transform.LookAt(interactObject.transform.position);
                             }
 
@@ -574,6 +540,10 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
     public bool IsCanWorkOnFarm(GameObject farm, bool displayErrorMessage = true)
     {
+        ResourceGatherInfo resourceInfo = resourceGatherInfo.Find(x => x.type == ResourceType.Food);
+        if (resourceInfo == null)
+            return false;
+
         foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
         {
             UnitBehavior workerUnitBehavior = unit.GetComponent<UnitBehavior>();
@@ -651,22 +621,26 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         return toolInfo;
     }
 
+    BaseBehavior objectToInteractBaseBehavior;
+    BuildingBehavior oneObjectBuildingBehavior;
+    GameObject newTarget = null;
     Dictionary<GameObject, float> objects = new Dictionary<GameObject, float>();
-    public GameObject GetObjectToInteract(InteractigType type = InteractigType.None)
+    public GameObject GetObjectToInteract(InteractigType type = InteractigType.None, float maxDistance = 15.0f)
     {
+        allObjects.Clear();
         objects.Clear();
         UnityEngine.Profiling.Profiler.BeginSample("p GetObjectToInteract"); // Profiler
-        GetObjectsInRange(ref allObjects, transform.position, 15.0f, team: -1);
+        GetObjectsInRange(ref allObjects, transform.position, maxDistance, team: -1);
         foreach (GameObject objectToInteract in allObjects.Concat(GameObject.FindGameObjectsWithTag("Ambient")))
         {
-            BaseBehavior objectToInteractBaseBehavior = objectToInteract.GetComponent<BaseBehavior>();
+            objectToInteractBaseBehavior = objectToInteract.GetComponent<BaseBehavior>();
             float distance = Vector3.Distance(gameObject.transform.position, objectToInteract.transform.position);
             if (distance > 15.0f && (objectToInteractBaseBehavior.team == team))
                 continue;
 
             if (type == InteractigType.Bulding)
             {
-                BuildingBehavior oneObjectBuildingBehavior = objectToInteract.GetComponent<BuildingBehavior>();
+                oneObjectBuildingBehavior = objectToInteract.GetComponent<BuildingBehavior>();
                 if (oneObjectBuildingBehavior != null &&
                     (oneObjectBuildingBehavior.state == BuildingBehavior.BuildingState.Building ||
                         oneObjectBuildingBehavior.state == BuildingBehavior.BuildingState.Project))
@@ -691,8 +665,16 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         }
         if (objects.Count > 0)
         {
-            objects.ToList().Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
-            return objects.ToList().First().Key;
+            newTarget = null;
+            float minDist = maxDistance;
+            foreach (var objectInfo in objects)
+                if(objectInfo.Value < minDist)
+                {
+                    newTarget = objectInfo.Key;
+                    minDist = objectInfo.Value;
+                }
+            
+            return newTarget;
         }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         return null;
@@ -961,7 +943,9 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
         SendAlertAttacking(attacker);
         AlertAttacking(attacker);
+
         health -= newDamage;
+
         TextBubble(new StringBuilder(30).AppendFormat("-{0:F0}", newDamage).ToString(), 1000);
 
         if (bloodOnBroundEffects.Count > 0)
@@ -1012,6 +996,8 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         // var collider = GetComponent<Collider>();
         // collider.enabled = false;
         agent.enabled = false;
+
+        UpdateVisionTool();
 
         if (resourceCapacity <= 0)
             SendToDestroy();
@@ -1115,20 +1101,72 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
         if (displayMarker)
             CreateOrUpdatePointMarker(colorMarker, target.transform.position, 1.5f, true, markerType);
+
+        UnitStatistic statisic = GetStatisticsInfo();
+        
+        bool isBuilding = target.GetComponent<BuildingBehavior>() != null;
+        BuildingBehavior targetBuildingBehavior = null;
+        if (isBuilding)
+            targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
+
+        if (isBuilding && targetBuildingBehavior.sourceType == SourceType.Farm)
+        {
+            if (targetBuildingBehavior.state == BuildingBehavior.BuildingState.Builded && !IsCanWorkOnFarm(target))
+            {
+                UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
+                cameraUIBaseScript.DisplayMessage("Only one worker can work in farm", 1500, "farmError");
+
+                StopAction(true);
+                ActionIsDone(InteractigType.Farming);
+                return;
+            }
+            interactObject = target;
+            SetAgentDestination(GetRandomPoint(target.transform.position, 3.0f));
+            target = null;
+            return;
+        }
+
+        // Reset path if target moved
+        var targetPoint = target.transform.position;
+        if (targetBaseBehavior.pointToInteract != null)
+            targetPoint = targetBaseBehavior.pointToInteract.transform.position;
+        SetAgentDestination(GetClosestPositionToTarget(targetPoint));
+
+        float minDistance = minDistanceToInteract;
+
+        if (IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live)
+            minDistance = statisic.rangeAttack;
+
+        if (isBuilding)
+        {
+            targetBuildingBehavior = target.GetComponent<BuildingBehavior>();
+            if (targetBuildingBehavior.sourceType == SourceType.Farm)
+                colliderCheck = false;
+        }
+
+        if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live && statisic.attackType != AttackType.None)
+            attackTarget = true;
+        else
+            attackTarget = false;
     }
 
+    bool[] skillResult;
+    bool[] result = { false, false };
+    BaseBehavior unitBaseBehavior;
     public override bool[] UICommand(string commandName)
     {
-        bool[] result = { false, false };
+        UnityEngine.Profiling.Profiler.BeginSample("p UICommand"); // Profiler
+
+        result[0] = false;
+        result[1] = false;
+
         if (!unitSelectionComponent.isSelected)
             return result;
-
-        CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
-        if (team != cameraController.team || cameraController.IsHotkeysBlocked())
+        
+        if (team != cameraController.team || CameraController.isHotkeysBlocked)
             return result;
 
-        bool[] skillResult = ActivateSkills(commandName);
+        skillResult = ActivateSkills(commandName);
         if (skillResult[0] || skillResult[1])
             return skillResult;
 
@@ -1146,13 +1184,14 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                 pos = 0;
             foreach(GameObject unit in cameraController.selectedObjects)
             {
-                BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
+                unitBaseBehavior = unit.GetComponent<BaseBehavior>();
                 unitBaseBehavior.behaviorType = types[pos];
             }
             cameraUIBaseScript.UpdateCommands();
             result[0] = true;
             return result;
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         return result;
     }
 
@@ -1178,8 +1217,55 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         return statisticStrings;
     }
 
+    private UnitStatistic _defaultStatistic;
     public override UnitStatistic GetStatisticsInfo()
     {
-        return defaultStatistic;
+        _defaultStatistic = defaultStatistic;
+        foreach (KeyValuePair<BaseSkillScript.UpgradeType, int> typesInfo in CameraController.GetUpgrades(ownerId))
+        {
+        }
+        return _defaultStatistic;
+    }
+
+    public ResourceGatherInfo GetResourceFarmByType(InteractigType interactigType, ResourceType resourceType = ResourceType.None)
+    {
+        if (interactigType == InteractigType.Farming)
+            return GetResourceFarmInfo(sourceType: SourceType.Farm);
+        else
+            return GetResourceFarmInfo(resourceType: resourceType);
+    }
+
+    public ResourceGatherInfo GetResourceFarmInfo(ResourceType resourceType = ResourceType.None, SourceType sourceType = SourceType.Default)
+    {
+        ResourceGatherInfo resourceInfo = new ResourceGatherInfo();
+        if (sourceType == SourceType.Farm)
+            resourceInfo = farmInfo.Clone();
+        else if(resourceType != ResourceType.None)
+            resourceInfo = resourceGatherInfo.Find(x => x.type == resourceType).Clone();
+
+        foreach (KeyValuePair<BaseSkillScript.UpgradeType, int> typesInfo in CameraController.GetUpgrades(ownerId))
+        {
+            if (typesInfo.Key == BaseSkillScript.UpgradeType.Farm)
+            {
+                resourceInfo.gatherPerSecond += 0.25f * typesInfo.Value;
+                resourceInfo.maximumCapacity += 5f * typesInfo.Value;
+            }
+            if (typesInfo.Key == BaseSkillScript.UpgradeType.Food)
+            {
+                resourceInfo.gatherPerSecond += 0.25f * typesInfo.Value;
+                resourceInfo.maximumCapacity += 5f * typesInfo.Value;
+            }
+            if (typesInfo.Key == BaseSkillScript.UpgradeType.Gold)
+            {
+                resourceInfo.gatherPerSecond += 0.3f * typesInfo.Value;
+                resourceInfo.maximumCapacity += 5f * typesInfo.Value;
+            }
+            if (typesInfo.Key == BaseSkillScript.UpgradeType.Wood)
+            {
+                resourceInfo.gatherPerSecond += 0.3f * typesInfo.Value;
+                resourceInfo.maximumCapacity += 5f * typesInfo.Value;
+            }
+        }
+        return resourceInfo;
     }
 }

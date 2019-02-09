@@ -105,6 +105,7 @@ MonoBehaviour:
   canBeSelected: 1
   isSelected: 0
   projector: {fileID: 843}
+  intersection: 0
 --- !u!195 &2945
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -174,7 +175,7 @@ MonoBehaviour:
     readableDescription: Worker
     imagePath: units/stone-crafting.png
     timeToBuild: 30
-    costFood: 60
+    costFood: 50
     costGold: 0
     costWood: 0
     productionHotkey: 115
@@ -319,7 +320,7 @@ MonoBehaviour:
     holder: {fileID: 661}
   resourceGatherInfo:
   - type: 1
-    gatherPerSecond: 0.5
+    gatherPerSecond: 0.25
     maximumCapacity: 10
     carryObject:
       prefab: {fileID: 1445014879897620, guid: cffef75ccdaa0504cb1dedbb354026b9, type: 3}
@@ -328,8 +329,8 @@ MonoBehaviour:
       prefab: {fileID: 1014602966566676, guid: de9c6dc2c03b1cd42873ff0de9975eec, type: 3}
       holder: {fileID: 664}
   - type: 3
-    gatherPerSecond: 0.5
-    maximumCapacity: 15
+    gatherPerSecond: 0.25
+    maximumCapacity: 10
     carryObject:
       prefab: {fileID: 1841068068563820, guid: 26d5f96940746ff4cb90f520e69cf0d5, type: 3}
       holder: {fileID: 659}
@@ -337,8 +338,8 @@ MonoBehaviour:
       prefab: {fileID: 1960420655220560, guid: c075b3766584c07409b8758ee2f83879, type: 3}
       holder: {fileID: 663}
   - type: 2
-    gatherPerSecond: 0.5
-    maximumCapacity: 15
+    gatherPerSecond: 0.25
+    maximumCapacity: 10
     carryObject:
       prefab: {fileID: 100000, guid: c18b48f6c33f79349b2b77a9a207d91c, type: 3}
       holder: {fileID: 1068}
@@ -347,7 +348,7 @@ MonoBehaviour:
       holder: {fileID: 1117}
   farmInfo:
     type: 1
-    gatherPerSecond: 0.5
+    gatherPerSecond: 0.2
     maximumCapacity: 10
     carryObject:
       prefab: {fileID: 0}
@@ -389,7 +390,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3006}
-  viewIdField: 8
+  viewIdField: 0
   InstantiationId: 8
   isRuntimeInstantiated: 0
 --- !u!114 &3006

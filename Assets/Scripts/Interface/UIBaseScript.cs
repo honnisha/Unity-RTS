@@ -302,11 +302,15 @@ namespace UISpace
                 element.innerHTML = "";
 
                 BaseBehavior.ResourceType resourseDisplayType = BaseBehavior.ResourceType.None;
+                string gatgherInfo = "";
                 float resources = 0.0f;
                 if (unitBaseBehaviorComponent != null && unitBaseBehaviorComponent.resourceHold > 0)
                 {
                     resources = unitBaseBehaviorComponent.resourceHold;
                     resourseDisplayType = unitBaseBehaviorComponent.resourceType;
+
+                    UnitBehavior.ResourceGatherInfo resourceGatherInfo = unit.GetComponent<UnitBehavior>().GetResourceFarmByType(unitBaseBehaviorComponent.interactType, resourseDisplayType);
+                    gatgherInfo = new StringBuilder(30).AppendFormat(" ({0:F1} per second. Maximum: {1:F1})", resourceGatherInfo.gatherPerSecond, resourceGatherInfo.maximumCapacity).ToString();
                 }
                 else if (unitBaseBehaviorComponent.resourceCapacity > 0)
                 {
@@ -317,11 +321,11 @@ namespace UISpace
                 {
                     Dom.Element statusticDiv = UI.document.createElement("p");
                     if (resourseDisplayType == BaseBehavior.ResourceType.Food)
-                        statusticDiv.innerHTML = new StringBuilder(16).AppendFormat("Food: {0:F0}", resources).ToString();
+                        statusticDiv.innerHTML = new StringBuilder(50).AppendFormat("Food: {0:F0} {1}", resources, gatgherInfo).ToString();
                     else if (resourseDisplayType == BaseBehavior.ResourceType.Gold)
-                        statusticDiv.innerHTML = new StringBuilder(16).AppendFormat("Gold: {0:F0}", resources).ToString();
+                        statusticDiv.innerHTML = new StringBuilder(50).AppendFormat("Gold: {0:F0} {1}", resources, gatgherInfo).ToString();
                     else if (resourseDisplayType == BaseBehavior.ResourceType.Wood)
-                        statusticDiv.innerHTML = new StringBuilder(16).AppendFormat("Wood: {0:F0}", resources).ToString();
+                        statusticDiv.innerHTML = new StringBuilder(50).AppendFormat("Wood: {0:F0} {1}", resources, gatgherInfo).ToString();
                     element.appendChild(statusticDiv);
                 }
             }
@@ -457,7 +461,7 @@ namespace UISpace
                         tableStatistics: tableStatistics,
                         costInfo: costInfo);
                     
-                    displayedNames.Add(skillObjectBaseBehaviorComponent.skillInfo.uniqueName);
+                    displayedNames.Add(skillInfo.uniqueName);
                     descriptionActiveClass = skillInfo.uniqueName;
                     return true;
                 }
@@ -480,9 +484,10 @@ namespace UISpace
             descriptionActiveClass = "";
         }
 
-        public static void CreateInfoButton(string className, int count, string hotkey, string img)
+        public static HtmlElement CreateInfoButton(string className, int count, string hotkey, string img)
         {
-            UI.document.Run("CreateInfoButton", className, count, hotkey, img);
+            object createdObject = UI.document.Run("CreateInfoButton", className, count, hotkey, img);
+            return (HtmlElement)((Jint.Native.JsValue)createdObject).ToObject();
         }
     }
 }

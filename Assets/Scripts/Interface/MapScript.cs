@@ -12,20 +12,38 @@ namespace GangaGame
 {
     public static class MapScript
     {
-        public static void CreateOrUpdateMaps(ref Dictionary<HtmlElement, HtmlElement> mapCache)
+        private static Dom.HTMLCollection mapBlocks = null;
+        public static void UpdateMaps()
         {
-            mapCache.Clear();
-            CameraController cameraController = Camera.main.GetComponent<CameraController>();
-            TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
+            mapBlocks = UI.document.getElementsByClassName("mapBlock");
+        }
 
-            foreach (var mapBlock in UI.document.getElementsByClassName("mapBlock"))
+        static HtmlElement mapImage;
+        static HtmlElement blindFog;
+        static HtmlElement unitsBlock;
+        static Dom.Element unitDiv;
+
+        static Dictionary<GameObject, List<Dom.Element>> cacheUnitDivs = new Dictionary<GameObject, List<Dom.Element>>();
+        public static void CreateOrUpdateMaps(ref Dictionary<HtmlElement, HtmlElement> mapCache, bool update = false)
+        {
+            if (update)
+            {
+                UpdateMaps();
+                
+                cacheUnitDivs.Clear();
+            }
+            mapCache.Clear();
+
+            CameraController cameraController = Camera.main.GetComponent<CameraController>();
+            int index = 0;
+            foreach (var mapBlock in mapBlocks)
             {
                 // Draw map
-                if (terrainGenerator != null)
+                if (cameraController.terrainGenerator != null)
                 {
-                    if (((HtmlElement)mapBlock).image == null && terrainGenerator.mapTexture != null)
+                    if (((HtmlElement)mapBlock).image == null && cameraController.terrainGenerator.mapTexture != null)
                     {
-                        ((HtmlElement)mapBlock).image = terrainGenerator.mapTexture;
+                        ((HtmlElement)mapBlock).image = cameraController.terrainGenerator.mapTexture;
                         mapBlock.style.height = "100%";
                         mapBlock.style.width = "100%";
                     }
@@ -34,43 +52,63 @@ namespace GangaGame
                 {
                     mapBlock.style.backgroundImage = String.Format("{0}.png", SceneManager.GetActiveScene().name);
                 }
-                var mapImage = (HtmlElement)mapBlock.getElementsByClassName("mapVision")[0];
+
+                mapImage = (HtmlElement)mapBlock.getElementsByClassName("mapVision")[0];
                 mapCache.Add((HtmlElement)mapBlock, mapImage);
 
-                if (mapImage.image == null && terrainGenerator.mapTexture != null && cameraController.mapTexture.height > 0)
+                if (mapImage.image == null && cameraController.terrainGenerator.mapTexture != null && cameraController.mapTexture.height > 0)
                 {
                     mapImage.image = cameraController.mapTexture;
                     mapImage.style.height = "100%";
                     mapImage.style.width = "100%";
                 }
 
-                var blindFog = (HtmlElement)mapBlock.getElementsByClassName("blindFog")[0];
-                if (blindFog.image == null && terrainGenerator.blindTexture2D != null && terrainGenerator.blindTexture2D.height > 0)
+                blindFog = (HtmlElement)mapBlock.getElementsByClassName("blindFog")[0];
+                if (blindFog.image == null && cameraController.terrainGenerator.blindTexture2D != null && cameraController.terrainGenerator.blindTexture2D.height > 0)
                 {
-                    blindFog.image = terrainGenerator.blindTexture;
+                    blindFog.image = cameraController.terrainGenerator.blindTexture;
                     blindFog.style.height = "100%";
                     blindFog.style.width = "100%";
                 }
 
-                var unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
-                unitsBlock.innerHTML = "";
-                
+                unitsBlock = (HtmlElement)mapBlock.getElementsByClassName("units")[0];
+                if (update)
+                    unitsBlock.innerHTML = "";
+
                 // Draw units + calculate statistic
                 foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
                 {
-                    BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
-                    if (unitBaseBehavior.IsDisplayOnMap() && MapScript.IsInTerrainRange(unit.transform.position))
+                    if (unit.GetComponent<BaseBehavior>().IsDisplayOnMap() && IsInTerrainRange(unit.transform.position))
                     {
-                        Dom.Element unitDiv = UI.document.createElement("div");
-                        unitDiv.className = "unit clckable";
-                        unitDiv.id = unit.GetComponent<PhotonView>().ViewID.ToString();
-                        Vector2 positionOnMap = MapScript.GetPositionOnMap(unit.transform.position);
-                        unitDiv.style.left = String.Format("{0}%", positionOnMap.x * 100.0f - 1.5);
-                        unitDiv.style.bottom = String.Format("{0}%", positionOnMap.y * 100.0f - 1.5);
-                        unitDiv.style.backgroundColor = unitBaseBehavior.GetDisplayColor();
-                        unitsBlock.appendChild(unitDiv);
+                        if (!update && cacheUnitDivs.ContainsKey(unit) && cacheUnitDivs[unit].Count > index)
+                        {
+                            unitDiv = cacheUnitDivs[unit][index];
+                        }
+                        else
+                        {
+                            unitDiv = UI.document.createElement("div");
+                            unitDiv.className = "unit clckable";
+                            // unitDiv.id = unit.GetComponent<PhotonView>().ViewID.ToString();
+                            unitsBlock.appendChild(unitDiv);
+
+                            if (!cacheUnitDivs.ContainsKey(unit))
+                                cacheUnitDivs[unit] = new List<Dom.Element>();
+
+                            cacheUnitDivs[unit].Add(unitDiv);
+                        }
+
+                        Vector2 positionOnMap = GetPositionOnMap(unit.transform.position);
+                        unitDiv.style.left = new StringBuilder(5).AppendFormat("{0}%", positionOnMap.x * 100.0f - 1.5).ToString();
+                        unitDiv.style.bottom = new StringBuilder(5).AppendFormat("{0}%", positionOnMap.y * 100.0f - 1.5).ToString();
+                        unitDiv.style.backgroundColor = unit.GetComponent<BaseBehavior>().GetDisplayColor();
+                    }
+                    else if (cacheUnitDivs.ContainsKey(unit) && cacheUnitDivs[unit].Count > index)
+                    {
+                        unitDiv = cacheUnitDivs[unit][index];
+                        unitsBlock.removeChild(unitDiv);
                     }
                 }
+                index++;
             }
         }
 

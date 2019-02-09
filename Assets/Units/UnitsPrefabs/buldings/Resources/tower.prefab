@@ -278,12 +278,12 @@ MonoBehaviour:
   allObjects: []
   statisticStrings:
   - 'Att. type: Stabbing'
-  - 'Damage: 15'
+  - 'Damage: 12'
   - 'Attack speed: 2.0 sec'
-  - 'Stabbing resist: 80%'
-  - 'Cutting resist: 40%'
+  - 'Stabbing resist: 70%'
+  - 'Cutting resist: 30%'
   - 'Biting resist: 20%'
-  - 'Magic resist: 20%'
+  - 'Magic resist: 30%'
   magnitDistance: 5
   tempMaterialsMode: 
   placeConditions: []
@@ -310,6 +310,7 @@ MonoBehaviour:
   canBeSelected: 1
   isSelected: 0
   projector: {fileID: 1354}
+  intersection: 0
 --- !u!114 &2765
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,7 +330,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2839}
-  viewIdField: 0
+  viewIdField: 2
   InstantiationId: 2
   isRuntimeInstantiated: 0
 --- !u!114 &2839
@@ -354,6 +355,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2057}
     m_Modifications:
+    - target: {fileID: 100000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
+      propertyPath: m_Name
+      value: tower_small
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -409,10 +414,6 @@ PrefabInstance:
     - target: {fileID: 400000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
       propertyPath: m_LocalScale.z
       value: 93.51038
-      objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
-      propertyPath: m_Name
-      value: tower_small
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 749452c483f72ef47acbba156497acfa, type: 3}
