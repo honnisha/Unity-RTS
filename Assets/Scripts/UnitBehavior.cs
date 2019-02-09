@@ -321,6 +321,10 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         UnityEngine.Profiling.Profiler.BeginSample("p CheckTargetReached"); // Profiler
         if (interactType == InteractigType.None && target != null)
         {
+            if (Time.frameCount % 15 == 0)
+                if (target.GetComponent<UnitBehavior>() != null)
+                    SetAgentDestination(GetClosestPositionToTarget(target.transform.position));
+
             bool reachDest = false;
             // If unit and target close enough
             if (Physics.Raycast(transform.position + offset, (target.transform.position + offset - (transform.position + offset)).normalized, out hit, minDistance))
@@ -724,6 +728,9 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
     public override void _StartInteract(GameObject targetObject)
     {
+        if (targetObject == null)
+            return;
+
         UnityEngine.Profiling.Profiler.BeginSample("p _StartInteract"); // Profiler
         SetAgentStopped(true);
 
@@ -1074,6 +1081,9 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
     public override void _GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
     {
+        if (targetObject == null)
+            return;
+
         if (overrideQueueCommands)
         {
             queueCommands.Clear();
@@ -1088,7 +1098,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
         // Order to target
         SetAgentStopped(false);
-        base.target = targetObject;
+        target = targetObject;
 
         Color colorMarker = Color.green;
         BaseBehavior targetBaseBehavior = targetObject.GetComponent<BaseBehavior>();

@@ -989,7 +989,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Ambient")).Concat(GameObject.FindGameObjectsWithTag("Unit")))
         {
             BaseBehavior unitBaseBehavior = unit.GetComponent<BaseBehavior>();
-            if (unitBaseBehavior.uniqueId == targetUniqueId)
+            if (unitBaseBehavior != null && unitBaseBehavior.uniqueId == targetUniqueId)
                 return unit;
         }
         return null;
