@@ -250,6 +250,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     {
         ownerId = newOwnerId;
         team = newTeam;
+        UpdateVisionTool();
     }
 
     Renderer[] renders;

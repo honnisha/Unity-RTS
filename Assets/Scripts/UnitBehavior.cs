@@ -77,8 +77,6 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
         tempSpeed = agent.speed;
         resourceType = ResourceType.None;
-
-        UpdateVisionTool();
     }
 
     float newIntersectionTimer = 0.0f;
