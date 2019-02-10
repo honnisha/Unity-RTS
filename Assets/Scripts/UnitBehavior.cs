@@ -1175,13 +1175,13 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
         result[0] = false;
         result[1] = false;
-
+        
         if (!unitSelectionComponent.isSelected)
             return result;
-        
-        if (team != cameraController.team || CameraController.isHotkeysBlocked)
-            return result;
 
+        if (team != cameraController.team && ownerId != cameraController.userId || CameraController.isHotkeysBlocked)
+            return result;
+        
         skillResult = ActivateSkills(commandName);
         if (skillResult[0] || skillResult[1])
             return skillResult;
@@ -1263,23 +1263,23 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         {
             if (typesInfo.Key == BaseSkillScript.UpgradeType.Farm)
             {
-                resourceInfo.gatherPerSecond += 0.25f * typesInfo.Value;
-                resourceInfo.maximumCapacity += 5f * typesInfo.Value;
+                resourceInfo.gatherPerSecond += 0.05f * typesInfo.Value;
+                resourceInfo.maximumCapacity += 2.5f * typesInfo.Value;
             }
             if (typesInfo.Key == BaseSkillScript.UpgradeType.Food)
             {
-                resourceInfo.gatherPerSecond += 0.25f * typesInfo.Value;
-                resourceInfo.maximumCapacity += 5f * typesInfo.Value;
+                resourceInfo.gatherPerSecond += 0.05f * typesInfo.Value;
+                resourceInfo.maximumCapacity += 2.5f * typesInfo.Value;
             }
             if (typesInfo.Key == BaseSkillScript.UpgradeType.Gold)
             {
-                resourceInfo.gatherPerSecond += 0.3f * typesInfo.Value;
-                resourceInfo.maximumCapacity += 5f * typesInfo.Value;
+                resourceInfo.gatherPerSecond += 0.05f * typesInfo.Value;
+                resourceInfo.maximumCapacity += 2.5f * typesInfo.Value;
             }
             if (typesInfo.Key == BaseSkillScript.UpgradeType.Wood)
             {
-                resourceInfo.gatherPerSecond += 0.3f * typesInfo.Value;
-                resourceInfo.maximumCapacity += 5f * typesInfo.Value;
+                resourceInfo.gatherPerSecond += 0.05f * typesInfo.Value;
+                resourceInfo.maximumCapacity += 2.5f * typesInfo.Value;
             }
         }
         return resourceInfo;

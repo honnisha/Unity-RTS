@@ -85,9 +85,6 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
     {
         UpdateDestroyBehavior();
         
-        if (resourceCapacityType == ResourceType.Wood)
-            return;
-
         UpdateVisionTool();
 
         UpdateProductionQuery();

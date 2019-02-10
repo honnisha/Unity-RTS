@@ -119,6 +119,7 @@ namespace GangaGame
 
         void Start()
         {
+            GameMenuBehavior.selectedWindowType = GameMenuBehavior.WindowType.None;
             gameInfoBlock = (HtmlElement)UI.document.getElementsByClassName("gameInfo")[0];
 
             terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();
