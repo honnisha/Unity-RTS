@@ -188,8 +188,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   food: 200
-  gold: 0
-  wood: 0
+  gold: 100
+  wood: 100
   soundsInfo:
   - type: 1
     soundList:
@@ -343,8 +343,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 0}
-  viewIdField: 2
-  InstantiationId: 2
+  viewIdField: 1
+  InstantiationId: 1
   isRuntimeInstantiated: 0
 --- !u!114 &4844609676478205319
 MonoBehaviour:

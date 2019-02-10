@@ -56,7 +56,13 @@ namespace UISpace
             {
                 DisplayCommands(cameraController.selectedObjects);
 
-                DisplaySkillsInfo(cameraController.selectedObjects);
+                bool displaySkills = true;
+                BuildingBehavior unitBuildingBehavior = cameraController.selectedObjects[0].GetComponent<BuildingBehavior>();
+                if (unitBuildingBehavior != null && unitBuildingBehavior.GetState() != BuildingBehavior.BuildingState.Builded)
+                    displaySkills = false;
+
+                if (displaySkills)
+                    DisplaySkillsInfo(cameraController.selectedObjects);
             }
 
             if (cameraController.selectedObjects.Count == 1)

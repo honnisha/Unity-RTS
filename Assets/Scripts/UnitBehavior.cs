@@ -83,8 +83,6 @@ public class UnitBehavior : BaseBehavior, IPunObservable
     public void Update()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p Base Update"); // Profiler
-        if (!live)
-            return;
 
         UpdateIsInCameraView();
 
@@ -93,6 +91,9 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         UpdateHealth();
 
         UpdateDestroyBehavior();
+
+        if (!live)
+            return;
         
         UpdateProductionQuery();
 
@@ -313,7 +314,6 @@ public class UnitBehavior : BaseBehavior, IPunObservable
     bool colliderCheck = true;
     bool attackTarget = false;
     RaycastHit hit;
-    Vector3 offset = new Vector3(0, 0.5f, 0);
     public void CheckTargetReached()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p CheckTargetReached"); // Profiler
@@ -325,11 +325,12 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
             bool reachDest = false;
             // If unit and target close enough
+            Vector3 offset = new Vector3(0, 0.5f, 0);
             if (Physics.Raycast(transform.position + offset, (target.transform.position + offset - (transform.position + offset)).normalized, out hit, minDistance))
             {
                 if (hit.transform.gameObject.GetHashCode() == target.GetHashCode())
                 {
-                    if (Vector3.Distance(gameObject.transform.position, target.transform.position) < 5.0f)
+                    if (Vector3.Distance(transform.position, target.transform.position) < minDistance)
                         reachDest = true;
                 }
             }
@@ -571,7 +572,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
     }
 
     private bool isAgentStopped = false;
-    public void SetAgentStopped(bool newState)
+    public override void SetAgentStopped(bool newState)
     {
         isAgentStopped = newState;
     }
@@ -587,6 +588,10 @@ public class UnitBehavior : BaseBehavior, IPunObservable
     {
         UnityEngine.Profiling.Profiler.BeginSample("p GetToolInfo"); // Profiler
         ToolInfo toolInfo = null;
+
+        if (!IsVisible())
+            return toolInfo;
+
         if(resourceType != ResourceType.None || interactType == InteractigType.Bulding)
         {
             ResourceGatherInfo resourceInfo = resourceGatherInfo.Find(x => x.type == resourceType);
@@ -644,8 +649,8 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             {
                 oneObjectBuildingBehavior = objectToInteract.GetComponent<BuildingBehavior>();
                 if (oneObjectBuildingBehavior != null &&
-                    (oneObjectBuildingBehavior.state == BuildingBehavior.BuildingState.Building ||
-                        oneObjectBuildingBehavior.state == BuildingBehavior.BuildingState.Project))
+                    (oneObjectBuildingBehavior.GetState() == BuildingBehavior.BuildingState.Building ||
+                        oneObjectBuildingBehavior.GetState() == BuildingBehavior.BuildingState.Project))
                     if(!objects.ContainsKey(objectToInteract))
                         objects.Add(objectToInteract, distance);
             }
@@ -745,7 +750,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                 bool canBuild = targetBuildingBehavior.IsUnitCanBuild(gameObject);
                 if (canBuild)
                 {
-                    targetBuildingBehavior.state = BuildingBehavior.BuildingState.Building;
+                    targetBuildingBehavior.SetState(BuildingBehavior.BuildingState.Building);
 
                     interactTimer = 1.0f;
                     transform.LookAt(targetObject.transform.position);
@@ -784,7 +789,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             {
                 interactType = InteractigType.None;
                 if (targetBuildingBehavior != null && targetBuildingBehavior.sourceType == SourceType.Farm && targetBaseBehavior.live &&
-                    targetBuildingBehavior.state == BuildingBehavior.BuildingState.Builded)
+                    targetBuildingBehavior.GetState() == BuildingBehavior.BuildingState.Builded)
                 { 
                     interactType = InteractigType.Farming;
                     interactAnimation = "Farming";
@@ -829,7 +834,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             ResourceType storedResource = targetBaseBehavior.storedResources.Find(x => x == resourceType);
             if (storedResource != ResourceType.None && resourceHold > 0 && targetBaseBehavior.live)
             {
-                if (targetBuildingBehavior != null && targetBuildingBehavior.state != BuildingBehavior.BuildingState.Builded)
+                if (targetBuildingBehavior != null && targetBuildingBehavior.GetState() != BuildingBehavior.BuildingState.Builded)
                 {
                     target = null;
                     return;
@@ -868,7 +873,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             if (buildingBaseBehavior.team == team && storedResource != ResourceType.None && buildingBaseBehavior.live)
             {
                 BuildingBehavior buildingBuildingBehavior = building.GetComponent<BuildingBehavior>();
-                if (buildingBuildingBehavior != null && buildingBuildingBehavior.state != BuildingBehavior.BuildingState.Builded)
+                if (buildingBuildingBehavior != null && buildingBuildingBehavior.GetState() != BuildingBehavior.BuildingState.Builded)
                     continue;
 
                 float distance = Vector3.Distance(gameObject.transform.position, building.transform.position);
@@ -1009,15 +1014,18 @@ public class UnitBehavior : BaseBehavior, IPunObservable
     }
 
     [PunRPC]
-    public override void _StopAction(bool deleteObject = false)
+    public override void _StopAction(bool deleteObject = false, bool agentStop = true)
     {
         interactDistance = 0.0f;
         DestroyPointMarker();
-        SetAgentStopped(true);
+
+        if (agentStop)
+            SetAgentStopped(true);
+
         base.tempDestinationPoint = Vector3.zero;
         base.target = null;
 
-        if (interactType == InteractigType.Attacking)
+        if (agentStop && interactType == InteractigType.Attacking)
             anim.Rebind();
 
         if (interactType != InteractigType.None)
@@ -1067,7 +1075,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         if (!live)
             return;
 
-        StopAction(true);
+        StopAction(true, agentStop: false);
 
         if (overrideQueueCommands)
             unitPosition = point;
@@ -1100,7 +1108,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
         Color colorMarker = Color.green;
         BaseBehavior targetBaseBehavior = targetObject.GetComponent<BaseBehavior>();
-        if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team))
+        if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.IsVisible())
             colorMarker = Color.red;
 
         PointMarker.MarkerType markerType = PointMarker.MarkerType.Point;
@@ -1119,7 +1127,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
         if (isBuilding && targetBuildingBehavior.sourceType == SourceType.Farm)
         {
-            if (targetBuildingBehavior.state == BuildingBehavior.BuildingState.Builded && !IsCanWorkOnFarm(target))
+            if (targetBuildingBehavior.GetState() == BuildingBehavior.BuildingState.Builded && !IsCanWorkOnFarm(target))
             {
                 UIBaseScript cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
                 cameraUIBaseScript.DisplayMessage("Only one worker can work in farm", 1500, "farmError");
@@ -1140,7 +1148,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             targetPoint = targetBaseBehavior.pointToInteract.transform.position;
         SetAgentDestination(GetClosestPositionToTarget(targetPoint));
 
-        float minDistance = minDistanceToInteract;
+        minDistance = minDistanceToInteract;
 
         if (IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live)
             minDistance = statisic.rangeAttack;

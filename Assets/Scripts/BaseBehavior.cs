@@ -412,7 +412,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
                     else
                     {
                         ActionIsDone();
-                        // SetAgentStopped(false);
+                        SetAgentStopped(false);
                     }
                 }
             }
@@ -533,8 +533,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
             isRender = newIsRender;
             foreach (Renderer render in renders)
                 render.enabled = isRender;
-
-            UpdateHealth();
+            
             // foreach (Collider collider in gameObject.GetComponents<Collider>().Concat(gameObject.GetComponentsInChildren<Collider>()).ToArray())
             //     collider.enabled = IsVisible() || beenSeen;
         }
@@ -976,7 +975,9 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     [PunRPC]
     public virtual void GiveOrderViewID(int targetViewId, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f)
     {
-        _GiveOrder(PhotonNetwork.GetPhotonView(targetViewId).gameObject, displayMarker, overrideQueueCommands, speed);
+        PhotonView targetPhotonView = PhotonNetwork.GetPhotonView(targetViewId);
+        if (targetPhotonView != null)
+            _GiveOrder(targetPhotonView.gameObject, displayMarker, overrideQueueCommands, speed);
     }
     [PunRPC]
     public virtual void GiveOrderUniqueID(int targetUniqueId, bool displayMarker = false, bool overrideQueueCommands = true, float speed = 0.0f)
@@ -996,15 +997,15 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         return null;
     }
 
-    public void StopAction(bool deleteObject = false, bool SendRPC = false)
+    public void StopAction(bool deleteObject = false, bool SendRPC = false, bool agentStop = true)
     {
         if (PhotonNetwork.InRoom && SendRPC)
-            photonView.RPC("_StopAction", PhotonTargets.All, deleteObject);
+            photonView.RPC("_StopAction", PhotonTargets.All, deleteObject, agentStop);
         else
-            _StopAction(deleteObject);
+            _StopAction(deleteObject, agentStop);
     }
 
-    public virtual void _StopAction(bool deleteObject = false) { }
+    public virtual void _StopAction(bool deleteObject = false, bool agentStop = true) { }
     public virtual void _GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
     public virtual void _GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
     public virtual bool IsIdle() { return true; }
@@ -1018,6 +1019,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     public virtual void AlertAttacking(GameObject attacker) { }
     public virtual void ResourcesIsOut(GameObject worker) { }
     public virtual UnitStatistic GetStatisticsInfo() { return null; }
+    
+    public virtual void SetAgentStopped(bool newState){ }
 
     public bool SpendResources(float food, float gold, float wood)
     {

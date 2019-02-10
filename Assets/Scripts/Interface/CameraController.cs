@@ -863,7 +863,7 @@ namespace GangaGame
                                 buildedObjectBuildingBehavior.ChangeOwner(userId, team);
 
                             // Set building as selected
-                            buildedObjectBuildingBehavior.state = BuildingBehavior.BuildingState.Selected;
+                            buildedObjectBuildingBehavior.SetState(BuildingBehavior.BuildingState.Selected);
                         }
                         BuildingBehavior buildingBehavior = selectedObject.GetComponent<BuildingBehavior>();
                         selectedObject.transform.position = hit.point;
@@ -920,7 +920,7 @@ namespace GangaGame
                                 DestyoyRanges(storeDict: ref greenProjectors);
 
                                 // Create building in project state
-                                buildedObjectBuildingBehavior.state = BuildingBehavior.BuildingState.Project;
+                                buildedObjectBuildingBehavior.SetState(BuildingBehavior.BuildingState.Project);
 
                                 foreach (GameObject unit in selectedObjects)
                                 {
@@ -1519,7 +1519,7 @@ namespace GangaGame
 
         public static Dictionary<string, Dictionary<BaseSkillScript.UpgradeType, int>> playersUpgrades = new Dictionary<string, Dictionary<BaseSkillScript.UpgradeType, int>>();
         [PunRPC]
-        public static void _AddUpgrade(string userId, BaseSkillScript.UpgradeType upgradeType)
+        public void _AddUpgrade(string userId, BaseSkillScript.UpgradeType upgradeType)
         {
             if (!playersUpgrades.ContainsKey(userId))
                 playersUpgrades[userId] = new Dictionary<BaseSkillScript.UpgradeType, int>();

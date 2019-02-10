@@ -52,4 +52,5 @@ MonoBehaviour:
   - GiveOrderUniqueID
   - StartInteractUniqueID
   - _StopAction
+  - _AddUpgrade
   DisableAutoOpenWizard: 1

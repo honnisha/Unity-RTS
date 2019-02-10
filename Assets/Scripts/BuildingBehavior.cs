@@ -49,13 +49,11 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
     {
         if (stream.IsWriting)
         {
-            stream.SendNext(this.state);
             stream.SendNext(this.health);
             stream.SendNext(this.live);
         }
         else
         {
-            this.state = (BuildingState)stream.ReceiveNext();
             this.health = (int)stream.ReceiveNext();
             this.live = (bool)stream.ReceiveNext();
         }
@@ -306,8 +304,19 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
         return true;
     }
 
+    [PunRPC]
+    public void _SetState(BuildingState buildingState) { state = buildingState; }
+    public void SetState(BuildingState buildingState)
+    {
+        if (PhotonNetwork.InRoom)
+            photonView.RPC("_SetState", PhotonTargets.All, buildingState);
+        else
+            state = buildingState;
+    }
+    public BuildingState GetState() { return state; }
+
     private BuildingState _state = BuildingState.Builded;
-    public BuildingState state
+    private BuildingState state
     {
         set
         {
@@ -530,7 +539,7 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
     }
 
     [PunRPC]
-    public override void _StopAction(bool deleteObject = false)
+    public override void _StopAction(bool deleteObject = false, bool agentStop = true)
     {
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
         if (state == BuildingState.Building || state == BuildingState.Project || state == BuildingState.Selected)
@@ -546,7 +555,7 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
                 objectUIInfo.Destroy();
                 objectUIInfo = null;
             }
-            PhotonView.Destroy(gameObject);
+            PhotonNetwork.Destroy(gameObject);
             cameraUIBaseScript.UpdateUI();
             return;
         }
@@ -568,29 +577,30 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
         if (skillResult[0] || skillResult[1])
             return skillResult;
 
-        foreach (GameObject unit in producedUnits)
-        {
-            BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
-            if (baseBehaviorComponent.skillInfo.uniqueName == commandName || Input.GetKeyDown(baseBehaviorComponent.skillInfo.productionHotkey))
+        if (state == BuildingState.Builded)
+            foreach (GameObject unit in producedUnits)
             {
-                if (productionQuery.Count >= uqeryLimit)
+                BaseBehavior baseBehaviorComponent = unit.GetComponent<BaseBehavior>();
+                if (baseBehaviorComponent.skillInfo.uniqueName == commandName || Input.GetKeyDown(baseBehaviorComponent.skillInfo.productionHotkey))
+                {
+                    if (productionQuery.Count >= uqeryLimit)
+                        return result;
+                    //Debug.Log(producedUnits.Count);
+
+                    // if not enough resources -> return second element true
+                    result[1] = !SpendResources(baseBehaviorComponent.skillInfo.costFood, baseBehaviorComponent.skillInfo.costGold, baseBehaviorComponent.skillInfo.costWood);
+                    if (result[1])
+                        return result;
+                    productionQuery.Add(unit);
+                    ProductionQueryUpdated();
+
+                    if (productionQuery.Count <= 1)
+                        buildTimer = baseBehaviorComponent.skillInfo.timeToBuild;
+
+                    result[0] = true;
                     return result;
-                //Debug.Log(producedUnits.Count);
-
-                // if not enough resources -> return second element true
-                result[1] = !SpendResources(baseBehaviorComponent.skillInfo.costFood, baseBehaviorComponent.skillInfo.costGold, baseBehaviorComponent.skillInfo.costWood);
-                if (result[1])
-                    return result;
-                productionQuery.Add(unit);
-                ProductionQueryUpdated();
-
-                if (productionQuery.Count <= 1)
-                    buildTimer = baseBehaviorComponent.skillInfo.timeToBuild;
-
-                result[0] = true;
-                return result;
+                }
             }
-        }
         if (commandName == "stop" || Input.GetKeyDown(KeyCode.H))
         {
             StopAction(SendRPC: true);
