@@ -73,9 +73,10 @@ namespace GangaGame
             quickSaveWriter.Write("cameraPosition", Camera.main.transform.position);
             quickSaveWriter.Write("cameraRotation", Camera.main.transform.rotation);
 
-            quickSaveWriter.Write("gold", cameraController.gold);
-            quickSaveWriter.Write("wood", cameraController.wood);
-            quickSaveWriter.Write("food", cameraController.food);
+            quickSaveWriter.Write("gold", cameraController.resources[BaseBehavior.ResourceType.Gold]);
+            quickSaveWriter.Write("wood", cameraController.resources[BaseBehavior.ResourceType.Wood]);
+            quickSaveWriter.Write("food", cameraController.resources[BaseBehavior.ResourceType.Food]);
+            quickSaveWriter.Write("favor", cameraController.resources[BaseBehavior.ResourceType.Favor]);
 
             int index = 0;
             foreach (GameObject unitObject in GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")))
@@ -135,9 +136,10 @@ namespace GangaGame
             Camera.main.transform.rotation = cameraRotation;
 
             CameraController cameraController = Camera.main.GetComponent<CameraController>();
-            cameraController.gold = saveReader.Read<float>("gold");
-            cameraController.wood = saveReader.Read<float>("wood");
-            cameraController.food = saveReader.Read<float>("food");
+            cameraController.resources[BaseBehavior.ResourceType.Gold] = saveReader.Read<float>("gold");
+            cameraController.resources[BaseBehavior.ResourceType.Wood] = saveReader.Read<float>("wood");
+            cameraController.resources[BaseBehavior.ResourceType.Food] = saveReader.Read<float>("food");
+            cameraController.resources[BaseBehavior.ResourceType.Favor] = saveReader.Read<float>("favor");
           
             // Blind texture
             TerrainGenerator terrainGenerator = Terrain.activeTerrain.GetComponent<TerrainGenerator>();

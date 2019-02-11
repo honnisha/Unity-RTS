@@ -53,4 +53,5 @@ MonoBehaviour:
   - StartInteractUniqueID
   - _StopAction
   - _AddUpgrade
+  - _SetState
   DisableAutoOpenWizard: 1

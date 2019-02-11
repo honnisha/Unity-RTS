@@ -27,6 +27,7 @@ namespace GangaGame
         public float costFood = 0.0f;
         public float costGold = 0.0f;
         public float costWood = 0.0f;
+        public float costFavor = 0.0f;
         public KeyCode productionHotkey;
         public SkillType skillType = SkillType.Skill;
     }

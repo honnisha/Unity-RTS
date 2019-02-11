@@ -27,7 +27,7 @@ namespace GangaGame
         public static List<int> NPCList = new List<int>();
         public static int mapSeed = 0;
 
-        public const int defaultMapSize = 3;
+        public const int defaultMapSize = 2;
         public static int mapSize = defaultMapSize;
 
         public static bool IsMasterClient()

@@ -2480,6 +2480,7 @@ MonoBehaviour:
     costFood: 50
     costGold: 0
     costWood: 0
+    costFavor: 0
     productionHotkey: 99
     skillType: 1
   _skillConditions: []
@@ -2623,8 +2624,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3391}
-  viewIdField: 4
-  InstantiationId: 4
+  viewIdField: 15
+  InstantiationId: 15
   isRuntimeInstantiated: 0
 --- !u!114 &3391
 MonoBehaviour:

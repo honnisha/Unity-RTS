@@ -1695,6 +1695,7 @@ MonoBehaviour:
     costFood: 0
     costGold: 0
     costWood: 0
+    costFavor: 0
     productionHotkey: 0
     skillType: 1
   _skillConditions: []

@@ -187,6 +187,7 @@ MonoBehaviour:
     costFood: 200
     costGold: 0
     costWood: 100
+    costFavor: 0
     productionHotkey: 99
     skillType: 1
   _skillConditions: []

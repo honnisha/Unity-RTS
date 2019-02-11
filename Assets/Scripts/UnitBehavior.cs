@@ -80,6 +80,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
     }
 
     float newIntersectionTimer = 0.0f;
+    Vector3 curMove;
     public void Update()
     {
         UnityEngine.Profiling.Profiler.BeginSample("p Base Update"); // Profiler
@@ -97,19 +98,22 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         
         UpdateProductionQuery();
 
+        CheckTargetReached();
+
+        UpdateAttack();
+
         if (unitSelectionComponent.isSelected && UnityEngine.Input.anyKeyDown)
             UICommand(null);
 
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
         UnityEngine.Profiling.Profiler.BeginSample("p UserUpdate"); // Profiler
-
+        
         #region Animations
-        Vector3 curMove = transform.position - previousPosition;
-        base.curSpeed = curMove.magnitude / Time.deltaTime;
-        base.previousPosition = transform.position;
-        base.anim.SetFloat("Speed", curSpeed);
-        base.anim.SetFloat("AttackSpeed", GetStatisticsInfo().attackTime);
+        curMove = transform.position - previousPosition;
+        curSpeed = curMove.magnitude / Time.deltaTime;
+        previousPosition = transform.position;
+        anim.SetFloat("Speed", curSpeed);
         #endregion
 
         // Find target
@@ -128,6 +132,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             if (blockedBuilding && interactObject != null)
                 StartInteract(interactObject);
 
+        UnityEngine.Profiling.Profiler.BeginSample("p UpdateToolInHand"); // Profiler
         toolInHandTimer += Time.fixedDeltaTime;
         timerToCreateHolder += Time.fixedDeltaTime;
         if (toolInHandTimer > 0.25f)
@@ -136,6 +141,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             UpdateToolInHand();
             toolInHandTimer = 0.0f;
         }
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
         // Stuck
         if (!IsIdle() && interactType == InteractigType.None)
@@ -169,10 +175,6 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         bool interrupt = DoInteract();
         if (interrupt)
             return;
-
-        CheckTargetReached();
-
-        UpdateAttack();
 
         if (isWalkAround && GameInfo.IsMasterClient() && target == null)
             WalkAround();
@@ -841,12 +843,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                 }
 
                 CameraController cameraController = Camera.main.GetComponent<CameraController>();
-                if (resourceType == ResourceType.Food)
-                    cameraController.food += resourceHold;
-                if (resourceType == ResourceType.Gold)
-                    cameraController.gold += resourceHold;
-                if (resourceType == ResourceType.Wood)
-                    cameraController.wood += resourceHold;
+                cameraController.resources[resourceType] += resourceHold;
 
                 resourceHold = 0.0f;
                 if (interactObject != null)
@@ -915,6 +912,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         transform.LookAt(target.transform.position);
         SetAgentStopped(true);
         anim.Rebind();
+        anim.SetFloat("AttackSpeed", GetStatisticsInfo().attackTime);
         anim.SetTrigger("Attack");
     }
 
@@ -933,7 +931,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         }
     }
 
-    public override void SendToDestroy()
+    public override void _SendToDestroy()
     {
         sendToDestroy = true;
     }
@@ -1049,7 +1047,13 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             PointMarker.MarkerType markerType = PointMarker.MarkerType.Point;
             if (((GameObject)newTarget).GetComponent<BuildingBehavior>() != null)
                 markerType = PointMarker.MarkerType.Arrow;
-            CreateOrUpdatePointMarker(Color.green, ((GameObject)newTarget).transform.position, 1.0f, false, markerType);
+
+            Color newColor = Color.green;
+            BaseBehavior targetBaseBehavior = ((GameObject)newTarget).GetComponent<BaseBehavior>();
+            if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.IsVisible())
+                newColor = Color.red;
+
+            CreateOrUpdatePointMarker(newColor, ((GameObject)newTarget).transform.position, 1.0f, false, markerType);
         }
     }
 

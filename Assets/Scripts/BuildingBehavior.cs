@@ -176,8 +176,8 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
 
         UpdateVision();
     }
-
-    public override void SendToDestroy()
+    
+    public override void _SendToDestroy()
     {
         enabled = true;
         sendToDestroy = true;
@@ -308,7 +308,7 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
         if (PhotonNetwork.InRoom)
             photonView.RPC("_SetState", PhotonTargets.All, buildingState);
         else
-            state = buildingState;
+            _SetState(buildingState);
     }
     public BuildingState GetState() { return state; }
 
@@ -543,9 +543,10 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
         {
             if (team == cameraController.team)
             {
-                cameraController.food += skillInfo.costFood;
-                cameraController.gold += skillInfo.costGold;
-                cameraController.wood += skillInfo.costWood;
+                cameraController.resources[ResourceType.Food] += skillInfo.costFood;
+                cameraController.resources[ResourceType.Gold] += skillInfo.costGold;
+                cameraController.resources[ResourceType.Wood] += skillInfo.costWood;
+                cameraController.resources[ResourceType.Favor] += skillInfo.costFavor;
             }
             if (objectUIInfo != null)
             {

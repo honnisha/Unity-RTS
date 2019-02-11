@@ -108,12 +108,7 @@ namespace UISpace
 
         private void OnElementOnClick(MouseEvent mouseEvent)
         {
-            if (mouseEvent.srcElement.className.Contains("detailInfo"))
-            {
-                if (cameraController.selectedObjects.Count > 0)
-                    cameraController.MoveCaeraToUnit(cameraController.selectedObjects[0]);
-            }
-            else if (mouseEvent.srcElement.className.Contains("unit"))
+            if (mouseEvent.srcElement.className.Contains("unit"))
             {
                 GameObject unit = PhotonNetwork.GetPhotonView(int.Parse(mouseEvent.srcElement.id)).gameObject;
                 cameraController.DeselectAllUnits();
@@ -316,7 +311,7 @@ namespace UISpace
                     resourseDisplayType = unitBaseBehaviorComponent.resourceType;
 
                     UnitBehavior.ResourceGatherInfo resourceGatherInfo = unit.GetComponent<UnitBehavior>().GetResourceFarmByType(unitBaseBehaviorComponent.interactType, resourseDisplayType);
-                    gatgherInfo = new StringBuilder(30).AppendFormat(" ({0:F1} per second. Maximum: {1:F1})", resourceGatherInfo.gatherPerSecond, resourceGatherInfo.maximumCapacity).ToString();
+                    gatgherInfo = new StringBuilder(30).AppendFormat(" ({0:F2} per second. Maximum: {1:F1})", resourceGatherInfo.gatherPerSecond, resourceGatherInfo.maximumCapacity).ToString();
                 }
                 else if (unitBaseBehaviorComponent.resourceCapacity > 0)
                 {

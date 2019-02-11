@@ -16,9 +16,7 @@ namespace GangaGame
     public class CameraController : MonoBehaviourPunCallbacks
     {
         [Header("Resources")]
-        public float food = 0;
-        public float gold = 0;
-        public float wood = 0;
+        public Dictionary<BaseBehavior.ResourceType, float> resources = new Dictionary<BaseBehavior.ResourceType, float>();
 
         public enum MusicType { None, Normal };
         [System.Serializable]
@@ -119,6 +117,11 @@ namespace GangaGame
 
         void Start()
         {
+            resources[BaseBehavior.ResourceType.Food] = 200.0f;
+            resources[BaseBehavior.ResourceType.Gold] = 0.0f;
+            resources[BaseBehavior.ResourceType.Wood] = 150.0f;
+            resources[BaseBehavior.ResourceType.Favor] = 0.0f;
+
             GameMenuBehavior.selectedWindowType = GameMenuBehavior.WindowType.None;
             gameInfoBlock = (HtmlElement)UI.document.getElementsByClassName("gameInfo")[0];
 
@@ -282,7 +285,7 @@ namespace GangaGame
         private float cameraPositionZ = 0.0f;
         public Dom.Element activeOver;
 
-        private int workedOnFood, workedOnGold, workedOnWood = 0;
+        private Dictionary<BaseBehavior.ResourceType, int> workedOn = new Dictionary<BaseBehavior.ResourceType, int>();
         private float countWorkersTimer = 0.0f;
         bool selectedObjectsChanged = false;
         Quaternion cameraRotation;
@@ -330,9 +333,14 @@ namespace GangaGame
             UnityEngine.Profiling.Profiler.BeginSample("p Update resources stats"); // Profiler
             if (Time.frameCount % 15 == 0)
             {
-                UI.Variables["food"] = new StringBuilder().AppendFormat("{0:F0} ({1})", food, workedOnFood).ToString();
-                UI.Variables["gold"] = new StringBuilder().AppendFormat("{0:F0} ({1})", gold, workedOnGold).ToString();
-                UI.Variables["wood"] = new StringBuilder().AppendFormat("{0:F0} ({1})", wood, workedOnWood).ToString();
+                foreach (string typeName in Enum.GetNames(typeof(BaseBehavior.ResourceType)))
+                {
+                    if (typeName == "None")
+                        continue;
+
+                    BaseBehavior.ResourceType resourceType = (BaseBehavior.ResourceType)Enum.Parse(typeof(BaseBehavior.ResourceType), typeName, true);
+                    UI.Variables[typeName] = new StringBuilder().AppendFormat("{0:F0} ({1})", resources[resourceType], workedOn[resourceType]).ToString();
+                }
             }
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
@@ -1123,7 +1131,12 @@ namespace GangaGame
             bool workersCalculated = false;
             freeWorkers.Clear();
 
-            workedOnFood = 0; workedOnGold = 0; workedOnWood = 0;
+            foreach (string typeName in Enum.GetNames(typeof(BaseBehavior.ResourceType)))
+            {
+                BaseBehavior.ResourceType resourceType = (BaseBehavior.ResourceType)Enum.Parse(typeof(BaseBehavior.ResourceType), typeName, true);
+                workedOn[resourceType] = 0;
+            }
+
             // Calculate statistic
             foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
             {
@@ -1134,13 +1147,8 @@ namespace GangaGame
                     {
                         if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId)
                         {
-                            BaseBehavior.ResourceType type = unitUnitBehavior.interactObject.GetComponent<BaseBehavior>().resourceCapacityType;
-                            if (type == BaseBehavior.ResourceType.Food)
-                                workedOnFood += 1;
-                            if (type == BaseBehavior.ResourceType.Gold)
-                                workedOnGold += 1;
-                            if (type == BaseBehavior.ResourceType.Wood)
-                                workedOnWood += 1;
+                            BaseBehavior.ResourceType resourceType = unitUnitBehavior.interactObject.GetComponent<BaseBehavior>().resourceCapacityType;
+                            workedOn[resourceType] += 1;
                         }
                     }
                     if (unitUnitBehavior.team == team && unitUnitBehavior.ownerId == userId && unitUnitBehavior.resourceGatherInfo.Count > 0 && unit.GetComponent<BaseBehavior>().IsIdle())

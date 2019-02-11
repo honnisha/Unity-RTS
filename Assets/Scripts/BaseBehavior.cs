@@ -213,7 +213,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
 
     #region Gatering hold info
 
-    public enum ResourceType { None, Food, Gold, Wood };
+    public enum ResourceType { None, Food, Gold, Wood, Favor };
     [Header("Gatering hold info")]
     public ResourceType resourceCapacityType = ResourceType.None;
     public float resourceCapacity = 0.0f;
@@ -540,7 +540,14 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
-    public virtual void SendToDestroy() { }
+    public void SendToDestroy()
+    {
+        if (PhotonNetwork.InRoom)
+            photonView.RPC("_SendToDestroy", PhotonTargets.All);
+        else
+            _SendToDestroy();
+    }
+    public virtual void _SendToDestroy() { }
 
     public void UpdateDestroyBehavior()
     {
@@ -852,7 +859,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
                         if (cameraController.buildedObject == null)
                         {
                             // if not enough resources -> return second element true
-                            result[1] = !SpendResources(buildingBehavior.skillInfo.costFood, buildingBehavior.skillInfo.costGold, buildingBehavior.skillInfo.costWood);
+                            result[1] = !SpendResources(buildingBehavior.skillInfo.costFood, buildingBehavior.skillInfo.costGold, buildingBehavior.skillInfo.costWood, skillScript.skillInfo.costFavor);
                             if (result[1])
                                 return result;
 
@@ -862,7 +869,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
                     }
                     else if (skillScript != null)
                     {
-                        result[1] = !SpendResources(skillScript.skillInfo.costFood, skillScript.skillInfo.costGold, skillScript.skillInfo.costWood);
+                        result[1] = !SpendResources(skillScript.skillInfo.costFood, skillScript.skillInfo.costGold, skillScript.skillInfo.costWood, skillScript.skillInfo.costFavor);
                         if (result[1])
                             return result;
 
@@ -894,15 +901,17 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
 
         if (baseBehavior != null)
         {
-            cameraController.food += baseBehavior.skillInfo.costFood;
-            cameraController.gold += baseBehavior.skillInfo.costGold;
-            cameraController.wood += baseBehavior.skillInfo.costWood;
+            cameraController.resources[ResourceType.Food] += baseBehavior.skillInfo.costFood;
+            cameraController.resources[ResourceType.Gold] += baseBehavior.skillInfo.costGold;
+            cameraController.resources[ResourceType.Wood] += baseBehavior.skillInfo.costWood;
+            cameraController.resources[ResourceType.Favor] += baseBehavior.skillInfo.costFavor;
         }
         else if (skillScript)
         {
-            cameraController.food += skillScript.skillInfo.costFood;
-            cameraController.gold += skillScript.skillInfo.costGold;
-            cameraController.wood += skillScript.skillInfo.costWood;
+            cameraController.resources[ResourceType.Food] += skillScript.skillInfo.costFood;
+            cameraController.resources[ResourceType.Gold] += skillScript.skillInfo.costGold;
+            cameraController.resources[ResourceType.Wood] += skillScript.skillInfo.costWood;
+            cameraController.resources[ResourceType.Favor] += skillScript.skillInfo.costFavor;
         }
         productionQuery.RemoveAt(index);
         ProductionQueryUpdated();
@@ -1022,26 +1031,29 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     
     public virtual void SetAgentStopped(bool newState){ }
 
-    public bool SpendResources(float food, float gold, float wood)
+    public bool SpendResources(float food, float gold, float wood, float favor = 0.0f)
     {
         CameraController cameraController = Camera.main.GetComponent<CameraController>();
-        if (cameraController.food < food || cameraController.gold < gold || cameraController.wood < wood)
+        if (cameraController.resources[ResourceType.Food] < food || cameraController.resources[ResourceType.Gold] < gold || cameraController.resources[ResourceType.Wood] < wood)
         {
             string notEnoughMessage = "Not enough resources!";
 
-            if (cameraController.food < food)
-                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} food: {1:F0}", notEnoughMessage, food - cameraController.food).ToString();
-            if (cameraController.gold < gold)
-                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} gold: {1:F0}", notEnoughMessage, gold - cameraController.gold).ToString();
-            if (cameraController.wood < wood)
-                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} wood: {1:F0}", notEnoughMessage, wood - cameraController.wood).ToString();
+            if (cameraController.resources[ResourceType.Food] < food)
+                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} food: {1:F0}", notEnoughMessage, food - cameraController.resources[ResourceType.Food]).ToString();
+            if (cameraController.resources[ResourceType.Gold] < gold)
+                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} gold: {1:F0}", notEnoughMessage, gold - cameraController.resources[ResourceType.Gold]).ToString();
+            if (cameraController.resources[ResourceType.Wood] < wood)
+                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} wood: {1:F0}", notEnoughMessage, wood - cameraController.resources[ResourceType.Wood]).ToString();
+            if (cameraController.resources[ResourceType.Favor] < favor)
+                notEnoughMessage = new StringBuilder(15).AppendFormat("{0} favor: {1:F0}", notEnoughMessage, favor - cameraController.resources[ResourceType.Favor]).ToString();
 
             cameraUIBaseScript.DisplayMessage(notEnoughMessage, 3000, "notEnoughResources");
             return false;
         }
-        cameraController.food -= food;
-        cameraController.gold -= gold;
-        cameraController.wood -= wood;
+        cameraController.resources[ResourceType.Food] -= food;
+        cameraController.resources[ResourceType.Gold] -= gold;
+        cameraController.resources[ResourceType.Wood] -= wood;
+        cameraController.resources[ResourceType.Favor] -= favor;
         return true;
     }
 
