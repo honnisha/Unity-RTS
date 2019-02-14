@@ -16,8 +16,6 @@ Unity Accidental Noise for generate texture map for procedural levels.</br>
 
 Screenshots from multiplayer
 =======
-<div align="center"><img src="https://github.com/gangashman/Ganga-RTS/blob/master/Screenshots/005.png"/></div>
-
 <div align="center"><img src="https://github.com/gangashman/Ganga-RTS/blob/master/Screenshots/006.png"/></div>
 
 <div align="center"><img src="https://github.com/gangashman/Ganga-RTS/blob/master/Screenshots/002.png"/></div>
