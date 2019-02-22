@@ -846,8 +846,11 @@ MonoBehaviour:
     costFood: 25
     costGold: 70
     costWood: 0
+    costFavor: 0
     productionHotkey: 102
     skillType: 1
+    givesLimit: 0
+    takesLimit: 2
   _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
   uniqueId: -1
@@ -1009,7 +1012,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 240754948708690846}
-  viewIdField: 12
+  viewIdField: 0
   InstantiationId: 12
   isRuntimeInstantiated: 0
 --- !u!114 &240754948708690846

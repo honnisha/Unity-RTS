@@ -859,10 +859,12 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
+    List<GameObject> allUnits = new List<GameObject>();
     public void GoToStoreResources()
     {
         Dictionary<GameObject, float> buildings = new Dictionary<GameObject, float>();
-        var allUnits = GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")).ToArray();
+        allUnits.Clear();
+        allUnits.AddRange(GameObject.FindGameObjectsWithTag("Building").Concat(GameObject.FindGameObjectsWithTag("Unit")));
         foreach (GameObject building in allUnits)
         {
             BaseBehavior buildingBaseBehavior = building.GetComponent<BaseBehavior>();
@@ -996,6 +998,8 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
     public override void BecomeDead()
     {
+        base.BecomeDead();
+
         SendSoundEvent(SoundEventType.Die);
 
         anim.Rebind();
@@ -1234,6 +1238,8 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             statisticStrings.Add(new StringBuilder(30).AppendFormat("Gold: {0:F0}", skillInfo.costGold).ToString());
         if (skillInfo.costWood > 0)
             statisticStrings.Add(new StringBuilder(30).AppendFormat("Wood: {0:F0}", skillInfo.costWood).ToString());
+        if (skillInfo.takesLimit > 0)
+            statisticStrings.Add(new StringBuilder(30).AppendFormat("Limit cost: {0}", skillInfo.takesLimit).ToString());
         return statisticStrings;
     }
 

@@ -2483,6 +2483,8 @@ MonoBehaviour:
     costFavor: 0
     productionHotkey: 99
     skillType: 1
+    givesLimit: 0
+    takesLimit: 1
   _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
   uniqueId: -1

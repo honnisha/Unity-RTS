@@ -115,6 +115,9 @@ namespace GangaGame
         RTS_Cam.RTS_Camera RTS_Camera;
         HtmlElement gameInfoBlock;
 
+        public int limit = 0;
+        public int maxLimit = 0;
+
         void Start()
         {
             resources[BaseBehavior.ResourceType.Food] = 200.0f;
@@ -342,6 +345,8 @@ namespace GangaGame
                     UI.Variables[typeName] = new StringBuilder().AppendFormat("{0:F0} ({1})", resources[resourceType], workedOn[resourceType]).ToString();
                 }
             }
+            UI.Variables["limit"] = limit.ToString();
+            UI.Variables["maxLimit"] = maxLimit.ToString();
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
@@ -692,6 +697,8 @@ namespace GangaGame
                     createdUnit.GetComponent<PhotonView>().RPC("ChangeOwner", PhotonTargets.All, newUserId, NewTeam);
                 else
                     baseBehaviorComponent.ChangeOwner(newUserId, NewTeam);
+
+                baseBehaviorComponent.CalculateLimit();
 
                 MoveCaeraToUnit(createdUnit);
             }

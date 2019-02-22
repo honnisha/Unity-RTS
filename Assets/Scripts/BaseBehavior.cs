@@ -340,10 +340,15 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateProductionQuery"); // Profiler
         if (productionQuery.Count > 0)
         {
+            BaseBehavior baseProductionBehavior = productionQuery[0].GetComponent<BaseBehavior>();
+            if (baseProductionBehavior != null)
+                if (cameraController.limit + productionQuery[0].GetComponent<BaseBehavior>().skillInfo.takesLimit > cameraController.maxLimit)
+                    return;
+
             buildTimer -= Time.deltaTime;
             if (buildTimer <= 0.0f)
             {
-                if (productionQuery[0].GetComponent<BaseBehavior>() != null)
+                if (baseProductionBehavior != null)
                     ProduceUnit(productionQuery[0].name);
                 if (productionQuery[0].GetComponent<BaseSkillScript>() != null)
                     productionQuery[0].GetComponent<BaseSkillScript>().Activate(gameObject);
@@ -447,6 +452,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
                 createdPhotonView.RPC("ChangeOwner", PhotonTargets.All, ownerId, team);
             else
                 createdObjectBehaviorComponent.ChangeOwner(ownerId, team);
+
+            createdObjectBehaviorComponent.CalculateLimit();
 
             if (target != null)
                 createdObjectBehaviorComponent.GiveOrder(target, true, false);
@@ -859,7 +866,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
                         if (cameraController.buildedObject == null)
                         {
                             // if not enough resources -> return second element true
-                            result[1] = !SpendResources(buildingBehavior.skillInfo.costFood, buildingBehavior.skillInfo.costGold, buildingBehavior.skillInfo.costWood, skillScript.skillInfo.costFavor);
+                            result[1] = !SpendResources(buildingBehavior.skillInfo.costFood, buildingBehavior.skillInfo.costGold, buildingBehavior.skillInfo.costWood, buildingBehavior.skillInfo.costFavor);
                             if (result[1])
                                 return result;
 
@@ -1014,12 +1021,30 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
             _StopAction(deleteObject, agentStop);
     }
 
+    public virtual void BecomeDead()
+    {
+        if (team == cameraController.team && ownerId == cameraController.userId && limitWasAdded)
+        {
+            cameraController.limit -= skillInfo.takesLimit;
+            cameraController.maxLimit -= skillInfo.givesLimit;
+        }
+    }
+
+    private bool limitWasAdded = false;
+    public void CalculateLimit()
+    {
+        if (team == cameraController.team && ownerId == cameraController.userId && limitWasAdded)
+        {
+            cameraController.limit += skillInfo.takesLimit;
+            cameraController.maxLimit += skillInfo.givesLimit;
+        }
+    }
+
     public virtual void _StopAction(bool deleteObject = false, bool agentStop = true) { }
     public virtual void _GiveOrder(Vector3 point, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
     public virtual void _GiveOrder(GameObject targetObject, bool displayMarker, bool overrideQueueCommands, float speed = 0.0f) { }
     public virtual bool IsIdle() { return true; }
     public virtual void TakeDamage(float damage, GameObject attacker) { }
-    public virtual void BecomeDead() { }
     public virtual void _StartInteract(GameObject targetObject) { }
     public virtual bool[] UICommand(string commandName) { return new bool[2] { false, false }; }
     public virtual bool IsHealthVisible() { return true; }
@@ -1257,5 +1282,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         }
         if (!live && anim != null)
             anim.SetTrigger("Die");
+
+        if (live)
+            CalculateLimit();
     }
 }

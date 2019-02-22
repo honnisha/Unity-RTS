@@ -30,9 +30,11 @@ namespace GangaGame
         public float costFavor = 0.0f;
         public KeyCode productionHotkey;
         public SkillType skillType = SkillType.Skill;
+        public int givesLimit = 0;
+        public int takesLimit = 0;
     }
 
-    public enum SkillConditionType { None, TearCheck, OnlyOneAtAQueue, OnlyOne, GlobalUpgradeCheck };
+    public enum SkillConditionType { None, TearCheck, OnlyOneAtAQueue, OnlyOne, GlobalUpgradeCheck, _LimitCheck };
     [System.Serializable]
     public class SkillCondition
     {
@@ -168,6 +170,19 @@ namespace GangaGame
             List<SkillCondition> condList, GameObject skillObject = null, int team = -1, string skillName = "", GameObject skillSender = null)
         {
             object[] errorInfo = new object[] {null, ""};
+
+            SkillInfo skillInfo = null;
+            if (skillObject.GetComponent<BaseBehavior>() != null)
+                skillInfo = skillObject.GetComponent<BaseBehavior>().skillInfo;
+            if (skillObject.GetComponent<BaseSkillScript>() != null)
+                skillInfo = skillObject.GetComponent<BaseSkillScript>().skillInfo;
+            CameraController cameraController = Camera.main.GetComponent<CameraController>();
+            if (cameraController.limit + skillInfo.takesLimit > cameraController.maxLimit)
+            {
+                errorInfo[0] = SkillConditionType._LimitCheck;
+                errorInfo[1] = "You do not have enough population limit!";
+                return errorInfo;
+            }
             foreach (SkillCondition cond in condList)
             {
                 if(cond.type == SkillConditionType.TearCheck)
@@ -186,7 +201,7 @@ namespace GangaGame
                         return errorInfo;
                     }
                 }
-                if(cond.type == SkillConditionType.GlobalUpgradeCheck)
+                if (cond.type == SkillConditionType.GlobalUpgradeCheck)
                 {
                     bool check = false;
                     //if (skillObject.GetComponent<BaseBehavior>() != null)

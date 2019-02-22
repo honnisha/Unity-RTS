@@ -62,9 +62,6 @@ html {
 	padding-bottom: 2px;
     text-shadow: 1px 1px 1px #000;
 }
-.resources {
-    font-size: 2.1vh;
-}
 .infoBlock {
 	height: 28%;
 	width: 88%;
@@ -357,7 +354,7 @@ html {
 	overflow: ellipsis;
 }
 .buttons {
-    height: 10%;
+    height: 2.2%;
     width: 100%;
 	position: absolute;
 }
@@ -366,11 +363,11 @@ html {
     float: right;
 	padding: 1px 3px;
 	text-align: center;
-	margin-right: 20px;
+	margin-right: 1%;
 	padding-top: 3px;
-    font-size: 9pt;
-    height: 16px;
-    width: 90px;
+    font-size: 1.5vh;
+    height: 100%;
+    width: 6%;
     background: url("button gray.png") no-repeat;
 	background-size: 100%;
 }
@@ -545,6 +542,28 @@ html {
 .selected {
     border: 1px solid white!important;
 	color: white!important;
+}
+.resources {
+    position: absolute;
+	height: 2.3%;
+	width: 70%;
+	left: 15%;
+	text-align: center;
+}
+.resources > .info {
+    font-size: 1.5vh;
+	padding-top: 10%;
+	display: inline-block;
+	height: 100%;
+	width: 10%;
+    background: url("title.png") no-repeat;
+	background-size: 100%;
+    text-shadow: 1px 1px 1px #000;
+}
+.resources > .separator {
+	display: inline-block;
+	height: 100%;
+	width: 0.5%;
 }
 </style>
 <script>
@@ -964,15 +983,16 @@ html {
 
 <div class="messages">
 </div>
+<div class="resources">
+	<div class="info" style="color: #33cc33">Food: &Food;</div><div class="separator"></div>
+	<div class="info" style="color: gold">Gold: &Gold;</div><div class="separator"></div>
+	<div class="info" style="color: #996600">Wood: &Wood;</div><div class="separator"></div>
+	<div class="info" style="color: #cc0099">Favor: &Favor;</div><div class="separator"></div>
+	<div class="info" style="color: #4db8ff">Limit: &limit; / &maxLimit;</div>
+</div>
 <div class="container">
     <div class="block">
 		<div class="left content lblock">
-			<div class="title resources">
-			Food: &Food;<br>
-			Gold: &Gold;<br>
-			Wood: &Wood;<br>
-			Favor: &Favor;
-			</div>
 		</div>
 		<div class="minimap">
 			<div class="mapBlock">

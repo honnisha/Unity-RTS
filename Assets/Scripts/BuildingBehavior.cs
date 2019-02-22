@@ -71,6 +71,9 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
 
         if (DisableUpdate())
             enabled = false;
+
+        if (live)
+            CalculateLimit();
     }
 
     public bool DisableUpdate()
@@ -257,6 +260,8 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
 
     public override void BecomeDead()
     {
+        base.BecomeDead();
+
         health = 0.0f;
         live = false;
 
@@ -359,7 +364,8 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
             {
                 gameObject.layer = LayerMask.NameToLayer("Building");
                 live = true;
-                UnityEngine.AI.NavMeshObstacle navMesh = gameObject.GetComponent<UnityEngine.AI.NavMeshObstacle>();
+                CalculateLimit();
+                NavMeshObstacle navMesh = gameObject.GetComponent<NavMeshObstacle>();
                 if (navMesh != null)
                     navMesh.enabled = true;
                 
@@ -618,6 +624,8 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
             statistics.Add(new StringBuilder(30).AppendFormat("Gold: {0:F0}", skillInfo.costGold).ToString());
         if (skillInfo.costWood > 0)
             statistics.Add(new StringBuilder(30).AppendFormat("Wood: {0:F0}", skillInfo.costWood).ToString());
+        if (skillInfo.givesLimit > 0)
+            statistics.Add(new StringBuilder(30).AppendFormat("Gives limit: {0:F0}", skillInfo.givesLimit).ToString());
         return statistics;
     }
 

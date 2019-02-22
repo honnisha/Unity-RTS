@@ -1131,6 +1131,7 @@ MonoBehaviour:
   canBeSelected: 1
   isSelected: 0
   projector: {fileID: 1839315294272728}
+  intersection: 0
 --- !u!114 &114634354996762512
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1165,8 +1166,11 @@ MonoBehaviour:
     costFood: 70
     costGold: 25
     costWood: 0
+    costFavor: 0
     productionHotkey: 100
     skillType: 1
+    givesLimit: 0
+    takesLimit: 2
   _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
   uniqueId: -1
