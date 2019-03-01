@@ -1033,10 +1033,11 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     private bool limitWasAdded = false;
     public void CalculateLimit()
     {
-        if (team == cameraController.team && ownerId == cameraController.userId && limitWasAdded)
+        if (team == cameraController.team && ownerId == cameraController.userId && !limitWasAdded)
         {
             cameraController.limit += skillInfo.takesLimit;
             cameraController.maxLimit += skillInfo.givesLimit;
+            limitWasAdded = true;
         }
     }
 

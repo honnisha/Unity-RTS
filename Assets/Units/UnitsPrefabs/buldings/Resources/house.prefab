@@ -235,7 +235,11 @@ MonoBehaviour:
   soundsInfo: []
   isInCameraView: 0
   allObjects: []
-  statisticStrings: []
+  statisticStrings:
+  - 'Stabbing resist: 20%'
+  - 'Cutting resist: 20%'
+  - 'Biting resist: 20%'
+  - 'Magic resist: 20%'
   magnitDistance: 2
   tempMaterialsMode: 
   placeConditions: []
@@ -295,8 +299,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 7787788025278453796}
-  viewIdField: 0
-  InstantiationId: 0
+  viewIdField: 17
+  InstantiationId: 17
   isRuntimeInstantiated: 0
 --- !u!114 &7787788025278453796
 MonoBehaviour:

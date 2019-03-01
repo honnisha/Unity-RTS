@@ -38,6 +38,10 @@ namespace GangaGame
     [System.Serializable]
     public class SkillCondition
     {
+        public SkillCondition(SkillConditionType _type)
+        {
+            type = _type;
+        }
         public SkillConditionType type = SkillConditionType.None;
         public string name = "";
         public int minValue = 0;
@@ -110,6 +114,7 @@ namespace GangaGame
             object[] errorInfo = GetSkillErrors(
                 condList: skillConditions, team: baseBehaviorComponent.team,
                 skillName: skillInfo.uniqueName, skillObject: skillObject, skillSender: sender);
+
             SkillCondition skillCondition = (SkillCondition)errorInfo[0];
             string errorMessage = (string)errorInfo[1];
             
@@ -179,7 +184,7 @@ namespace GangaGame
             CameraController cameraController = Camera.main.GetComponent<CameraController>();
             if (cameraController.limit + skillInfo.takesLimit > cameraController.maxLimit)
             {
-                errorInfo[0] = SkillConditionType._LimitCheck;
+                errorInfo[0] = new SkillCondition(SkillConditionType._LimitCheck);
                 errorInfo[1] = "You do not have enough population limit!";
                 return errorInfo;
             }
