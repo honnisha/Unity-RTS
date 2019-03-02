@@ -22,7 +22,7 @@ Screenshots from multiplayer
 
 <div align="center"><img src="https://github.com/gangashman/Ganga-RTS/blob/master/Screenshots/003.png"/></div>
 
-<div align="center"><img src="https://github.com/gangashman/Ganga-RTS/blob/master/Screenshots/004.png"/></div>
+<div align="center"><img src="https://github.com/gangashman/Ganga-RTS/blob/master/Screenshots/007.png"/></div>
 
 Stuff
 =======

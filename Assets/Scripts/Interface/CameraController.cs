@@ -1165,15 +1165,9 @@ namespace GangaGame
             workersCalculated = true;
 
             // Display free workers
-            if (cacheInfoButtons[10] != freeWorkers.Count && cacheInfoButtonElements[10] != null)
+            if (cacheInfoButtons[10] != freeWorkers.Count)
             {
-                cacheInfoButtonElements[10].remove();
-                cacheInfoButtonElements[10] = null;
-                cacheInfoButtons[10] = 0;
-            }
-            if (freeWorkers.Count > 0 && cacheInfoButtons[10] != freeWorkers.Count)
-            {
-                cacheInfoButtonElements[10] = UIBaseScript.CreateInfoButton("workers", freeWorkers.Count, "F1", "");
+                UI.document.getElementsByClassName("freeWorkersCount")[0].innerText = freeWorkers.Count.ToString();
                 cacheInfoButtons[10] = freeWorkers.Count;
             }
 
@@ -1194,7 +1188,7 @@ namespace GangaGame
                 UnityEngine.Profiling.Profiler.BeginSample("p CreateInfoButton"); // Profiler
                 if (cacheInfoButtons[i - 1] != units.Count && cacheInfoButtonElements[i - 1] != null)
                 {
-                    UI.document.removeChild(cacheInfoButtonElements[i - 1]);
+                    cacheInfoButtonElements[i - 1].remove();
                     cacheInfoButtonElements[i - 1] = null;
                     cacheInfoButtons[i - 1] = 0;
                 }
