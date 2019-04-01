@@ -763,6 +763,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                         interactAnimation = "Builded";
 
                     anim.SetBool(interactAnimation, true);
+                    anim.SetTrigger("ActionStart");
                     interactObject = targetObject;
                     interactType = InteractigType.Bulding;
                     target = null;
@@ -823,6 +824,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
 
                     interactObject = targetObject;
                     anim.SetBool(interactAnimation, true);
+                    anim.SetTrigger("ActionStart");
                     transform.LookAt(targetObject.transform.position);
                     interactTimer = 1.0f;
                     target = null;
@@ -1033,7 +1035,10 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         if (interactType != InteractigType.None)
         {
             if(interactAnimation != "")
+            {
                 anim.SetBool(interactAnimation, false);
+                anim.SetTrigger("ActionStart");
+            }
         }
         if (deleteObject)
             interactObject = null;

@@ -183,8 +183,11 @@ MonoBehaviour:
     costFood: 0
     costGold: 100
     costWood: 200
+    costFavor: 0
     productionHotkey: 121
     skillType: 1
+    givesLimit: 0
+    takesLimit: 0
   _skillConditions:
   - type: 1
     name: townCenter
@@ -330,7 +333,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2839}
-  viewIdField: 2
+  viewIdField: 0
   InstantiationId: 2
   isRuntimeInstantiated: 0
 --- !u!114 &2839

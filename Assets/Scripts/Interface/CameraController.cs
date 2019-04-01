@@ -134,7 +134,8 @@ namespace GangaGame
             audioSource = GetComponent<AudioSource>();
             interfaceSource = GetComponentInChildren<AudioSource>();
 
-            MapScript.CreateOrUpdateMaps(ref mapCache, update: true);
+            if (terrainGenerator != null)
+                MapScript.CreateOrUpdateMaps(ref mapCache, update: true);
 
             UI.document.Run("CreateLoadingScreen", "Retrieving data");
 
@@ -321,17 +322,20 @@ namespace GangaGame
                 UnityEngine.Profiling.Profiler.EndSample(); // Profiler
             }
 
-            countWorkersTimer -= Time.deltaTime;
-            if (countWorkersTimer <= 0)
+            if (terrainGenerator != null)
             {
-                UnityEngine.Profiling.Profiler.BeginSample("p CreateOrUpdateMaps"); // Profiler
-                MapScript.CreateOrUpdateMaps(ref mapCache);
-                UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+                countWorkersTimer -= Time.deltaTime;
+                if (countWorkersTimer <= 0)
+                {
+                    UnityEngine.Profiling.Profiler.BeginSample("p CreateOrUpdateMaps"); // Profiler
+                    MapScript.CreateOrUpdateMaps(ref mapCache);
+                    UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
-                UpdateStatistic();
-                countWorkersTimer = 1.0f;
+                    UpdateStatistic();
+                    countWorkersTimer = 1.0f;
+                }
+                UpdateMapsCamera();
             }
-            UpdateMapsCamera();
 
             UnityEngine.Profiling.Profiler.BeginSample("p Update resources stats"); // Profiler
             if (Time.frameCount % 15 == 0)
@@ -342,7 +346,9 @@ namespace GangaGame
                         continue;
 
                     BaseBehavior.ResourceType resourceType = (BaseBehavior.ResourceType)Enum.Parse(typeof(BaseBehavior.ResourceType), typeName, true);
-                    UI.Variables[typeName] = new StringBuilder().AppendFormat("{0:F0} ({1})", resources[resourceType], workedOn[resourceType]).ToString();
+                    int workedOnCount = 0;
+                    workedOn.TryGetValue(resourceType, out workedOnCount);
+                    UI.Variables[typeName] = new StringBuilder().AppendFormat("{0:F0} ({1})", resources[resourceType], workedOnCount).ToString();
                 }
             }
             UI.Variables["limit"] = limit.ToString();

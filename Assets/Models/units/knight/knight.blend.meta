@@ -56,6 +56,71 @@ ModelImporter:
     100100: torso_ctrl
     100102: upper_arm_l
     100104: upper_arm_r
+    100106: Head
+    100108: HeadTop_End
+    100110: Hips
+    100112: LeftArm
+    100114: LeftFoot
+    100116: LeftForeArm
+    100118: LeftHand
+    100120: LeftHandIndex1
+    100122: LeftHandIndex2
+    100124: LeftHandIndex3
+    100126: LeftHandIndex4
+    100128: LeftHandMiddle1
+    100130: LeftHandMiddle2
+    100132: LeftHandMiddle3
+    100134: LeftHandMiddle4
+    100136: LeftHandPinky1
+    100138: LeftHandPinky2
+    100140: LeftHandPinky3
+    100142: LeftHandPinky4
+    100144: LeftHandRing1
+    100146: LeftHandRing2
+    100148: LeftHandRing3
+    100150: LeftHandRing4
+    100152: LeftHandThumb1
+    100154: LeftHandThumb2
+    100156: LeftHandThumb3
+    100158: LeftHandThumb4
+    100160: LeftLeg
+    100162: LeftShoulder
+    100164: LeftToe_End
+    100166: LeftToeBase
+    100168: LeftUpLeg
+    100170: Neck
+    100172: RightArm
+    100174: RightFoot
+    100176: RightForeArm
+    100178: RightHand
+    100180: RightHandIndex1
+    100182: RightHandIndex2
+    100184: RightHandIndex3
+    100186: RightHandIndex4
+    100188: RightHandMiddle1
+    100190: RightHandMiddle2
+    100192: RightHandMiddle3
+    100194: RightHandMiddle4
+    100196: RightHandPinky1
+    100198: RightHandPinky2
+    100200: RightHandPinky3
+    100202: RightHandPinky4
+    100204: RightHandRing1
+    100206: RightHandRing2
+    100208: RightHandRing3
+    100210: RightHandRing4
+    100212: RightHandThumb1
+    100214: RightHandThumb2
+    100216: RightHandThumb3
+    100218: RightHandThumb4
+    100220: RightLeg
+    100222: RightShoulder
+    100224: RightToe_End
+    100226: RightToeBase
+    100228: RightUpLeg
+    100230: Spine
+    100232: Spine1
+    100234: Spine2
     400000: ankle_l
     400002: ankle_r
     400004: arm_pole_l
@@ -109,6 +174,71 @@ ModelImporter:
     400100: torso_ctrl
     400102: upper_arm_l
     400104: upper_arm_r
+    400106: Head
+    400108: HeadTop_End
+    400110: Hips
+    400112: LeftArm
+    400114: LeftFoot
+    400116: LeftForeArm
+    400118: LeftHand
+    400120: LeftHandIndex1
+    400122: LeftHandIndex2
+    400124: LeftHandIndex3
+    400126: LeftHandIndex4
+    400128: LeftHandMiddle1
+    400130: LeftHandMiddle2
+    400132: LeftHandMiddle3
+    400134: LeftHandMiddle4
+    400136: LeftHandPinky1
+    400138: LeftHandPinky2
+    400140: LeftHandPinky3
+    400142: LeftHandPinky4
+    400144: LeftHandRing1
+    400146: LeftHandRing2
+    400148: LeftHandRing3
+    400150: LeftHandRing4
+    400152: LeftHandThumb1
+    400154: LeftHandThumb2
+    400156: LeftHandThumb3
+    400158: LeftHandThumb4
+    400160: LeftLeg
+    400162: LeftShoulder
+    400164: LeftToe_End
+    400166: LeftToeBase
+    400168: LeftUpLeg
+    400170: Neck
+    400172: RightArm
+    400174: RightFoot
+    400176: RightForeArm
+    400178: RightHand
+    400180: RightHandIndex1
+    400182: RightHandIndex2
+    400184: RightHandIndex3
+    400186: RightHandIndex4
+    400188: RightHandMiddle1
+    400190: RightHandMiddle2
+    400192: RightHandMiddle3
+    400194: RightHandMiddle4
+    400196: RightHandPinky1
+    400198: RightHandPinky2
+    400200: RightHandPinky3
+    400202: RightHandPinky4
+    400204: RightHandRing1
+    400206: RightHandRing2
+    400208: RightHandRing3
+    400210: RightHandRing4
+    400212: RightHandThumb1
+    400214: RightHandThumb2
+    400216: RightHandThumb3
+    400218: RightHandThumb4
+    400220: RightLeg
+    400222: RightShoulder
+    400224: RightToe_End
+    400226: RightToeBase
+    400228: RightUpLeg
+    400230: Spine
+    400232: Spine1
+    400234: Spine2
     4300000: Knight
     7400000: Default Take
     7400002: Attack
@@ -323,9 +453,10 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 1
+    globalScale: 10
     meshCompression: 0
     addColliders: 0
+    useSRGBMaterialColor: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -344,12 +475,15 @@ ModelImporter:
     secondaryUVPackMargin: 4
     useFileScale: 1
     previousCalculatedGlobalScale: 1
-    hasPreviousCalculatedGlobalScale: 0
+    hasPreviousCalculatedGlobalScale: 1
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
   importAnimation: 1
   copyAvatar: 0
   humanDescription:

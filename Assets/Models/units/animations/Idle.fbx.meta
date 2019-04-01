@@ -1,151 +1,191 @@
 fileFormatVersion: 2
-guid: 9562ddedc2cc4e244876afe304812c85
+guid: b0cfeecf1b174ba49b0e7996736d139d
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
-    100000: ankle_l
-    100002: ankle_r
-    100004: //RootNode
-    100006: arm_pole_l
-    100008: arm_pole_r
-    100010: Armature
-    100012: ball_ctrl_l
-    100014: ball_ctrl_r
-    100016: body_ctrl
-    100018: bow_lower_1
-    100020: bow_lower_2
-    100022: bow_lower_3
-    100024: bow_upper_1
-    100026: bow_upper_2
-    100028: bow_upper_3
-    100030: Cube
-    100032: finger_ctrl_l
-    100034: finger_ctrl_r
-    100036: finger_ik_l
-    100038: finger_ik_r
-    100040: fingers_l
-    100042: fingers_r
-    100044: foot_ctrl_l
-    100046: foot_ctrl_r
-    100048: foot_l
-    100050: foot_r
-    100052: global
-    100054: hand_ctrl_l
-    100056: hand_ctrl_r
-    100058: hand_ik_l
-    100060: hand_ik_r
-    100062: knee_pole_l
-    100064: knee_pole_r
-    100066: lower_arm_l
-    100068: lower_arm_r
-    100070: neck
-    100072: palm_l
-    100074: palm_r
-    100076: pelvis
-    100078: root_bow
-    100080: shin_l
-    100082: shin_r
-    100084: skull
-    100086: spine_1
-    100088: spine_2
-    100090: spine_3
-    100092: string_ctrl
-    100094: string_ik
-    100096: string_lower
-    100098: string_upper
-    100100: thigh_l
-    100102: thigh_r
-    100104: thumb_l
-    100106: thumb_r
-    100108: toe_ctrl_l
-    100110: toe_ctrl_r
-    100112: toes_l
-    100114: toes_r
-    100116: torso_ctrl
-    100118: upper_arm_l
-    100120: upper_arm_r
-    400000: ankle_l
-    400002: ankle_r
-    400004: //RootNode
-    400006: arm_pole_l
-    400008: arm_pole_r
-    400010: Armature
-    400012: ball_ctrl_l
-    400014: ball_ctrl_r
-    400016: body_ctrl
-    400018: bow_lower_1
-    400020: bow_lower_2
-    400022: bow_lower_3
-    400024: bow_upper_1
-    400026: bow_upper_2
-    400028: bow_upper_3
-    400030: Cube
-    400032: finger_ctrl_l
-    400034: finger_ctrl_r
-    400036: finger_ik_l
-    400038: finger_ik_r
-    400040: fingers_l
-    400042: fingers_r
-    400044: foot_ctrl_l
-    400046: foot_ctrl_r
-    400048: foot_l
-    400050: foot_r
-    400052: global
-    400054: hand_ctrl_l
-    400056: hand_ctrl_r
-    400058: hand_ik_l
-    400060: hand_ik_r
-    400062: knee_pole_l
-    400064: knee_pole_r
-    400066: lower_arm_l
-    400068: lower_arm_r
-    400070: neck
-    400072: palm_l
-    400074: palm_r
-    400076: pelvis
-    400078: root_bow
-    400080: shin_l
-    400082: shin_r
-    400084: skull
-    400086: spine_1
-    400088: spine_2
-    400090: spine_3
-    400092: string_ctrl
-    400094: string_ik
-    400096: string_lower
-    400098: string_upper
-    400100: thigh_l
-    400102: thigh_r
-    400104: thumb_l
-    400106: thumb_r
-    400108: toe_ctrl_l
-    400110: toe_ctrl_r
-    400112: toes_l
-    400114: toes_r
-    400116: torso_ctrl
-    400118: upper_arm_l
-    400120: upper_arm_r
-    4300000: Cube
-    7400000: Default Take
-    7400002: Attack
-    7400004: Die
-    7400006: Hit
-    7400008: Idle
-    7400010: Walk
+    100000: Head
+    100002: HeadTop_End
+    100004: HeadTop_End_end
+    100006: Hips
+    100008: //RootNode
+    100010: LeftArm
+    100012: LeftFoot
+    100014: LeftForeArm
+    100016: LeftHand
+    100018: LeftHandIndex1
+    100020: LeftHandIndex2
+    100022: LeftHandIndex3
+    100024: LeftHandIndex4
+    100026: LeftHandIndex4_end
+    100028: LeftHandMiddle1
+    100030: LeftHandMiddle2
+    100032: LeftHandMiddle3
+    100034: LeftHandMiddle4
+    100036: LeftHandMiddle4_end
+    100038: LeftHandPinky1
+    100040: LeftHandPinky2
+    100042: LeftHandPinky3
+    100044: LeftHandPinky4
+    100046: LeftHandPinky4_end
+    100048: LeftHandRing1
+    100050: LeftHandRing2
+    100052: LeftHandRing3
+    100054: LeftHandRing4
+    100056: LeftHandRing4_end
+    100058: LeftHandThumb1
+    100060: LeftHandThumb2
+    100062: LeftHandThumb3
+    100064: LeftHandThumb4
+    100066: LeftHandThumb4_end
+    100068: LeftLeg
+    100070: LeftShoulder
+    100072: LeftToe_End
+    100074: LeftToe_End_end
+    100076: LeftToeBase
+    100078: LeftUpLeg
+    100080: Neck
+    100082: RightArm
+    100084: RightFoot
+    100086: RightForeArm
+    100088: RightHand
+    100090: RightHandIndex1
+    100092: RightHandIndex2
+    100094: RightHandIndex3
+    100096: RightHandIndex4
+    100098: RightHandIndex4_end
+    100100: RightHandMiddle1
+    100102: RightHandMiddle2
+    100104: RightHandMiddle3
+    100106: RightHandMiddle4
+    100108: RightHandMiddle4_end
+    100110: RightHandPinky1
+    100112: RightHandPinky2
+    100114: RightHandPinky3
+    100116: RightHandPinky4
+    100118: RightHandPinky4_end
+    100120: RightHandRing1
+    100122: RightHandRing2
+    100124: RightHandRing3
+    100126: RightHandRing4
+    100128: RightHandRing4_end
+    100130: RightHandThumb1
+    100132: RightHandThumb2
+    100134: RightHandThumb3
+    100136: RightHandThumb4
+    100138: RightHandThumb4_end
+    100140: RightLeg
+    100142: RightShoulder
+    100144: RightToe_End
+    100146: RightToe_End_end
+    100148: RightToeBase
+    100150: RightUpLeg
+    100152: Spine
+    100154: Spine1
+    100156: Spine2
+    100158: Armature
+    100160: Camera
+    100162: Knight
+    100164: Lamp
+    400000: Head
+    400002: HeadTop_End
+    400004: HeadTop_End_end
+    400006: Hips
+    400008: //RootNode
+    400010: LeftArm
+    400012: LeftFoot
+    400014: LeftForeArm
+    400016: LeftHand
+    400018: LeftHandIndex1
+    400020: LeftHandIndex2
+    400022: LeftHandIndex3
+    400024: LeftHandIndex4
+    400026: LeftHandIndex4_end
+    400028: LeftHandMiddle1
+    400030: LeftHandMiddle2
+    400032: LeftHandMiddle3
+    400034: LeftHandMiddle4
+    400036: LeftHandMiddle4_end
+    400038: LeftHandPinky1
+    400040: LeftHandPinky2
+    400042: LeftHandPinky3
+    400044: LeftHandPinky4
+    400046: LeftHandPinky4_end
+    400048: LeftHandRing1
+    400050: LeftHandRing2
+    400052: LeftHandRing3
+    400054: LeftHandRing4
+    400056: LeftHandRing4_end
+    400058: LeftHandThumb1
+    400060: LeftHandThumb2
+    400062: LeftHandThumb3
+    400064: LeftHandThumb4
+    400066: LeftHandThumb4_end
+    400068: LeftLeg
+    400070: LeftShoulder
+    400072: LeftToe_End
+    400074: LeftToe_End_end
+    400076: LeftToeBase
+    400078: LeftUpLeg
+    400080: Neck
+    400082: RightArm
+    400084: RightFoot
+    400086: RightForeArm
+    400088: RightHand
+    400090: RightHandIndex1
+    400092: RightHandIndex2
+    400094: RightHandIndex3
+    400096: RightHandIndex4
+    400098: RightHandIndex4_end
+    400100: RightHandMiddle1
+    400102: RightHandMiddle2
+    400104: RightHandMiddle3
+    400106: RightHandMiddle4
+    400108: RightHandMiddle4_end
+    400110: RightHandPinky1
+    400112: RightHandPinky2
+    400114: RightHandPinky3
+    400116: RightHandPinky4
+    400118: RightHandPinky4_end
+    400120: RightHandRing1
+    400122: RightHandRing2
+    400124: RightHandRing3
+    400126: RightHandRing4
+    400128: RightHandRing4_end
+    400130: RightHandThumb1
+    400132: RightHandThumb2
+    400134: RightHandThumb3
+    400136: RightHandThumb4
+    400138: RightHandThumb4_end
+    400140: RightLeg
+    400142: RightShoulder
+    400144: RightToe_End
+    400146: RightToe_End_end
+    400148: RightToeBase
+    400150: RightUpLeg
+    400152: Spine
+    400154: Spine1
+    400156: Spine2
+    400158: Armature
+    400160: Camera
+    400162: Knight
+    400164: Lamp
+    2000000: Camera
+    2100000: knight
+    4300000: Knight
+    7400000: idle
+    7400002: Armature|ArmatureAction
+    7400004: Armature|Armature|mixamo.com|Layer0
+    7400006: Armature|Armature|Take 001|Layer0
+    7400008: Armature|KnightAction
     9500000: //RootNode
-    13700000: Cube
-    2186277476908879412: ImportLogs
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material_001__Archer_png
-    second: {fileID: 2100000, guid: 28a122abac6191c45a83cf6c2d9b5045, type: 2}
+    10800000: Lamp
+    13700000: Knight
+  externalObjects: {}
   materials:
     importMaterials: 1
     materialName: 0
     materialSearch: 1
-    materialLocation: 0
+    materialLocation: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
@@ -169,10 +209,10 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Default Take
-      takeName: Default Take
+      name: Armature|ArmatureAction
+      takeName: Armature|ArmatureAction
       firstFrame: 0
-      lastFrame: 42
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -197,10 +237,10 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Attack
-      takeName: Attack
+      name: Armature|Armature|mixamo.com|Layer0
+      takeName: Armature|Armature|mixamo.com|Layer0
       firstFrame: 0
-      lastFrame: 42
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -225,10 +265,10 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Die
-      takeName: Die
+      name: Armature|Armature|Take 001|Layer0
+      takeName: Armature|Armature|Take 001|Layer0
       firstFrame: 0
-      lastFrame: 20
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -253,10 +293,10 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Hit
-      takeName: Hit
+      name: Armature|KnightAction
+      takeName: Armature|KnightAction
       firstFrame: 0
-      lastFrame: 10
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -281,45 +321,17 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Idle
-      takeName: Idle
+      name: idle
+      takeName: mixamo.com
       firstFrame: 0
-      lastFrame: 20
+      lastFrame: 300
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: Walk
-      takeName: Walk
-      firstFrame: 0
-      lastFrame: 32
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -342,6 +354,7 @@ ModelImporter:
     globalScale: 1
     meshCompression: 0
     addColliders: 0
+    useSRGBMaterialColor: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -359,13 +372,16 @@ ModelImporter:
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 1
-    hasPreviousCalculatedGlobalScale: 0
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
   importAnimation: 1
   copyAvatar: 0
   humanDescription:

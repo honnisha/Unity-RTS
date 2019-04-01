@@ -193,8 +193,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.037, y: 0.039585702, z: 0.021754913}
-  m_Center: {x: 0.006, y: 0.008800564, z: 0.010877459}
+  m_Size: {x: 0.04001277, y: 0.046244152, z: 0.021754913}
+  m_Center: {x: 0.005703994, y: 0.009839841, z: 0.010877459}
 --- !u!114 &8581569689415320749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -229,8 +229,11 @@ MonoBehaviour:
     costFood: 0
     costGold: 0
     costWood: 50
+    costFavor: 0
     productionHotkey: 100
     skillType: 1
+    givesLimit: 0
+    takesLimit: 0
   _skillConditions: []
   unitPosition: {x: 0, y: 0, z: 0}
   uniqueId: -1
@@ -386,7 +389,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2274483802049673732}
-  viewIdField: 6
+  viewIdField: 0
   InstantiationId: 6
   isRuntimeInstantiated: 0
 --- !u!114 &2274483802049673732

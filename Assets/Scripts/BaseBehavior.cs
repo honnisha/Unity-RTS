@@ -126,6 +126,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
 
     [HideInInspector]
     public NavMeshAgent agent;
+    [HideInInspector]
     public NavMeshObstacle obstacle;
     [HideInInspector]
     public Animator anim;
@@ -260,10 +261,13 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         cameraUIBaseScript = Camera.main.GetComponent<UIBaseScript>();
         cameraController = Camera.main.GetComponent<CameraController>();
         unitSelectionComponent = GetComponent<UnitSelectionComponent>();
-        anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         obstacle = GetComponent<NavMeshObstacle>();
         audioSource = GetComponent<AudioSource>();
+
+        anim = GetComponent<Animator>();
+        if (anim == null)
+            anim = GetComponentInChildren<Animator>();
 
         if (agent != null && obstacle != null)
             obstacle.enabled = false;

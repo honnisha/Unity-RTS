@@ -182,8 +182,11 @@ MonoBehaviour:
     costFood: 0
     costGold: 50
     costWood: 100
+    costFavor: 0
     productionHotkey: 118
     skillType: 1
+    givesLimit: 0
+    takesLimit: 0
   _skillConditions:
   - type: 1
     name: townCenter
@@ -237,7 +240,10 @@ MonoBehaviour:
   cameraController: {fileID: 0}
   cameraUIBaseScript: {fileID: 0}
   skillList: []
-  producedUnits: []
+  producedUnits:
+  - {fileID: 3153157004686879022, guid: c5e3f6be3a57eff4f9279dc0fa7545d4, type: 3}
+  - {fileID: 6227628844134980363, guid: f9d8849150230b24f8b003dd45126029, type: 3}
+  - {fileID: 3665220566919391146, guid: 61820f1a6b3fc90439e6780739814efa, type: 3}
   spawnPoint: {fileID: 1353}
   spawnTarget: {x: 0, y: 0, z: 0}
   buildTimer: 0
@@ -306,6 +312,7 @@ MonoBehaviour:
   canBeSelected: 1
   isSelected: 0
   projector: {fileID: 1354}
+  intersection: 0
 --- !u!114 &2765
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -325,8 +332,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 2839}
-  viewIdField: 2
-  InstantiationId: 2
+  viewIdField: 18
+  InstantiationId: 18
   isRuntimeInstantiated: 0
 --- !u!114 &2839
 MonoBehaviour:
