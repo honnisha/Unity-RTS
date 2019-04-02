@@ -67,7 +67,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     [HideInInspector]
     public bool attacked;
 
-    public enum AttackType { Stabbing, Cutting, Biting, Magic, None };
+    public enum DamageType { Stabbing, Cutting, Biting, Magic, None };
+    public enum AttackType { Sword, Bow };
     public enum BehaviorType { Run, Hold, Counterattack, Aggressive, None };
     [System.Serializable]
     public class UnitStatistic
@@ -78,7 +79,8 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         public float attackDelay = 0.5f;
         public bool damageAfterTimer = true;
 
-        public AttackType attackType = AttackType.None;
+        public DamageType damageType = DamageType.None;
+        public AttackType attackType = AttackType.Sword;
         public float stabbingResist = 0.0f;
         public float cuttingResist = 0.0f;
         public float bitingResist = 0.0f;
@@ -369,7 +371,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
     }
 
-    public virtual void Attack(GameObject target)
+    public virtual void Attack(GameObject target, int attackType = 1)
     {
         if (!live)
             return;
@@ -697,13 +699,13 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
         UnitStatistic statisic = GetStatisticsInfo();
 
         float newDamage = damage;
-        if (attackerStatisic.attackType == AttackType.Biting)
+        if (attackerStatisic.damageType == DamageType.Biting)
             newDamage -= (newDamage * statisic.bitingResist / 100);
-        if (attackerStatisic.attackType == AttackType.Cutting)
+        if (attackerStatisic.damageType == DamageType.Cutting)
             newDamage -= (newDamage * statisic.cuttingResist / 100);
-        if (attackerStatisic.attackType == AttackType.Magic)
+        if (attackerStatisic.damageType == DamageType.Magic)
             newDamage -= (newDamage * statisic.magicResist / 100);
-        if (attackerStatisic.attackType == AttackType.Stabbing)
+        if (attackerStatisic.damageType == DamageType.Stabbing)
             newDamage -= (newDamage * statisic.stabbingResist / 100);
         return newDamage;
     }
@@ -757,7 +759,7 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
     {
         allObjects.Clear();
         UnitStatistic statisic = GetStatisticsInfo();
-        if (statisic.attackType == AttackType.None && interactType != InteractigType.Attacking)
+        if (statisic.damageType == DamageType.None && interactType != InteractigType.Attacking)
             return false;
 
         if (behaviorType == BehaviorType.Counterattack || behaviorType == BehaviorType.Aggressive)
@@ -1121,16 +1123,16 @@ public class BaseBehavior : MonoBehaviourPunCallbacks, ISkillInterface
 
         statisticStrings.Clear();
         string attackTypeName = "";
-        if (statisic.attackType == AttackType.Biting)
+        if (statisic.damageType == DamageType.Biting)
             attackTypeName = "Biting";
-        if (statisic.attackType == AttackType.Cutting)
+        if (statisic.damageType == DamageType.Cutting)
             attackTypeName = "Cutting";
-        if (statisic.attackType == AttackType.Magic)
+        if (statisic.damageType == DamageType.Magic)
             attackTypeName = "Magic";
-        if (statisic.attackType == AttackType.Stabbing)
+        if (statisic.damageType == DamageType.Stabbing)
             attackTypeName = "Stabbing";
 
-        if (statisic.attackType != AttackType.None)
+        if (statisic.damageType != DamageType.None)
         {
             statisticStrings.Add(new StringBuilder(30).AppendFormat("Att. type: {0}", attackTypeName).ToString());
             statisticStrings.Add(new StringBuilder(30).AppendFormat("Damage: {0:F0}", statisic.damage).ToString());

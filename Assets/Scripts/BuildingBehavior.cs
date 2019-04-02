@@ -146,7 +146,7 @@ public class BuildingBehavior : BaseBehavior, IPunObservable
         interactType = InteractigType.None;
     }
 
-    public override void Attack(GameObject target)
+    public override void Attack(GameObject target, int attackType = 1)
     {
         if (!live)
             return;

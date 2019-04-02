@@ -313,6 +313,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
     }
 
     float minDistance = 0.0f;
+    int unitAttackType = 1;
     bool colliderCheck = true;
     bool attackTarget = false;
     RaycastHit hit;
@@ -344,7 +345,17 @@ public class UnitBehavior : BaseBehavior, IPunObservable
             {
                 // Attack it target if target is enemy or stop
                 if (attackTarget)
-                    Attack(target);
+                {
+                    int type = 1;
+                    UnitStatistic statisic = GetStatisticsInfo();
+
+                    if (statisic.attackType == AttackType.Sword)
+                        type = 1;
+                    else if (statisic.attackType == AttackType.Sword)
+                        type = 2;
+
+                    Attack(target, attackType: type);
+                }
                 else
                     StartInteract(target);
             }
@@ -906,18 +917,22 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         return false;
     }
 
-    public override void Attack(GameObject target)
+    public override void Attack(GameObject target, int attackType = 1)
     {
         if (!live)
             return;
 
         base.Attack(target);
 
+        // 1 - Sword Attack
+        // 2 - Bow Attack
+
         transform.LookAt(target.transform.position);
         SetAgentStopped(true);
         anim.Rebind();
         anim.SetFloat("AttackSpeed", GetStatisticsInfo().attackTime);
-        anim.SetTrigger("Attack");
+        anim.SetInteger("AttackType", attackType);
+        anim.SetTrigger("Fight");
     }
 
     public override void AlertAttacking(GameObject attacker)
@@ -1173,7 +1188,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                 colliderCheck = false;
         }
 
-        if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live && statisic.attackType != AttackType.None)
+        if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live && statisic.damageType != DamageType.None)
             attackTarget = true;
         else
             attackTarget = false;

@@ -213,7 +213,8 @@ MonoBehaviour:
     attackTime: 2
     attackDelay: 0.5
     damageAfterTimer: 0
-    attackType: 0
+    damageType: 0
+    attackType: 1
     stabbingResist: 10
     cuttingResist: 10
     bitingResist: 10
@@ -354,8 +355,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3482}
-  viewIdField: 3
-  InstantiationId: 3
+  viewIdField: 2
+  InstantiationId: 2
   isRuntimeInstantiated: 0
 --- !u!114 &3482
 MonoBehaviour:
@@ -607,7 +608,7 @@ PrefabInstance:
     - target: {fileID: 9500000, guid: 383c7b9414641ef498681e5a861bd535, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 33041fd75dd0c8a489a92dacf2ab20d4, type: 2}
+      objectReference: {fileID: 9100000, guid: 2ba5e9cdae4fc474791bf1b809677925, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 383c7b9414641ef498681e5a861bd535, type: 3}
 --- !u!4 &8393803131778324856 stripped
