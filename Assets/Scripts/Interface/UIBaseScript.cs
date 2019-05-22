@@ -148,9 +148,13 @@ namespace UISpace
             if (selectedObjects.Count == 1)
             {
                 unitBaseBehaviorComponent = selectedObjects[0].GetComponent<BaseBehavior>();
+
+                UnityEngine.Profiling.Profiler.BeginSample("p DrawInfo"); // Profiler
                 HtmlElement createdImage = DrawInfo(
                     "cblock", skillInfo: unitBaseBehaviorComponent.skillInfo, detailInfo: true, dinamicInfo: true, 
                     tableStatistics: unitBaseBehaviorComponent.GetStatistics().ToArray(), drawHP: true);
+                UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
                 createdImage.onclick = SelectObject;
             }
             else
@@ -161,9 +165,12 @@ namespace UISpace
                     unitBaseBehaviorComponent = selectedObject.GetComponent<BaseBehavior>();
                     if (!displayedNames.Contains(unitBaseBehaviorComponent.skillInfo.uniqueName))
                     {
+                        UnityEngine.Profiling.Profiler.BeginSample("p DrawInfo"); // Profiler
                         HtmlElement createdImage = DrawInfo(
                             "cblock", skillInfo: unitBaseBehaviorComponent.skillInfo, detailInfo: false, 
                             tableStatistics: unitBaseBehaviorComponent.GetStatistics().ToArray());
+                        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
+
                         displayedNames.Add(unitBaseBehaviorComponent.skillInfo.uniqueName);
                         createdImage.onclick = SelectOnly;
                     }

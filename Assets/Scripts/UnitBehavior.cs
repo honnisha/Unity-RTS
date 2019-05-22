@@ -108,12 +108,13 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
         UnityEngine.Profiling.Profiler.BeginSample("p UserUpdate"); // Profiler
-        
+
         #region Animations
         curMove = transform.position - previousPosition;
         curSpeed = curMove.magnitude / Time.deltaTime;
         previousPosition = transform.position;
-        anim.SetFloat("Speed", curSpeed);
+        if (Time.frameCount % 15 == 0 && IsInCameraView() && IsVisible())
+            anim.SetFloat("Speed", curSpeed);
         #endregion
 
         // Find target
@@ -126,11 +127,12 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                 AttackNearEnemies(gameObject.transform.position, GetStatisticsInfo().agrRange, randomRange: 7.0f);
             SendOrderFromQueue();
         }
-
+        
         // Wait for building if something blocked
         if (IsStopped())
             if (blockedBuilding && interactObject != null)
                 StartInteract(interactObject);
+        UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
         UnityEngine.Profiling.Profiler.BeginSample("p UpdateToolInHand"); // Profiler
         toolInHandTimer += Time.fixedDeltaTime;
@@ -143,6 +145,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
         }
         UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
+        UnityEngine.Profiling.Profiler.BeginSample("p EndUpdate"); // Profiler
         // Stuck
         if (!IsIdle() && interactType == InteractigType.None)
         {
@@ -820,7 +823,7 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                     interactType = InteractigType.Gathering;
                     interactAnimation = "Mining";
                 }
-                else if (targetBuildingBehavior.sourceType == SourceType.Default && targetBaseBehavior.resourceCapacityType == BaseBehavior.ResourceType.Wood)
+                else if (targetBuildingBehavior != null && targetBuildingBehavior.sourceType == SourceType.Default && targetBaseBehavior.resourceCapacityType == BaseBehavior.ResourceType.Wood)
                 {
                     interactType = InteractigType.CuttingTree;
                     interactAnimation = "Cutting";
@@ -1188,8 +1191,12 @@ public class UnitBehavior : BaseBehavior, IPunObservable
                 colliderCheck = false;
         }
 
-        if (targetBaseBehavior != null && IsTeamEnemy(targetBaseBehavior.team) && targetBaseBehavior.live && statisic.damageType != DamageType.None)
-            attackTarget = true;
+        if (targetBaseBehavior != null && targetBaseBehavior.live)
+        {
+            if (IsTeamEnemy(targetBaseBehavior.team) && statisic.damageType != DamageType.None ||
+                targetBaseBehavior.team == 0 && targetBaseBehavior.resourceCapacityType == ResourceType.Food)
+                attackTarget = true;
+        }
         else
             attackTarget = false;
     }

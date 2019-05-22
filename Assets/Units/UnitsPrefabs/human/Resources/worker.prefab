@@ -262,9 +262,6 @@ MonoBehaviour:
   isInCameraView: 0
   allObjects: []
   statisticStrings:
-  - 'Att. type: Stabbing'
-  - 'Damage: 10'
-  - 'Attack speed: 1.4 sec'
   - 'Stabbing resist: 20%'
   - 'Cutting resist: 20%'
   - 'Biting resist: 30%'
@@ -272,35 +269,35 @@ MonoBehaviour:
   buildHpPerSecond: 10
   buildingTool:
     prefab: {fileID: 1266908089214646, guid: 0d6787997193dc34882796b0a1a05748, type: 3}
-    holder: {fileID: 0}
+    holder: {fileID: 6884740010984076714}
   resourceGatherInfo:
   - type: 1
     gatherPerSecond: 0.25
     maximumCapacity: 10
     carryObject:
       prefab: {fileID: 1445014879897620, guid: cffef75ccdaa0504cb1dedbb354026b9, type: 3}
-      holder: {fileID: 0}
+      holder: {fileID: 6884740010984076714}
     toolObject:
       prefab: {fileID: 1014602966566676, guid: de9c6dc2c03b1cd42873ff0de9975eec, type: 3}
-      holder: {fileID: 0}
+      holder: {fileID: 6884740010984076714}
   - type: 3
     gatherPerSecond: 0.2
     maximumCapacity: 10
     carryObject:
       prefab: {fileID: 1841068068563820, guid: 26d5f96940746ff4cb90f520e69cf0d5, type: 3}
-      holder: {fileID: 0}
+      holder: {fileID: 6884740010984076714}
     toolObject:
       prefab: {fileID: 1960420655220560, guid: c075b3766584c07409b8758ee2f83879, type: 3}
-      holder: {fileID: 0}
+      holder: {fileID: 6884740010984076714}
   - type: 2
     gatherPerSecond: 0.2
     maximumCapacity: 10
     carryObject:
       prefab: {fileID: 100000, guid: c18b48f6c33f79349b2b77a9a207d91c, type: 3}
-      holder: {fileID: 0}
+      holder: {fileID: 6884740010984076714}
     toolObject:
       prefab: {fileID: 1149314094770296, guid: 7655a33462091a245bdfb3084dcf4e99, type: 3}
-      holder: {fileID: 0}
+      holder: {fileID: 6884740010984076714}
   farmInfo:
     type: 1
     gatherPerSecond: 0.2
@@ -311,7 +308,7 @@ MonoBehaviour:
     toolObject:
       prefab: {fileID: 5905209926080179135, guid: a4b9c724c66fa5145bda1c94ae29125d,
         type: 3}
-      holder: {fileID: 0}
+      holder: {fileID: 6884740010984076714}
 --- !u!136 &2921
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -345,8 +342,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 3006}
-  viewIdField: 7
-  InstantiationId: 7
+  viewIdField: 6
+  InstantiationId: 6
   isRuntimeInstantiated: 0
 --- !u!114 &3006
 MonoBehaviour:
@@ -590,6 +587,14 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 2ba5e9cdae4fc474791bf1b809677925, type: 2}
+    - target: {fileID: 9500000, guid: cf6267726b6993f42b6494b519b5b14f, type: 3}
+      propertyPath: m_CullingMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: cf6267726b6993f42b6494b519b5b14f, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 13700000, guid: cf6267726b6993f42b6494b519b5b14f, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -599,6 +604,12 @@ PrefabInstance:
 --- !u!4 &6884740010983582116 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400054, guid: cf6267726b6993f42b6494b519b5b14f,
+    type: 3}
+  m_PrefabInstance: {fileID: 6884740010983977746}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6884740010984076714 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100024, guid: cf6267726b6993f42b6494b519b5b14f,
     type: 3}
   m_PrefabInstance: {fileID: 6884740010983977746}
   m_PrefabAsset: {fileID: 0}

@@ -167,6 +167,7 @@ MonoBehaviour:
     attackTime: 2
     attackDelay: 0.5
     damageAfterTimer: 1
+    damageType: 4
     attackType: 4
     stabbingResist: 20
     cuttingResist: 20

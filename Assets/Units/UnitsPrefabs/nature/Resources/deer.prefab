@@ -1639,7 +1639,7 @@ Animator:
   m_GameObject: {fileID: 1031}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: efe59de1903c17141bf3a8511eda0c7e, type: 3}
-  m_Controller: {fileID: 9100000, guid: 27a5594807924a748b66cfeb781c1db3, type: 2}
+  m_Controller: {fileID: 0}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1715,6 +1715,7 @@ MonoBehaviour:
     attackTime: 2
     attackDelay: 0.5
     damageAfterTimer: 1
+    damageType: 4
     attackType: 4
     stabbingResist: 10
     cuttingResist: 10

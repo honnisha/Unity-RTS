@@ -297,8 +297,9 @@ namespace GangaGame
         // Update is called once per frame
         void Update()
         {
+            UnityEngine.Profiling.Profiler.BeginSample("p Begin Update"); // Profiler
             isHotkeysBlocked = false;
-            if (UI.document.getElementsByClassName("chatInput").length > 0)
+            if (chatInput)
                 isHotkeysBlocked = true;
             else if (GameMenuBehavior.selectedWindowType != GameMenuBehavior.WindowType.None)
                 isHotkeysBlocked = true;
@@ -307,6 +308,7 @@ namespace GangaGame
 
             if (activeOver != null && activeOver.className.Contains("units"))
                 MapScript.MapEvent((HtmlDivElement)activeOver);
+            UnityEngine.Profiling.Profiler.EndSample(); // Profiler
 
             UnityEngine.Profiling.Profiler.BeginSample("p Update vision and map"); // Profiler
             cameraPositionX = transform.position.x;
@@ -479,10 +481,9 @@ namespace GangaGame
             UnityEngine.Profiling.Profiler.EndSample(); // Profiler
         }
 
+        public bool chatInput = false;
         public void UpdateChat(Dom.Element activeOver)
         {
-            bool chatInput = UI.document.getElementsByClassName("chatInput").length > 0;
-
             UnityEngine.Profiling.Profiler.BeginSample("p UpdateChat"); // Profiler
             if ((activeOver != null && activeOver.className.Contains("chatSend") && UnityEngine.Input.GetMouseButtonDown(0) ||
                 UnityEngine.Input.GetKeyDown(KeyCode.Return) || (UnityEngine.Input.GetKeyDown(KeyCode.Escape) && chatInput)))
