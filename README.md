@@ -1,1 +1,1 @@
- Repository moves here: /ganga-rts
+ Repository moves here: https://gitlab.com/ganagsh/ganga-rts
